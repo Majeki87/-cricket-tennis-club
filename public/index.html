@@ -281,7 +281,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 @media (orientation:landscape) and (max-height:520px){body.mobile.playing #rotateHint{display:flex}}
 @media (prefers-reduced-motion:reduce){.arena.shake,.bug,.bug.stunned svg,.gauge.full i,.skill.special.ready{animation:none}.cutin,.banner{animation-duration:.01s;animation-delay:1s}}
 </style></head><body><main class="wrap">
-<header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음 켜기/끄기">🎵 배경음</button></div></header>
+<header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음(숲속 자연 소리) 켜기/끄기">🌿 배경음</button></div></header>
 
 
 <div id="lobby" class="lobby">
@@ -457,7 +457,7 @@ function hideOverlay(){$("overlay").classList.add("hidden")}
 
 /* ───── 소리: 모든 효과음·배경음을 브라우저에서 직접 만들어 냄(음원 파일 없음) ───── */
 const Snd=(()=>{
-  let ctx=null,master,sfxBus,bgmBus,amb,noiseBuf,scene="lobby",timer=0,nextT=0,stepN=0,chirpAt=0;
+  let ctx=null,master,sfxBus,bgmBus,natBus,noiseBuf,scene="lobby",timer=0,natStarted=false,nextCricket=0,nextBird=0,nextRustle=0,gameFadeAt=0;
   const pref={sfx:true,bgm:true};
   try{Object.assign(pref,JSON.parse(localStorage.getItem("ct_sound")||"{}"))}catch{}
   const save=()=>{try{localStorage.setItem("ct_sound",JSON.stringify(pref))}catch{}};
@@ -468,26 +468,27 @@ const Snd=(()=>{
     ctx=new AC();master=ctx.createGain();master.gain.value=.8;master.connect(ctx.destination);
     sfxBus=ctx.createGain();sfxBus.connect(master);bgmBus=ctx.createGain();bgmBus.connect(master);
     noiseBuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-    apply();timer=setInterval(schedule,25);nextT=ctx.currentTime+.1;
+    natBus=ctx.createGain();natBus.gain.value=scene==="game"?0:NAT;natBus.connect(bgmBus);
+    startNature();apply();timer=setInterval(schedule,25);
   }
   function apply(){
     if(!ctx)return;const t=ctx.currentTime;
     sfxBus.gain.setTargetAtTime(pref.sfx?1:0,t,.05);
-    bgmBus.gain.setTargetAtTime(pref.bgm?(scene==="game"?.4:1):0,t,.3);
-    if(amb)amb.gain.setTargetAtTime(pref.bgm&&scene==="game"?.035:0,t,.5);
+    bgmBus.gain.setTargetAtTime(pref.bgm?1:0,t,.3);
   }
-  function tone(o){   // {f,f2,type,at,dur,vol,bus}
+  function out(g,o){const bus=o.bus||sfxBus;if(o.pan&&ctx.createStereoPanner){const p=ctx.createStereoPanner();p.pan.value=o.pan;g.connect(p);p.connect(bus)}else g.connect(bus)}
+  function tone(o){   // {f,f2,type,at,dur,vol,bus,pan}
     const t=ctx.currentTime+(o.at||0),osc=ctx.createOscillator(),g=ctx.createGain(),dur=o.dur||.15;
     osc.type=o.type||"sine";osc.frequency.setValueAtTime(o.f,t);if(o.f2)osc.frequency.exponentialRampToValueAtTime(o.f2,t+dur);
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.vol||.2,t+(o.atk||.005));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
     if(o.lp){const fl=ctx.createBiquadFilter();fl.type="lowpass";fl.frequency.value=o.lp;fl.Q.value=o.q||1;osc.connect(fl);fl.connect(g)}else osc.connect(g);
-    g.connect(o.bus||sfxBus);osc.start(t);osc.stop(t+dur+.02);
+    out(g,o);osc.start(t);osc.stop(t+dur+.02);
   }
   function noise(o){   // {at,dur,vol,f,f2,q,ft}
     const t=ctx.currentTime+(o.at||0),src=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain(),dur=o.dur||.1;
     src.buffer=noiseBuf;src.loop=true;fl.type=o.ft||"bandpass";fl.frequency.setValueAtTime(o.f||1000,t);if(o.f2)fl.frequency.exponentialRampToValueAtTime(o.f2,t+dur);fl.Q.value=o.q||1;
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.vol||.2,t+(o.atk||.004));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-    src.connect(fl);fl.connect(g);g.connect(o.bus||sfxBus);src.start(t,Math.random()*.5);src.stop(t+dur+.02);
+    src.connect(fl);fl.connect(g);out(g,o);src.start(t,Math.random()*.5);src.stop(t+dur+.02);
   }
   const notes=(list,o={})=>list.forEach((n,i)=>tone({f:N(n),type:o.type||"triangle",at:(o.at||0)+i*(o.gap||.09),dur:o.dur||.18,vol:o.vol||.16}));
   function chirp(at=0,vol=.06){for(let r=0;r<2;r++)for(let k=0;k<3;k++)tone({f:4300,type:"sine",at:at+r*.22+k*.045,dur:.03,vol})}   // 귀뚤귀뚤
@@ -524,49 +525,50 @@ const Snd=(()=>{
     click(){tone({f:1100,dur:.03,vol:.05})}
   };
   function play(name,...a){if(!ctx||!pref.sfx||ctx.state!=="running")return;try{FX[name]&&FX[name](...a)}catch{}}
-  /* 배경음: 128BPM 스포츠 중계풍 — 킥·클랩·하이햇 드럼, 통통 튀는 베이스, 신스 스탭, 신나는 리드 멜로디
-     코드 C-G-Am-F 8마디 반복, 8마디째 끝에 스네어 필인. 경기 중에는 리드를 빼고 작게 */
-  const PROG=[[48,60,64,67],[43,55,59,62],[45,57,60,64],[41,53,57,60]],SPB=60/128/4;
-  const HOOK=[   // [16분음표 위치, 음] 마디별 멜로디
-    [[0,76],[2,79],[4,84],[6,79],[8,76],[10,79],[12,81],[14,79]],
-    [[0,83],[2,79],[4,86],[6,83],[8,79],[12,81],[14,83]],
-    [[0,84],[2,81],[4,88],[6,84],[8,81],[12,83],[14,84]],
-    [[0,81],[2,77],[4,84],[6,81],[8,77],[12,79],[14,81]],
-    [[0,76],[2,79],[4,84],[6,79],[8,76],[10,79],[12,81],[14,84]],
-    [[0,86],[2,83],[4,79],[6,83],[8,86],[12,88],[14,86]],
-    [[0,84],[2,88],[4,84],[6,81],[8,84],[10,81],[12,79],[14,81]],
-    [[0,81],[4,84],[8,86],[12,88]]];
-  function drum(kind,at,v=1){const B={bus:bgmBus,at};
-    if(kind==="kick"){tone({...B,f:160,f2:42,dur:.16,vol:.42*v});noise({...B,dur:.012,vol:.06*v,f:3000})}
-    else if(kind==="clap"){noise({...B,dur:.13,vol:.2*v,f:1700,q:.7});noise({...B,at:at+.012,dur:.09,vol:.12*v,f:2400,q:.9});tone({...B,f:210,f2:130,dur:.05,vol:.08*v})}
-    else if(kind==="hat")noise({...B,dur:.03,vol:.055*v,f:8500,ft:"highpass"});
-    else if(kind==="ohat")noise({...B,dur:.11,vol:.05*v,f:7500,ft:"highpass"});
+  /* 배경음: 숲속 자연의 소리 — 산들바람, 나뭇잎 바스락, 졸졸 시냇물, 찌르르 귀뚜라미, 여러 가지 새소리
+     로비에서는 계속, 경기에 들어가면 처음 몇 초만 들리다가 조용히 사라져 경기에 집중할 수 있게 함 */
+  const NAT=2.6;   // 자연 소리 전체 음량
+  function loopNoise(ft,f,q,vol){const src=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
+    src.buffer=noiseBuf;src.loop=true;fl.type=ft;fl.frequency.value=f;fl.Q.value=q;g.gain.value=vol;src.connect(fl);fl.connect(g);g.connect(natBus);src.start();return{fl,g}}
+  function lfo(param,rate,depth){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=rate;g.gain.value=depth;o.connect(g);g.connect(param);o.start()}
+  function startNature(){
+    if(natStarted)return;natStarted=true;
+    const wind=loopNoise("bandpass",380,.6,.05);lfo(wind.g.gain,.07,.035);lfo(wind.fl.frequency,.05,160);   // 산들바람: 천천히 커졌다 작아짐
+    const stream=loopNoise("bandpass",1800,.9,.012);lfo(stream.fl.frequency,.9,350);lfo(stream.g.gain,1.7,.005);   // 졸졸 시냇물
+    const t=ctx.currentTime;nextCricket=t+.5;nextBird=t+1.2;nextRustle=t+2;
+  }
+  const NB={bus:null};
+  function cricket(at,f,pan,vol){   // 찌르르르: 아주 빠른 떨림을 몇 번 반복
+    const reps=2+Math.floor(Math.random()*3),pulses=5+Math.floor(Math.random()*6);
+    for(let r=0;r<reps;r++)for(let k=0;k<pulses;k++)tone({bus:natBus,f,at:at+r*.32+k*.028,dur:.018,vol,pan});
+  }
+  function bird(at){
+    const pan=Math.random()*1.6-.8,B={bus:natBus,pan},kind=Math.floor(Math.random()*5);
+    if(kind===0){const n=2+Math.floor(Math.random()*3),f=2600+Math.random()*1200;          // 짹짹: 위로 휙 올라가는 짧은 소리
+      for(let i=0;i<n;i++)tone({...B,f,f2:f*1.6,at:at+i*.13,dur:.07,vol:.05})}
+    else if(kind===1){const f=3000+Math.random()*800;                                         // 지저귐: 떨리며 노래
+      for(let i=0;i<9;i++)tone({...B,f:f*(1+.12*Math.sin(i*1.9)),f2:f*(1.05+.1*Math.cos(i*1.3)),at:at+i*.055,dur:.06,vol:.035})}
+    else if(kind===2){tone({...B,f:4200,f2:2400,at,dur:.22,vol:.04});tone({...B,f:4200,f2:2400,at:at+.3,dur:.22,vol:.035})}   // 휘익~ 휘익~ 내려가는 휘파람
+    else if(kind===3){tone({...B,f:N(81),at,dur:.32,vol:.05,atk:.03});tone({...B,f:N(77),at:at+.38,dur:.45,vol:.045,atk:.03})}  // 멀리서 뻐꾹(두 음)
+    else{const f=5200+Math.random()*900;for(let i=0;i<14;i++)tone({...B,f:f-i*120,at:at+i*.035,dur:.025,vol:.03})}          // 또르르르 내려가는 트릴
   }
   function schedule(){
     if(!ctx||ctx.state!=="running")return;
-    if(!pref.bgm){nextT=Math.max(nextT,ctx.currentTime+.05);return}   // 배경음을 끄면 소리를 아예 만들지 않음
-    while(nextT<ctx.currentTime+.12){
-      const bar=Math.floor(stepN/16)%8,s=stepN%16,ch=PROG[bar%4],at=nextT-ctx.currentTime,B={bus:bgmBus,at},lobby=scene!=="game";
-      // 드럼: 네 박자 킥, 2·4박 클랩, 8분 하이햇 + 엇박 오픈햇, 8마디째 끝 스네어 필인
-      if(s%4===0)drum("kick",at);
-      if(s===4||s===12)drum("clap",at);
-      if(s%2===0)drum(s%4===2?"ohat":"hat",at);else if(lobby)drum("hat",at,.5);
-      if(bar===7&&s>=12)drum("clap",at,.45+(s-12)*.15);
-      // 베이스: 8분음표로 근음-옥타브 통통
-      if(s%2===0)tone({...B,f:N(ch[0]-12+(s%4===2?12:0)),type:"sawtooth",lp:700,dur:SPB*1.7,vol:.11});
-      // 신스 스탭: 엇박에 짧게 끊는 화음
-      if(s===2||s===6||s===10||s===14)ch.slice(1).forEach(n=>tone({...B,f:N(n+12),type:"square",lp:2400,dur:SPB*.9,vol:.022}));
-      // 리드 멜로디(로비에서만)
-      if(lobby)for(const [ps,n] of HOOK[bar])if(ps===s){tone({...B,f:N(n),type:"square",lp:3200,dur:SPB*1.8,vol:.05});tone({...B,f:N(n)*1.006,type:"sawtooth",lp:2600,dur:SPB*1.8,vol:.025})}
-      nextT+=SPB;stepN++;
-    }
-    if(scene==="game"&&ctx.currentTime>chirpAt){chirpAt=ctx.currentTime+6+Math.random()*8;chirp(0,.025)}
+    const t=ctx.currentTime,audible=pref.bgm&&(scene!=="game"||t<gameFadeAt);
+    if(!audible){nextCricket=Math.max(nextCricket,t+.3);nextBird=Math.max(nextBird,t+.6);nextRustle=Math.max(nextRustle,t+1);return}
+    if(nextCricket<t+.15){                                            // 귀뚜라미 두세 마리가 다른 높이·위치에서
+      const c=Math.floor(Math.random()*3);cricket(nextCricket-t,[4300,4800,5300][c],[-.6,.5,.1][c],.022+Math.random()*.012);
+      nextCricket+=1.1+Math.random()*2.2}
+    if(nextBird<t+.15){bird(nextBird-t);nextBird+=2.2+Math.random()*4.5}
+    if(nextRustle<t+.15){noise({bus:natBus,at:nextRustle-t,dur:.9+Math.random()*.8,vol:.03,f:3200,q:.4,atk:.35,pan:Math.random()*1.4-.7});nextRustle+=4+Math.random()*6}   // 나뭇잎 바스락
   }
-  function startAmb(){   // 관중 웅성임(경기 중에만 들림)
-    if(amb||!ctx)return;const src=ctx.createBufferSource(),fl=ctx.createBiquadFilter();amb=ctx.createGain();amb.gain.value=0;
-    src.buffer=noiseBuf;src.loop=true;fl.type="lowpass";fl.frequency.value=520;src.connect(fl);fl.connect(amb);amb.connect(bgmBus);src.start();
+  function setScene(v){
+    const prev=scene;scene=v;if(!ctx)return;const t=ctx.currentTime;
+    natBus.gain.cancelScheduledValues(t);natBus.gain.setValueAtTime(natBus.gain.value,t);
+    if(v==="game"){gameFadeAt=t+7;natBus.gain.setValueAtTime(natBus.gain.value,t+2.5);natBus.gain.linearRampToValueAtTime(0,t+7)}   // 경기 시작: 2.5초 뒤부터 서서히 사라짐
+    else natBus.gain.linearRampToValueAtTime(NAT,t+2);
+    apply();
   }
-  function setScene(v){scene=v;if(ctx){startAmb();apply()}}
   function toggle(k){pref[k]=!pref[k];save();init();apply();return pref[k]}
   document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else ctx.resume()});
   return{init,play,setScene,toggle,pref};
