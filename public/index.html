@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#176b42"><title>귀뚜라미 테니스 클럽</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="귀뚜라미 테니스"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon.svg"><meta name="theme-color" content="#176b42"><title>귀뚜라미 테니스 클럽</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);color:#edf5f1;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
@@ -164,6 +164,46 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 .ov-btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .ov-btns .btn{font-size:14px;padding:10px 14px}
 @media (max-width:560px){.charpick{grid-template-columns:repeat(2,1fr)}}
+/* ───── 휴대폰 전용 경기 화면 (body.mobile) ───── */
+#mTop,#mCtrl,#rotateHint{display:none}
+body.mobile.playing{overflow:hidden;overscroll-behavior:none;position:fixed;inset:0}
+body.mobile.playing .top,body.mobile.playing footer{display:none}
+body.mobile.playing .wrap{padding:0;max-width:none}
+html{background:#0b1722}
+body.mobile #game{background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;gap:6px;margin:0;padding:calc(env(safe-area-inset-top) + 6px) 8px calc(env(safe-area-inset-bottom) + 6px);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+body.mobile #game.hidden{display:none}
+body.mobile #boardPanel,body.mobile #statusPanel,body.mobile #ctrlPanel,body.mobile #tipPanel{display:none}
+body.mobile #mTop{display:block;width:100%;order:0}
+body.mobile #arena{order:1;position:relative;top:auto;flex:none;margin:0;border-width:3px;border-radius:10px;aspect-ratio:14.6/28;width:min(calc(100vw - 16px),calc((100dvh - 232px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * .5214))}
+body.mobile .bug{width:18%}
+body.mobile #mCtrl{display:flex;order:2;width:100%;max-width:520px;height:140px;flex:none;margin-top:auto}
+.mrow{display:flex;gap:6px;align-items:stretch}
+#mExit{flex:none;width:34px;border:1px solid #52717a;background:#294650;color:#e4f4ee;border-radius:9px;font-size:15px;font-weight:900}
+.mp{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;column-gap:5px;background:#172b35;border:1px solid #41616a;border-radius:9px;padding:3px 7px}
+.mp .mn{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp .mg{font-size:17px;font-weight:900}
+.mp .mpt{font-size:15px;font-weight:900;color:#ffe25a;background:#10242d;border-radius:6px;padding:0 6px;min-width:30px;text-align:center}
+.mp .mgauge{grid-column:1/-1;display:block;height:4px;background:#0d1e25;border-radius:3px;overflow:hidden;margin-top:3px}
+.mp .mgauge b{display:block;height:100%;width:0;background:#3fb8ff;transition:width .25s}
+.mp .mgauge b.full{background:#ffd04a}
+.mmsg{margin-top:4px;font-size:11px;line-height:1.35;color:#e7f4ee;text-align:center;min-height:30px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.joyzone{position:relative;flex:1;touch-action:none}
+.joybase{position:absolute;width:100px;height:100px;margin:-50px 0 0 -50px;left:50%;top:52%;border-radius:50%;border:2px dashed #6f9aa3;background:#ffffff0a;pointer-events:none}
+.joybase.on{border-style:solid;border-color:#9fd8c5;background:#ffffff14}
+.joyknob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#2c5c5a;border:2px solid #9fd8c5}
+.joyhint{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-size:11px;color:#8fa9a0;pointer-events:none}
+.actzone{flex:none;display:grid;grid-template-columns:48px 48px 86px;grid-template-rows:44px 44px 34px;gap:5px;align-content:center;padding-right:2px}
+.mbtn{border:1px solid #55747c;background:#294650;color:#eaf8f1;border-radius:13px;font-size:18px;line-height:1;touch-action:none;padding:0}
+.mbtn{font-size:16px}.mbtn small{display:block;font-size:10px;font-weight:700;margin-top:3px;color:#c7d9d2}
+.mbtn:active,.mbtn.down{transform:scale(.94);background:#36606a}
+.mbtn.special{grid-column:1/3;border-style:dashed;font-size:13px;font-weight:800;border-radius:20px}
+.mbtn.special.ready{background:linear-gradient(135deg,#e59a35,#bd5d19);border:1px solid #ffe08a;color:#fff}
+.mbtn.special:disabled{opacity:.45}
+.mbtn.act{grid-column:3;grid-row:1/3;align-self:center;justify-self:center;width:82px;height:82px;border-radius:50%;background:linear-gradient(135deg,#16a078,#08735f);border:2px solid #7fe0bf;font-size:16px;font-weight:900}
+.mbtn.act.serve{background:linear-gradient(135deg,#e08a2c,#b5600f);border-color:#ffd18a}
+.mbtn.act.next{background:linear-gradient(135deg,#3a7bd5,#2556a0);border-color:#9cc4ff;font-size:14px}
+#rotateHint{position:fixed;inset:0;z-index:50;background:#0b1722;color:#edf5f1;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;padding:24px;line-height:1.6}
+@media (orientation:landscape) and (max-height:520px){body.mobile.playing #rotateHint{display:flex}}
 @media (prefers-reduced-motion:reduce){.arena.shake,.bug,.bug.stunned svg,.gauge.full i,.skill.special.ready{animation:none}.cutin,.banner{animation-duration:.01s;animation-delay:1s}}
 </style></head><body><main class="wrap">
 <header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div></header>
@@ -228,9 +268,16 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
 <div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>빠르지만 아웃 위험 · F</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · C</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
 </section>
+<div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button>
+<div class="mp"><span class="mn" id="mMeName">나</span><span class="mg" id="mMeGames">0</span><span class="mpt" id="mMePts">0</span><i class="mgauge"><b id="mMeGauge"></b></i></div>
+<div class="mp"><span class="mn" id="mOpName">상대</span><span class="mg" id="mOpGames">0</span><span class="mpt" id="mOpPts">0</span><i class="mgauge"><b id="mOpGauge"></b></i></div></div>
+<div class="mmsg" id="mMsg"></div></div>
+<div id="mCtrl"><div class="joyzone" id="joyZone"><div class="joybase" id="joyBase"><div class="joyknob" id="joyKnob"></div></div><span class="joyhint">누른 곳에서 이동</span></div>
+<div class="actzone"><button class="mbtn" data-mskill="volley">🏐<small>발리</small></button><button class="mbtn" data-mskill="drop">🪶<small>드롭</small></button><button class="mbtn act" id="mAct">타격</button><button class="mbtn" data-mskill="speed">💥<small>스피드</small></button><button class="mbtn" data-mskill="lob">🌙<small>로브</small></button><button class="mbtn special" id="mSpecial" data-mskill="special" disabled>✨ 필살기</button></div></div>
 <section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li></ul></section>
 
 </div>
+<div id="rotateHint">📱<br>휴대폰을 세로로 돌려 주세요.<br><span style="font-size:13px;font-weight:500">코트가 세로로 길어서 세로 화면에 맞춰져 있습니다.</span></div>
 <footer class="muted" style="text-align:center;padding:14px">귀뚜라미 테니스 클럽 · 사내 친선 게임</footer>
 </main>
 <script src="engine.js"></script>
@@ -257,14 +304,19 @@ let ws=null,room="",roomStatus="",roomFormat="set1",names=["",""],lastEv=0,last=
 const IDLE_PLAYERS=[{x:0,y:C.L+.8},{x:0,y:-C.L-.8}];
 
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-function msg(t){curMsg=t;$("message").textContent=t;$("lobbyHint").textContent=t}
+const isMobile=()=>document.body.classList.contains("mobile");
+// 휴대폰에서는 키보드 안내를 버튼 안내로 바꿔서 보여 줌
+const MOBILE_TEXT=[[" (Space)",""],["Space로 다음 서브","다음 서브 버튼으로 진행"],["다음 서브(Space로 바로)","다음 서브(버튼으로 바로)"],["Space로 새 경기를 시작하세요","새 경기 버튼으로 다시 시작하세요"],["Space로 서브하세요","서브 버튼을 누르세요"],["Space 또는 경기 시작 버튼을 누르세요","경기 시작 버튼을 누르세요"],["Q 키로","필살기 버튼으로"],["←→로 위치를 잡고","조이스틱으로 위치를 잡고"],["키를 누른 채 서브하면","조이스틱을 기울인 채 서브하면"]];
+function mt(t){if(!isMobile())return t;for(const [a,b] of MOBILE_TEXT)t=t.split(a).join(b);return t}
+function msg(t){curMsg=t;t=mt(t);$("message").textContent=t;$("lobbyHint").textContent=t;$("mMsg").textContent=t}
 function who(i){return i===side?"나":(mode==="solo"?"컴퓨터":(names[i]||"상대"))}
 function charLabel(k){const c=CHARS[k];return c?c.emoji+" "+c.name:""}
 function setLook(el,k){const c=CHARS[k];["body","belly","head","band","glow"].forEach(v=>c?el.style.setProperty("--"+v,c[v]):el.style.removeProperty("--"+v))}
 function send(o){if(ws?.readyState===1)ws.send(JSON.stringify(o))}
 // 화면 좌표(%) — 실시간 대전에서 1번 선수는 화면을 180° 돌려 내 선수가 항상 아래에 보이게 함
 const flip=()=>side===1?-1:1;
-const sx=x=>((flip()*x)+C.AX)/(2*C.AX)*100, sy=y=>((flip()*y)+C.AY)/(2*C.AY)*100;
+let viewAY=C.AY;   // 휴대폰에서는 14m까지만 보여 줌
+const sx=x=>((flip()*x)+C.AX)/(2*C.AX)*100, sy=y=>((flip()*y)+viewAY)/(2*viewAY)*100;
 function worldKeys(){return side===1?{up:!!keys.down,down:!!keys.up,left:!!keys.right,right:!!keys.left}:{up:!!keys.up,down:!!keys.down,left:!!keys.left,right:!!keys.right}}
 
 /* ───── 연출 ───── */
@@ -334,6 +386,7 @@ function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;last
 function serveMessage(){
   const mine=st.server===side,court=E.serveCourt(st)==="deuce"?"듀스 코트(서버 기준 오른쪽)":"애드 코트(서버 기준 왼쪽)",no=st.serveNo===1?"퍼스트 서브":"세컨드 서브";
   const t=tossText;tossText="";
+  if(isMobile())return mine?"내 "+no+" · "+(E.serveCourt(st)==="deuce"?"듀스 코트":"애드 코트")+" — 조이스틱으로 위치를 잡고 서브!":who(st.server)+"의 "+no+" — 한 번 튄 다음에 받아치세요.";
   return t+(mine?"내 "+no+" · "+court+" — ←→로 위치를 잡고 Space로 서브하세요. 키를 누른 채 서브하면 코스가 바뀌고, 노란 박스에 넣어야 합니다."
     :who(st.server)+"의 "+no+" · "+court+" — 서브는 한 번 튄 다음에 받아치세요.");
 }
@@ -343,7 +396,11 @@ function setGauge(prefix,v){v=clamp(v||0,0,100);const full=v>=100;$(prefix+"Gaug
   $(prefix+"GaugeTxt").textContent=full?"기 100% · 필살기 준비!":"기 "+Math.floor(v)+"%";$(prefix+"GaugeTxt").classList.toggle("full",full)}
 function isLocked(){return mode==="multi"&&!!(st&&st.phase!=="done")}
 function formatLocked(){return mode==="multi"&&!!room&&(side!==0||isLocked())}
-function showScreen(v){screen=v;$("lobby").classList.toggle("hidden",v!=="lobby");$("game").classList.toggle("hidden",v!=="game");keys={};window.scrollTo(0,0)}
+function showScreen(v){screen=v;$("lobby").classList.toggle("hidden",v!=="lobby");$("game").classList.toggle("hidden",v!=="game");keys={};joyEnd();window.scrollTo(0,0);
+  document.body.classList.toggle("playing",v==="game");lockScreen(v==="game")}
+let wakeLock=null;   // 경기 중에는 화면이 꺼지지 않도록
+async function lockScreen(on){try{if(on&&isMobile()&&!wakeLock&&navigator.wakeLock){wakeLock=await navigator.wakeLock.request("screen");wakeLock.addEventListener("release",()=>wakeLock=null)}else if(!on&&wakeLock){await wakeLock.release();wakeLock=null}}catch{}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&screen==="game")lockScreen(true)});
 let phaseAt=0;const settled=()=>performance.now()-phaseAt>400;   // 포인트가 끝난 직후 스페이스 연타로 안내를 놓치지 않도록 0.4초 여유
 function canStartNewMatch(){
   if(mode==="multi")return side===0&&((!st&&roomStatus==="ready")||(st?.phase==="done"&&settled()));
@@ -352,12 +409,12 @@ function canStartNewMatch(){
 function canNextServe(){return !!st&&(st.phase==="point"||st.phase==="fault")&&settled()}
 function render(){
   const pl=st?st.players:IDLE_PLAYERS,b=st?.ball;
-  $("player").style.left=sx(pl[side].x)+"%";$("player").style.top=sy(pl[side].y)+"%";
-  $("opponent").style.left=sx(pl[1-side].x)+"%";$("opponent").style.top=sy(pl[1-side].y)+"%";
+  $("player").style.left=sx(pl[side].x)+"%";$("player").style.top=clamp(sy(pl[side].y),3,97)+"%";
+  $("opponent").style.left=sx(pl[1-side].x)+"%";$("opponent").style.top=clamp(sy(pl[1-side].y),3,97)+"%";
   const show=!!b&&(b.held||b.live||st.phase==="point"||st.phase==="fault");
   $("ball").style.display=$("ballShadow").style.display=show?"block":"none";
   if(show){
-    const lift=b.z*.62/(2*C.AY)*100;
+    const lift=b.z*.62/(2*viewAY)*100;
     $("ballShadow").style.left=$("ball").style.left=sx(b.x)+"%";
     $("ballShadow").style.top=sy(b.y)+"%";$("ball").style.top=(sy(b.y)-lift)+"%";
     $("ballShadow").style.opacity=String(clamp(1-b.z*.18,.35,1));
@@ -409,14 +466,30 @@ function render(){
   if(st&&st.phase!==lastPhase){phaseAt=performance.now();
     if(st.phase==="serve")msg(serveMessage());
     if(st.phase==="done"){const sets=st.history.map(h=>h[side]+"-"+h[1-side]).join(", "),host=mode==="solo"||side===0;
-      overlay(st.winner===side?"🏆 우승!":"😵 패배","세트 스코어 "+sets,`<div class="ov-btns">${host?'<button class="btn" data-act="again">다시 하기 (Space)</button>':""}<button class="btn alt" data-act="lobby">선수 다시 고르기</button></div>`)}
+      overlay(st.winner===side?"🏆 우승!":"😵 패배","세트 스코어 "+sets,`<div class="ov-btns">${host?'<button class="btn" data-act="again">'+mt("다시 하기 (Space)")+'</button>':""}<button class="btn alt" data-act="lobby">선수 다시 고르기</button></div>`)}
     else hideOverlay();
     lastPhase=st.phase;
   }
   if(!st)lastPhase="";
   renderLobby();
+  if(isMobile()&&screen==="game")renderMobile(g,mine,theirs);
 }
 const FORMAT_SHORT={short:"짧은 세트(4게임)",set1:"1세트(6게임)",set3:"3세트 2선승"},LEVEL={easy:"쉬움",normal:"보통",hard:"어려움"};
+function renderMobile(g,mine,theirs){
+  const pl=(i,pre)=>{$(pre+"Name").textContent=(st&&st.phase!=="done"&&st.server===i?"🎾":"")+(i===side?"나":(mode==="solo"?"컴퓨터":(names[i]||"상대")))+" "+(CHARS[i===side?mine:theirs]?.emoji||"");
+    $(pre+"Games").textContent=st?st.games[i]:0;$(pre+"Pts").textContent=pointLabel(i);
+    const gb=$(pre+"Gauge");gb.style.width=clamp(g[i],0,100)+"%";gb.classList.toggle("full",g[i]>=100)};
+  pl(side,"mMe");pl(1-side,"mOp");
+  // 큰 버튼 하나가 상황에 따라 서브 / 타격 / 다음 서브 / 새 경기로 바뀜 (PC의 Space와 같음)
+  const a=$("mAct");let label="타격",cls="";
+  if(canStartNewMatch()){label="새 경기";cls="next"}
+  else if(st&&(st.phase==="point"||st.phase==="fault")){label="다음<br>서브";cls="next"}
+  else if(isMyServe()){label="서브";cls="serve"}
+  if(a.dataset.l!==label){a.dataset.l=label;a.innerHTML=label;a.className="mbtn act "+cls}
+  const ready=!!mine&&g[side]>=100,sb=$("mSpecial");sb.disabled=!ready;sb.classList.toggle("ready",ready);
+  const sl=ready?(CHARS[mine].emoji+" "+CHARS[mine].special):"✨ 필살기 "+Math.floor(g[side]||0)+"%";
+  if(sb.dataset.l!==sl){sb.dataset.l=sl;sb.textContent=sl}
+}
 function renderLobby(){
   const c=CHARS[myChar],connected=!!(ws&&ws.readyState===1&&room),roomReady=roomStatus==="ready"||st?.phase==="done";
   let t="경기 시작 (Space)",dis=false;
@@ -431,7 +504,7 @@ function renderLobby(){
   const opp=roomChars[1-side];
   const line=room?`방 코드 ${room} · ${side===0?"호스트":"참가자"} · ${roomStatus==="waiting"?"상대를 기다리는 중":"상대 "+(names[1-side]||"선수")+(opp?" ("+charLabel(opp)+")":"")}`:"아직 방에 들어가지 않았습니다.";
   const key=t+dis+sum+line;
-  if(key!==lobbyCache){lobbyCache=key;$("lobbyStart").textContent=t;$("lobbyStart").disabled=dis;$("pickSummary").innerHTML=sum;$("roomLine").textContent=line}
+  if(key!==lobbyCache){lobbyCache=key;$("lobbyStart").textContent=mt(t);$("lobbyStart").disabled=dis;$("pickSummary").innerHTML=sum;$("roomLine").textContent=line}
 }
 
 /* ───── 캐릭터 · 모드 선택 ───── */
@@ -522,6 +595,34 @@ $("overlay").addEventListener("click",e=>{const a=e.target.closest("[data-act]")
 $("createRoom").onclick=()=>{setMode("multi");connect(true)};
 $("joinRoom").onclick=()=>{if(!$("roomCode").value.trim()){msg("방 코드를 입력하세요.");return}connect(false)};
 $("startPoint").onclick=nextPoint;
+function primaryAction(){if(canStartNewMatch()||canNextServe())nextPoint();else if(isMyServe())serveNow();else hitBall("normal")}
+
+/* ───── 휴대폰 조작: 조이스틱 + 버튼 (멀티터치) ───── */
+const JOY_R=46;let joyId=null,joyCx=0,joyCy=0;
+function joySet(dx,dy){
+  const d=Math.hypot(dx,dy),m=Math.min(d,JOY_R),nx=d?dx/d:0,ny=d?dy/d:0;
+  $("joyKnob").style.transform=`translate(${nx*m}px,${ny*m}px)`;
+  const dead=d<JOY_R*.28,k={up:!dead&&ny<-.38,down:!dead&&ny>.38,left:!dead&&nx<-.38,right:!dead&&nx>.38};
+  if(k.up!==!!keys.up||k.down!==!!keys.down||k.left!==!!keys.left||k.right!==!!keys.right){keys=k;sendKeys()}
+}
+function joyEnd(){joyId=null;const b=$("joyBase");b.classList.remove("on");b.style.left="";b.style.top="";$("joyKnob").style.transform="";if(keys.up||keys.down||keys.left||keys.right){keys={};sendKeys()}}
+$("joyZone").addEventListener("pointerdown",e=>{
+  if(joyId!==null)return;e.preventDefault();joyId=e.pointerId;$("joyZone").setPointerCapture(e.pointerId);
+  const r=$("joyZone").getBoundingClientRect();
+  joyCx=clamp(e.clientX-r.left,56,r.width-56);joyCy=clamp(e.clientY-r.top,56,r.height-56);   // 누른 자리에 조이스틱이 생김
+  const b=$("joyBase");b.style.left=joyCx+"px";b.style.top=joyCy+"px";b.classList.add("on");
+  joySet(e.clientX-r.left-joyCx,e.clientY-r.top-joyCy);
+});
+$("joyZone").addEventListener("pointermove",e=>{if(e.pointerId!==joyId)return;const r=$("joyZone").getBoundingClientRect();joySet(e.clientX-r.left-joyCx,e.clientY-r.top-joyCy)});
+["pointerup","pointercancel","lostpointercapture"].forEach(ev=>$("joyZone").addEventListener(ev,e=>{if(e.pointerId===joyId)joyEnd()}));
+function buzz(){try{navigator.vibrate?.(12)}catch{}}
+function tapBtn(el,fn){el.addEventListener("pointerdown",e=>{e.preventDefault();el.classList.add("down");buzz();fn()});["pointerup","pointercancel","pointerleave"].forEach(ev=>el.addEventListener(ev,()=>el.classList.remove("down")));el.addEventListener("contextmenu",e=>e.preventDefault())}
+tapBtn($("mAct"),primaryAction);
+document.querySelectorAll("[data-mskill]").forEach(b=>tapBtn(b,()=>hitBall(b.dataset.mskill)));
+$("mExit").onclick=toLobby;
+function updateMobile(){const m=matchMedia("(pointer:coarse)").matches||innerWidth<600;if(m!==isMobile()){document.body.classList.toggle("mobile",m);lobbyCache="";msg(curMsg)}
+  viewAY=m?14:C.AY;document.querySelector(".court").setAttribute("viewBox",`-7.3 -${viewAY} 14.6 ${viewAY*2}`)}
+addEventListener("resize",updateMobile);
 $("hit").onclick=()=>hitBall("normal");
 $("serve").onclick=serveNow;
 document.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>{difficulty=b.dataset.level;setSeg("level",difficulty);msg("컴퓨터 난이도: "+({easy:"쉬움 · 느리고 실수가 잦아요",normal:"보통 · 적당한 발과 정확도",hard:"어려움 · 빠른 발, 아웃 공은 정확히 보내 줘요"}[difficulty]))});
@@ -535,7 +636,7 @@ const SKILL_KEY={KeyZ:"volley",KeyE:"drop",KeyF:"speed",KeyC:"lob",KeyQ:"special
 window.addEventListener("keydown",e=>{
   if(e.target.closest("input,textarea"))return;
   const k=MOVE[e.code];if(k&&screen==="game"){e.preventDefault();if(!keys[k]){keys[k]=true;sendKeys()}}
-  if(e.code==="Space"){e.preventDefault();if(e.repeat)return;if(canStartNewMatch()||canNextServe())nextPoint();else if(isMyServe())serveNow();else hitBall("normal")}
+  if(e.code==="Space"){e.preventDefault();if(e.repeat)return;primaryAction()}
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
 });
 window.addEventListener("keyup",e=>{const k=MOVE[e.code];if(k){keys[k]=false;sendKeys()}});
@@ -549,7 +650,7 @@ function loop(t){
   requestAnimationFrame(loop);
 }
 $("player").innerHTML=BUG_SVG;$("opponent").innerHTML=BUG_SVG;
-buildCharPick();setMode("solo");
+updateMobile();buildCharPick();setMode("solo");
 requestAnimationFrame(loop);
 })();
 </script>
