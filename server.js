@@ -1,42 +1,147 @@
-<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#176b42"><title>귀뚜라미 테니스 클럽</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);color:#edf5f1;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}.wrap{max-width:760px;margin:auto;padding:16px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.sub{font-size:12px;color:#a9c2b8;font-weight:700;letter-spacing:1px}.title{font-size:25px;font-weight:900}.panel{background:linear-gradient(145deg,#172b35,#203a42);border:1px solid #41616a;border-radius:15px;padding:13px;margin-top:12px;box-shadow:0 10px 24px #0004}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.score{font-size:30px;font-weight:900;text-align:center}.score small{display:block;font-size:12px;color:#b6cbc3}.arena{position:relative;background:radial-gradient(ellipse at center,#2c9a78 0%,#14765f 52%,#0b4d4c 100%);border:7px solid #d7e4e3;border-radius:17px;overflow:hidden;aspect-ratio:4/3;margin-top:12px;touch-action:none;box-shadow:0 18px 40px #0007,inset 0 0 0 3px #ffffff30}.lines{position:absolute;inset:5% 8%;border:2px solid #e6f5e9;box-shadow:inset 0 0 0 1px #ffffff22}.mid{position:absolute;left:50%;top:5%;height:90%;border-left:2px solid #e6f5e9}.hmid{position:absolute;left:8%;right:8%;top:50%;border-top:3px solid #f4fff6;box-shadow:0 0 10px #fff7}.net{position:absolute;left:50%;top:4%;height:92%;border-left:7px solid #d9e1e2;filter:drop-shadow(0 2px 3px #0019)}.bug{position:absolute;z-index:3;transform:translate(-50%,-50%);width:clamp(54px,11vw,78px);height:clamp(54px,11vw,78px);filter:drop-shadow(0 4px 3px #153a2566);user-select:none;pointer-events:none;animation:idleBob 1.5s ease-in-out infinite}.bug svg{width:100%;height:100%;overflow:visible}.bug.opponent{transform:translate(-50%,-50%) rotate(180deg);filter:drop-shadow(0 4px 3px #153a2566) hue-rotate(115deg)}.bug.swinging{animation:cricketSwing .34s ease-in-out}.bug .racket{transform-origin:78px 48px;transition:transform .12s ease}.bug.swinging .racket{transform:rotate(-72deg)}@keyframes idleBob{0%,100%{margin-top:0}50%{margin-top:-4px}}@keyframes cricketSwing{0%{transform:translate(-50%,-50%) rotate(0) scale(1)}35%{transform:translate(-50%,-50%) rotate(-15deg) scale(1.12)}100%{transform:translate(-50%,-50%) rotate(0) scale(1)}}.ball{position:absolute;z-index:4;width:13px;height:13px;border-radius:50%;background:#edff45;border:2px solid white;transform:translate(-50%,-50%);box-shadow:0 0 10px #edff45}.overlay{position:absolute;z-index:5;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:white;font-weight:900;font-size:19px;background:#102d2080;padding:20px}.overlay span{font-size:13px;font-weight:500}.btn{border:0;border-radius:10px;padding:12px 14px;background:linear-gradient(135deg,#16a078,#08735f);color:white;font-weight:800;font-size:15px;cursor:pointer}.btn.alt{background:#294650;color:#e4f4ee;border:1px solid #52717a}.btn:disabled{opacity:.45}.field{min-width:0;width:100%;padding:11px;border:1px solid #52717a;background:#10242d;color:#f3fbf7;border-radius:9px;font-size:15px}.muted{font-size:12px;color:#b5c9c2}.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-width:250px;margin:auto}.pad button{font-size:20px;min-height:46px;background:#294650;color:#effaf5;border:1px solid #52717a;border-radius:10px;touch-action:none}.pad .blank{visibility:hidden}.status{font-size:13px;text-align:center;background:#10242d;color:#e7f4ee;padding:10px;border-radius:9px;margin-top:10px}.hidden{display:none!important}
-.skillrow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}.skill{background:#294650;border:1px solid #55747c;color:#eaf8f1;border-radius:10px;padding:10px 5px;font-weight:800;font-size:13px}.skill small{display:block;font-size:10px;font-weight:500;color:#b9d2c8;margin-top:3px}.skill:disabled{opacity:.38}.skill.active{background:linear-gradient(135deg,#e59a35,#bd5d19);border-color:#ffd18a;color:#fff}.difficulty{display:flex;gap:7px;margin-top:8px}.difficulty button{flex:1;background:#294650;color:#eaf8f1;border:1px solid #52717a;border-radius:9px;padding:9px;font-weight:700}.difficulty button.active{background:#d18a2c;color:#1c2830;border-color:#ffd18a}.shotfx{position:absolute;z-index:6;pointer-events:none;font-size:13px;font-weight:1000;color:#fff;text-shadow:0 2px 7px #000;animation:shotPop .75s ease-out forwards}.ball.fast{box-shadow:0 0 16px 6px #fff6,0 0 22px #ffb52e}.ball.drop{box-shadow:0 0 14px 5px #6cf5ff99}@keyframes shotPop{0%{opacity:0;transform:translate(-50%,0) scale(.7)}20%{opacity:1;transform:translate(-50%,-12px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-40px) scale(.9)} }</style></head><body><main class="wrap">
-<header class="top"><div><div class="sub">KRE TENNIS CLUB · 2026</div><div class="title">🦗 귀뚜라미 테니스</div></div><div style="font-size:12px;text-align:right;color:#657267">CRICKET<br>CHAMPIONSHIP</div></header>
-<section class="panel"><b>게임 모드</b><div class="row" style="margin-top:9px"><button id="soloTab" class="btn">개인 연습</button><button id="multiTab" class="btn alt">실시간 대전</button></div>
-<div id="soloSetup" style="margin-top:12px"><div class="muted">혼자 컴퓨터 상대와 경기합니다. 먼저 5점을 얻으면 승리!</div><label class="muted" style="display:block;margin-top:10px">컴퓨터 난이도</label><div class="difficulty"><button data-level="easy" class="active">쉬움</button><button data-level="normal">보통</button><button data-level="hard">어려움</button></div><button id="soloStart" class="btn" style="width:100%;margin-top:9px">개인전 시작</button></div>
-<div id="multiSetup" class="hidden" style="margin-top:12px"><label class="muted">내 닉네임</label><input id="name" class="field" maxlength="12" value="귀뚜라미 선수"><div class="row" style="margin-top:8px"><button id="createRoom" class="btn">방 만들기</button><input id="roomCode" class="field" placeholder="방 코드"><button id="joinRoom" class="btn alt">참가</button></div><div class="muted" style="margin-top:7px">방을 만든 사람이 방 코드를 상대에게 공유하세요. 2명까지 입장할 수 있습니다.</div></div></section>
-<section class="row" style="margin-top:12px"><div class="panel" style="margin:0"><div class="score" id="myScore">0</div><div class="muted" style="text-align:center">내 점수</div></div><div class="panel" style="margin:0"><div class="score" id="oppScore">0</div><div class="muted" style="text-align:center" id="oppLabel">컴퓨터</div></div></section>
-<div class="arena" id="arena"><div class="lines"></div><div class="mid"></div><div class="hmid"></div><div class="net"></div><div class="bug opponent" id="opponent" role="img" aria-label="상대 귀뚜라미 선수"><svg viewBox="0 0 120 100" aria-hidden="true"><g stroke="#173c2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M48 34 Q22 2 15 17 M58 31 Q48 0 60 8" fill="none"/><path d="M42 66 L18 87 M54 70 L42 96 M72 66 L94 88 M78 57 L108 70" fill="none"/><path d="M36 48 Q18 42 16 57 M78 45 Q96 36 101 48" fill="none"/></g><ellipse cx="59" cy="60" rx="29" ry="21" fill="#42a86b" stroke="#173c2b" stroke-width="4"/><ellipse cx="48" cy="61" rx="12" ry="16" fill="#8bdc85"/><circle cx="42" cy="34" r="19" fill="#62c878" stroke="#173c2b" stroke-width="4"/><circle cx="35" cy="31" r="5" fill="white"/><circle cx="36" cy="31" r="2.5" fill="#142a20"/><path d="M26 43 Q42 52 55 43" fill="none" stroke="#173c2b" stroke-width="3" stroke-linecap="round"/><g class="racket"><path d="M79 42 L95 18" stroke="#f5d58b" stroke-width="5" stroke-linecap="round"/><ellipse cx="101" cy="12" rx="10" ry="15" transform="rotate(35 101 12)" fill="none" stroke="#f5f1dd" stroke-width="4"/><path d="M94 3 L108 20 M91 10 L104 1 M98 24 L110 9" stroke="#f5f1dd" stroke-width="1.5"/></g><path d="M19 86 L10 91 M42 95 L34 99 M95 87 L104 92 M108 70 L115 70" stroke="#173c2b" stroke-width="4" stroke-linecap="round"/></svg></div><div class="bug" id="player" role="img" aria-label="내 귀뚜라미 선수"><svg viewBox="0 0 120 100" aria-hidden="true"><g stroke="#173c2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M48 34 Q22 2 15 17 M58 31 Q48 0 60 8" fill="none"/><path d="M42 66 L18 87 M54 70 L42 96 M72 66 L94 88 M78 57 L108 70" fill="none"/><path d="M36 48 Q18 42 16 57 M78 45 Q96 36 101 48" fill="none"/></g><ellipse cx="59" cy="60" rx="29" ry="21" fill="#42a86b" stroke="#173c2b" stroke-width="4"/><ellipse cx="48" cy="61" rx="12" ry="16" fill="#8bdc85"/><circle cx="42" cy="34" r="19" fill="#62c878" stroke="#173c2b" stroke-width="4"/><circle cx="35" cy="31" r="5" fill="white"/><circle cx="36" cy="31" r="2.5" fill="#142a20"/><path d="M26 43 Q42 52 55 43" fill="none" stroke="#173c2b" stroke-width="3" stroke-linecap="round"/><g class="racket"><path d="M79 42 L95 18" stroke="#f5d58b" stroke-width="5" stroke-linecap="round"/><ellipse cx="101" cy="12" rx="10" ry="15" transform="rotate(35 101 12)" fill="none" stroke="#f5f1dd" stroke-width="4"/><path d="M94 3 L108 20 M91 10 L104 1 M98 24 L110 9" stroke="#f5f1dd" stroke-width="1.5"/></g><path d="M19 86 L10 91 M42 95 L34 99 M95 87 L104 92 M108 70 L115 70" stroke="#173c2b" stroke-width="4" stroke-linecap="round"/></svg></div><div class="ball" id="ball"></div><div class="overlay" id="overlay">🎾<br>귀뚜라미 테니스<br><span>게임 모드를 선택하고 시작하세요</span></div></div>
-<div class="panel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message">방향키로 이동하고 스페이스바로 공을 쳐보세요.</div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 포인트 / 시작</button><button id="reset" class="btn alt">초기화</button></div></div>
-<section class="panel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px">키보드: 방향키 또는 WASD · 스페이스바: 기본 타격 · 1 발리 · 2 드롭 · 3 스피드</div><div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div><div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16">⚡ 강서브</button></div><div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>네트 근처 빠른 타격 · 1</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>짧고 낮게 떨어짐 · 2</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>초고속 직선 타격 · 3</small></button></div><div class="muted" style="margin-top:7px;text-align:center">공이 가까이 왔을 때 기술 버튼 또는 숫자 1·2·3을 눌러봐!</div></section>
-<footer class="muted" style="text-align:center;padding:14px">귀뚜라미 테니스 클럽 · 사내 친선 게임</footer>
-</main>
-<script>
-(()=>{
-const $=id=>document.getElementById(id);let mode="solo",running=false,finished=false,serveReady=false,score=[0,0],p=[{x:50,y:79},{x:50,y:21}],ball={x:50,y:50,vx:0,vy:0,active:false,hit:0},keys={},raf=0,last=0,ws=null,side=0,room="",serverState=null,serveSide=0,difficulty="easy",selectedSkill="normal";
-const AI={easy:{speed:.30,reach:7.5,error:.22,delay:5},normal:{speed:.48,reach:9,error:.12,delay:2},hard:{speed:.68,reach:11,error:.035,delay:0}};let aiDelay=0;
-function clamp(n,a,b){return Math.max(a,Math.min(b,n))}function draw(){$("player").style.left=p[side].x+"%";$("player").style.top=p[side].y+"%";$("opponent").style.left=p[1-side].x+"%";$("opponent").style.top=p[1-side].y+"%";$("ball").style.left=ball.x+"%";$("ball").style.top=ball.y+"%";$("ball").style.display=ball.active?"block":"none";$("ball").className="ball"+(ball.kind==="speed"?" fast":ball.kind==="drop"?" drop":"");$("myScore").textContent=score[side];$("oppScore").textContent=score[1-side]}
-function msg(t){$("message").textContent=t}function animateSwing(id){const el=$(id);el.classList.remove("swinging");void el.offsetWidth;el.classList.add("swinging");setTimeout(()=>el.classList.remove("swinging"),360)}function overlay(a,b){$("overlay").classList.remove("hidden");$("overlay").innerHTML=a+"<br><span>"+b+"</span>"}function hide(){$("overlay").classList.add("hidden")}
-function effect(label,x,y){const e=document.createElement("div");e.className="shotfx";e.textContent=label;e.style.left=x+"%";e.style.top=y+"%";$("arena").appendChild(e);setTimeout(()=>e.remove(),800)}
-function setMode(m){mode=m;if(m==="solo")side=0;$("soloTab").className="btn "+(m==="solo"?"":"alt");$("multiTab").className="btn "+(m==="multi"?"":"alt");$("soloSetup").classList.toggle("hidden",m!=="solo");$("multiSetup").classList.toggle("hidden",m!=="multi");$("oppLabel").textContent=m==="solo"?"컴퓨터":"상대 선수";$("roomInfo").textContent=m==="solo"?"개인 연습 모드":"온라인 대전"}
-function setDifficulty(v){difficulty=v;document.querySelectorAll("[data-level]").forEach(b=>b.classList.toggle("active",b.dataset.level===v));msg("컴퓨터 난이도: "+({easy:"쉬움 · 실수도 하고 공을 놓칠 수 있어요",normal:"보통 · 적당한 반응과 정확도",hard:"어려움 · 빠르고 정확한 수비"}[v]))}
-function pointServe(){serveReady=true;$("serve").disabled=false;serveSide=0;ball={x:p[0].x,y:p[0].y-10,vx:0,vy:0,active:false,hit:0,kind:"normal"};running=true;draw();hide();$("gameStatus").textContent="서브 준비";msg("내 서브 차례! 강서브 버튼 또는 E 키로 시작하세요.")}
-function serveBall(){if(mode==="multi"){if(ws?.readyState===1&&serverState?.status==="serve"&&serverState.serveSide===side)sendInput(false,true,"speed");return}if(!running||!serveReady)return;serveReady=false;$("serve").disabled=true;ball={x:p[0].x,y:p[0].y-10,vx:(Math.random()-.5)*.22,vy:-1.55,active:true,hit:1,kind:"speed"};animateSwing("player");effect("⚡ POWER SERVE",ball.x,ball.y);$("gameStatus").textContent="경기 중";msg("⚡ 강서브! 빠른 공으로 상대를 압박합니다.")}
-function reset(){cancelAnimationFrame(raf);running=false;finished=false;serveReady=false;$("serve").disabled=true;score=[0,0];p=[{x:50,y:79},{x:50,y:21}];ball.active=false;draw();$("gameStatus").textContent="대기 중";$("startPoint").disabled=mode==="multi";$("startPoint").textContent="다음 포인트 / 시작";overlay("🦗 귀뚜라미 테니스","난이도를 선택하고 경기를 시작하세요!")}
-function soloStart(){if(mode!=="solo")return;reset();pointServe();last=performance.now();raf=requestAnimationFrame(soloLoop)}
-function movePlayer(i,dt){let k=i===side?keys:{},dx=(k.right?1:0)-(k.left?1:0),dy=(k.down?1:0)-(k.up?1:0),mag=Math.hypot(dx,dy)||1;p[i].x=clamp(p[i].x+dx/mag*.85*dt,10,90);p[i].y=i===0?clamp(p[i].y+dy/mag*.85*dt,53,91):clamp(p[i].y+dy/mag*.85*dt,9,47)}
-function computerMove(dt){const cfg=AI[difficulty],targetX=ball.active&&ball.y<55?ball.x:50;let targetY=ball.active&&ball.y<55?clamp(ball.y+5,9,45):21;let dx=targetX-p[1].x,dy=targetY-p[1].y;let dist=Math.hypot(dx,dy)||1;p[1].x=clamp(p[1].x+dx/dist*Math.min(dist,cfg.speed*dt),10,90);p[1].y=clamp(p[1].y+dy/dist*Math.min(dist,cfg.speed*dt),9,47)}
-function soloLoop(t){if(!running||mode!=="solo")return;const dt=Math.min((t-last)/16.67,2);last=t;movePlayer(0,dt);computerMove(dt);if(ball.active){if(ball.hit===1&&ball.y<52){aiDelay=Math.max(0,aiDelay-dt);let cfg=AI[difficulty],d=Math.hypot(p[1].x-ball.x,p[1].y-ball.y);if(d<cfg.reach&&aiDelay<=0){if(Math.random()>cfg.error){animateSwing("opponent");ball.hit=0;let aim=difficulty==="hard"?(p[0].x<50?clamp(66+Math.random()*20,12,88):clamp(14+Math.random()*20,12,88)):difficulty==="normal"?clamp(p[0].x+(Math.random()-.5)*58,12,88):clamp(p[0].x+(Math.random()-.5)*34,12,88);ball.vx=clamp((aim-ball.x)*.018,-.85,.85);ball.vy=.72+(difficulty==="hard"?.10:0);ball.kind="normal";msg("컴퓨터가 코스를 바꿔 리턴했어! 공의 방향을 읽어봐.")}else{msg("컴퓨터가 공을 놓쳤어! 기회야!")}aiDelay=cfg.delay+3;}}
- advanceBall();}draw();if(running)raf=requestAnimationFrame(soloLoop)}
-function advanceBall(){if(!ball.active)return;ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=ball.vy>0?.002:-.002;if(ball.x<8||ball.x>92){ball.vx*=-.88;ball.x=clamp(ball.x,8,92)}if(ball.y<4){award(0);return}if(ball.y>96){award(1);return}}
-function award(w){running=false;ball.active=false;score[w]++;draw();if(score[w]>=5){finished=true;$("gameStatus").textContent="경기 종료";overlay(w===side?"🏆 우승!":"😵 패배!",score[side]+" : "+score[1-side]+" · 다시 도전하세요");$("startPoint").disabled=false;msg(w===side?"축하합니다! 챔피언입니다.":"아쉽습니다. 난이도를 낮춰 다시 도전해 보세요.")}else{$("gameStatus").textContent="포인트 종료";$("startPoint").disabled=false;msg((w===side?"내가":"컴퓨터가")+" 득점했습니다.")}}
-function hitBall(skill="normal"){if(mode==="multi"){animateSwing("player");if(ws?.readyState===1)sendInput(true,false,skill);return}if(!running||!ball.active)return;let d=Math.hypot(p[0].x-ball.x,p[0].y-ball.y),reach=skill==="volley"?22:18;if(d<reach&&ball.hit===0){animateSwing("player");ball.hit=1;let dx=ball.x-p[0].x;let speed=skill==="speed"?1.48:skill==="volley"?1.08:skill==="drop"?.40:.78;let vx=skill==="drop"?clamp(dx*.018,-.32,.32):clamp(dx*.035+(Math.random()-.5)*.12,-.9,.9);ball.vx=vx;ball.vy=-speed;ball.kind=skill;let label=skill==="volley"?"🏐 VOLLEY!":skill==="drop"?"🪶 DROP SHOT!":skill==="speed"?"💥 SPEED SHOT!":"NICE RETURN!";effect(label,ball.x,ball.y);msg(label+" 상대 코트로 날아갑니다!")}else msg("헛스윙! 공이 가까이 왔을 때 기술을 사용해봐.")}
-function sendInput(hit=false,serve=false,skill="normal"){if(ws?.readyState!==1)return;ws.send(JSON.stringify({type:"input",keys,hit,serve,skill}))}
-function connect(create){if(ws)ws.close();const proto=location.protocol==="https:"?"wss":"ws";ws=new WebSocket(proto+"://"+location.host);ws.onopen=()=>ws.send(JSON.stringify({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미"}));ws.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch{return}if(d.type==="error"){msg(d.message);return}if(d.type==="joined"){room=d.room;side=d.side;$("roomCode").value=room;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자");msg("방에 입장했습니다. 상대에게 방 코드를 공유하세요.");return}if(d.type==="state"){serverState=d;serveSide=d.serveSide??0;score=d.score;p=d.players;ball=d.ball;$("gameStatus").textContent=d.status==="playing"?"경기 중":d.status==="finished"?"경기 종료":d.status==="ready"?"선수 준비 완료":"대기 중";$("startPoint").disabled=!(side===0&&["ready","point","finished"].includes(d.status));$("startPoint").textContent=d.status==="finished"?"새 경기":"경기 시작";$("oppLabel").textContent=d.names?.[1-side]||"상대 선수";msg(d.message);if(d.status==="finished")overlay(d.winner===side?"🏆 우승!":"경기 종료",score[side]+" : "+score[1-side]);else if(d.status==="playing"||d.status==="serve")hide();if(d.status==="serve")msg(serveSide===side?"내 서브 차례! ⚡ 강서브 버튼을 누르세요.":"상대의 서브를 기다리는 중...");$("serve").disabled=!(d.status==="serve"&&serveSide===side);draw()}};ws.onclose=()=>{if(mode==="multi")msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")}}
-$("soloTab").onclick=()=>{if(ws)ws.close();setMode("solo");reset()};$("multiTab").onclick=()=>{setMode("multi");reset()};$("soloStart").onclick=soloStart;$("createRoom").onclick=()=>{setMode("multi");connect(true)};$("joinRoom").onclick=()=>{if(!$("roomCode").value.trim()){msg("방 코드를 입력하세요.");return}connect(false)};$("startPoint").onclick=()=>{if(mode==="multi"){if(ws?.readyState===1)ws.send(JSON.stringify({type:"start"}))}else if(finished){soloStart()}else if(!running){pointServe();last=performance.now();raf=requestAnimationFrame(soloLoop)}};$("reset").onclick=()=>{if(mode==="solo")reset();else if(ws)ws.close();setMode("multi");reset()};$("hit").onclick=()=>hitBall("normal");$("serve").onclick=serveBall;document.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>setDifficulty(b.dataset.level));document.querySelectorAll("[data-skill]").forEach(b=>b.onclick=()=>hitBall(b.dataset.skill));
-document.querySelectorAll("[data-key]").forEach(b=>{let k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true;sendInput()});["pointerup","pointercancel","pointerleave"].forEach(ev=>b.addEventListener(ev,()=>{keys[k]=false;sendInput()}))});window.addEventListener("keydown",e=>{let k={ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"}[e.key];if(k){keys[k]=true;sendInput();e.preventDefault()}if(e.code==="Space"){e.preventDefault();if(!e.repeat)hitBall("normal")}if(e.key.toLowerCase()==="e"){e.preventDefault();serveBall()}if(["1","2","3"].includes(e.key)){hitBall(({1:"volley",2:"drop",3:"speed"})[e.key])}});window.addEventListener("keyup",e=>{let k={ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"}[e.key];if(k){keys[k]=false;sendInput()}});$("serve").disabled=true;setMode("solo");setDifficulty("easy");reset();
-})();
-</script>
-</body></html>
+const express = require("express");
+const http = require("http");
+const { WebSocketServer } = require("ws");
+const crypto = require("crypto");
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+app.use(express.static("public"));
+app.get("/health", (_, res) => res.json({ ok: true }));
+
+const rooms = new Map();
+const PORT = process.env.PORT || 3000;
+
+function code() { return crypto.randomBytes(3).toString("hex").toUpperCase(); }
+function freshGame() {
+  return { score:[0,0], players:[{x:50,y:79},{x:50,y:21}],
+    ball:{x:50,y:50,vx:0,vy:0,active:false,hit:0,kind:"normal"}, status:"waiting", serveSide:0,
+    message:"두 명이 입장하면 경기를 시작할 수 있습니다.", pointAt:0, winner:null };
+}
+function send(ws, obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+function broadcast(room, obj) { room.clients.forEach(c => send(c.ws,obj)); }
+function snapshot(room) {
+  return {type:"state", room:room.id, players:room.game.players, ball:room.game.ball, serveSide:room.game.serveSide,
+    score:room.game.score, status:room.game.status, message:room.game.message,
+    winner:room.game.winner, names:room.clients.map(c=>c.name)};
+}
+function resetPoint(room) {
+  const g=room.game;
+  g.serveSide=Math.random()<.5 ? 0 : 1;
+  const server=g.players[g.serveSide];
+  g.ball={x:server.x,y:g.serveSide===0?server.y-10:server.y+10,vx:0,vy:0,active:false,hit:0};
+  g.message=(g.serveSide===0?"왼쪽":"오른쪽")+" 선수의 서브 차례! 강서브 버튼을 누르세요.";
+  g.status="serve";
+}
+
+function scorePoint(room, side) {
+  const g=room.game;
+  g.score[side]++;
+  g.ball.active=false;
+  g.message=(side===0?"왼쪽":"오른쪽")+" 선수 득점!";
+  if(g.score[side]>=5) {
+    g.status="finished"; g.winner=side;
+    g.message=(side===0?"왼쪽":"오른쪽")+" 선수 우승!";
+  } else {
+    g.status="point"; g.pointAt=Date.now()+1300;
+  }
+}
+function tick(room) {
+  const g=room.game;
+  if(room.clients.length<2) {g.status="waiting";g.ball.active=false;return;}
+  if(g.status==="waiting") {g.status="ready";g.message="두 선수 준비 완료! 호스트가 시작하세요.";return;}
+  if(g.status==="point" && Date.now()>=g.pointAt) { resetPoint(room); return; }
+  if(g.status==="serve") {
+    for(let i=0;i<2;i++) {
+      const inp=room.inputs[i];
+      if(inp.serve && g.serveSide===i) {
+        const server=g.players[i];
+        g.ball={x:server.x,y:i===0?server.y-10:server.y+10,vx:(Math.random()-.5)*.42,vy:i===0?-1.25:1.25,active:true,hit:1-i};
+        g.status="playing";
+        g.message="⚡ 강서브 발사! 공이 빠르게 날아갑니다.";
+        inp.serve=false;
+        break;
+      }
+      inp.serve=false;
+    }
+    return;
+  }
+  if(g.status!=="playing" || !g.ball.active) return;
+  const dt=1;
+  for(let i=0;i<2;i++) {
+    const p=g.players[i], inp=room.inputs[i];
+    const dx=(inp.right?1:0)-(inp.left?1:0);
+    const dy=(inp.down?1:0)-(inp.up?1:0);
+    const mag=Math.hypot(dx,dy)||1;
+    p.x=Math.max(10,Math.min(90,p.x+dx/mag*.78));
+    p.y=i===0?Math.max(53,Math.min(91,p.y+dy/mag*.78)):Math.max(9,Math.min(47,p.y+dy/mag*.78));
+    if(inp.hit) {
+      const b=g.ball;
+      if(b.active && Math.hypot(p.x-b.x,p.y-b.y)<(inp.skill==="volley"?22:18) && b.hit===i) {
+        const skill=["volley","drop","speed"].includes(inp.skill)?inp.skill:"normal";
+        b.hit=1-i;
+        b.vx=skill==="drop"?Math.max(-.32,Math.min(.32,(b.x-p.x)*.018)):Math.max(-.9,Math.min(.9,(b.x-p.x)*.035+(Math.random()-.5)*.12));
+        const velocity=skill==="speed"?1.48:skill==="volley"?1.08:skill==="drop"?.40:.78;
+        b.vy=i===0?-velocity:velocity; b.kind=skill;
+        g.message=skill==="volley"?"🏐 발리샷!":skill==="drop"?"🪶 드롭샷!":skill==="speed"?"💥 스피드샷!":"멋진 리턴!";
+      }
+      inp.hit=false; inp.skill="normal";
+    }
+  }
+  const b=g.ball;
+  b.x+=b.vx; b.y+=b.vy; b.vy+=b.vy>0?.003:-.003;
+  if(b.x<8||b.x>92){b.vx*=-.88;b.x=Math.max(8,Math.min(92,b.x));}
+  if(b.y<4){scorePoint(room,0);return;}
+  if(b.y>96){scorePoint(room,1);return;}
+  // A ball crossing to the other side is returned when the receiving player gets close.
+  const receiver=b.y<50?1:0, p=g.players[receiver];
+  if(Math.hypot(p.x-b.x,p.y-b.y)<9 && b.hit===receiver) {
+    b.hit=1-receiver;
+    b.vx=Math.max(-.72,Math.min(.72,(b.x-p.x)*.035+(Math.random()-.5)*.22));
+    b.vy=receiver===0?-.76:.76;
+    g.message="상대의 리턴! 랠리 중!";
+  }
+}
+wss.on("connection",(ws)=>{
+  let client=null, room=null;
+  ws.on("message",(raw)=>{
+    let msg; try{msg=JSON.parse(raw.toString())}catch{return}
+    if(msg.type==="join") {
+      let id=String(msg.room||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8);
+      if(!id) id=code();
+      room=rooms.get(id);
+      if(!room) {room={id,clients:[],game:freshGame(),inputs:[{},{}]};rooms.set(id,room);}
+      if(room.clients.length>=2) {send(ws,{type:"error",message:"방이 가득 찼습니다. 다른 방을 만들어 주세요."});return;}
+      client={ws,name:String(msg.name||"귀뚜라미").slice(0,12),side:room.clients.length};
+      room.clients.push(client);
+      send(ws,{type:"joined",room:id,side:client.side});
+      room.game.message=room.clients.length===2?"두 선수 준비 완료! 왼쪽 선수가 시작 버튼을 누르세요.":"상대방을 기다리는 중...";
+      broadcast(room,snapshot(room));
+      return;
+    }
+    if(!room||!client)return;
+    if(msg.type==="input") {
+      const inp=room.inputs[client.side]||(room.inputs[client.side]={});
+      ["up","down","left","right"].forEach(k=>inp[k]=!!msg.keys?.[k]);
+      inp.hit=!!msg.hit;
+      inp.skill=["volley","drop","speed"].includes(msg.skill)?msg.skill:"normal";
+      inp.serve=!!msg.serve;
+    }
+    if(msg.type==="start" && client.side===0 && room.clients.length===2 && ["ready","point","finished"].includes(room.game.status)) {
+      if(room.game.status==="finished"){room.game=freshGame();room.inputs=[{},{}];}
+      resetPoint(room);
+    }
+    broadcast(room,snapshot(room));
+  });
+  ws.on("close",()=>{
+    if(room&&client){
+      room.clients=room.clients.filter(c=>c!==client);
+      room.game.status="waiting";room.game.ball.active=false;
+      room.game.message="상대방이 나갔습니다. 새 선수를 기다리는 중...";
+      broadcast(room,snapshot(room));
+      if(room.clients.length===0)rooms.delete(room.id);
+    }
+  });
+});
+setInterval(()=>{for(const room of rooms.values()){tick(room);if(room.clients.length)broadcast(room,snapshot(room));}},1000/30);
+server.listen(PORT,()=>console.log(`Cricket Tennis running on ${PORT}`));
