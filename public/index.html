@@ -5,7 +5,11 @@
 html,body{touch-action:manipulation}   /* 두 번 탭해도 화면이 확대되지 않게 */
 body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);color:#edf5f1;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
 .wrap{max-width:1360px;margin:auto;padding:16px}
-.top{text-align:center}
+.top{text-align:center;position:relative}
+.sndbox{position:absolute;right:0;top:4px;display:flex;gap:6px}
+.sndbtn{background:#294650;color:#e4f4ee;border:1px solid #52717a;border-radius:9px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer}
+.sndbtn.off{opacity:.45;text-decoration:line-through}
+@media (max-width:640px){.sndbox{position:static;justify-content:center;margin-top:8px}}
 .sub{font-size:12px;color:#a9c2b8;font-weight:700;letter-spacing:1px}
 .title{font-size:25px;font-weight:900}
 .panel{background:linear-gradient(145deg,#172b35,#203a42);border:1px solid #41616a;border-radius:15px;padding:13px;box-shadow:0 10px 24px #0004}
@@ -235,6 +239,7 @@ body.mobile #mTop{display:block;width:100%;order:0;flex:none}
 body.mobile #arena{order:1;position:relative;top:auto;flex:1 1 auto;min-height:0;width:100%;aspect-ratio:auto;margin:0;border-width:3px;border-radius:10px}
 body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-events:none}
 .mrow{display:flex;gap:5px;align-items:stretch}
+#mSnd{flex:none;width:34px;border:1px solid #52717a;background:#294650;color:#e4f4ee;border-radius:9px;font-size:15px}
 #mExit{flex:none;width:34px;border:1px solid #52717a;background:#294650;color:#e4f4ee;border-radius:9px;font-size:15px;font-weight:900}
 .mp{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;column-gap:5px;background:#172b35;border:1px solid #41616a;border-radius:9px;padding:3px 7px}
 .mp .mn{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -276,7 +281,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 @media (orientation:landscape) and (max-height:520px){body.mobile.playing #rotateHint{display:flex}}
 @media (prefers-reduced-motion:reduce){.arena.shake,.bug,.bug.stunned svg,.gauge.full i,.skill.special.ready{animation:none}.cutin,.banner{animation-duration:.01s;animation-delay:1s}}
 </style></head><body><main class="wrap">
-<header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div></header>
+<header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음 켜기/끄기">🎵 배경음</button></div></header>
 
 
 <div id="lobby" class="lobby">
@@ -348,7 +353,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 </section>
 <section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li><li>포인트가 끝난 뒤 <kbd>T</kbd>(휴대폰은 😜)를 누르면 상대를 약 올리는 동작을 해요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
 </div>
-<div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button>
+<div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button><button id="mSnd" aria-label="소리 설정">🔊</button>
 <div class="mp"><span class="mn" id="mMeName">나</span><span class="mg" id="mMeGames">0</span><span class="mpt" id="mMePts">0</span><i class="mgauge"><b id="mMeGauge"></b></i></div>
 <div class="mp"><span class="mn" id="mOpName">상대</span><span class="mg" id="mOpGames">0</span><span class="mpt" id="mOpPts">0</span><i class="mgauge"><b id="mOpGauge"></b></i></div></div>
 <div class="mmsg" id="mMsg"></div></div>
@@ -450,6 +455,123 @@ function shake(){const a=$("arena");a.classList.remove("shake");void a.offsetWid
 function overlay(a,b,btns=""){const h="<div>"+a+"<br><span>"+b+"</span>"+btns+"</div>";const o=$("overlay");o.classList.remove("hidden");if(o.innerHTML!==h)o.innerHTML=h}
 function hideOverlay(){$("overlay").classList.add("hidden")}
 
+/* ───── 소리: 모든 효과음·배경음을 브라우저에서 직접 만들어 냄(음원 파일 없음) ───── */
+const Snd=(()=>{
+  let ctx=null,master,sfxBus,bgmBus,amb,noiseBuf,scene="lobby",timer=0,nextT=0,stepN=0,chirpAt=0;
+  const pref={sfx:true,bgm:true};
+  try{Object.assign(pref,JSON.parse(localStorage.getItem("ct_sound")||"{}"))}catch{}
+  const save=()=>{try{localStorage.setItem("ct_sound",JSON.stringify(pref))}catch{}};
+  const N=n=>440*Math.pow(2,(n-69)/12);   // MIDI 번호 → 주파수
+  function init(){
+    if(ctx){if(ctx.state==="suspended")ctx.resume();return}
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    ctx=new AC();master=ctx.createGain();master.gain.value=.8;master.connect(ctx.destination);
+    sfxBus=ctx.createGain();sfxBus.connect(master);bgmBus=ctx.createGain();bgmBus.connect(master);
+    noiseBuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    apply();timer=setInterval(schedule,25);nextT=ctx.currentTime+.1;
+  }
+  function apply(){
+    if(!ctx)return;const t=ctx.currentTime;
+    sfxBus.gain.setTargetAtTime(pref.sfx?1:0,t,.05);
+    bgmBus.gain.setTargetAtTime(pref.bgm?(scene==="game"?.4:1):0,t,.3);
+    if(amb)amb.gain.setTargetAtTime(pref.bgm&&scene==="game"?.035:0,t,.5);
+  }
+  function tone(o){   // {f,f2,type,at,dur,vol,bus}
+    const t=ctx.currentTime+(o.at||0),osc=ctx.createOscillator(),g=ctx.createGain(),dur=o.dur||.15;
+    osc.type=o.type||"sine";osc.frequency.setValueAtTime(o.f,t);if(o.f2)osc.frequency.exponentialRampToValueAtTime(o.f2,t+dur);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.vol||.2,t+(o.atk||.005));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    if(o.lp){const fl=ctx.createBiquadFilter();fl.type="lowpass";fl.frequency.value=o.lp;fl.Q.value=o.q||1;osc.connect(fl);fl.connect(g)}else osc.connect(g);
+    g.connect(o.bus||sfxBus);osc.start(t);osc.stop(t+dur+.02);
+  }
+  function noise(o){   // {at,dur,vol,f,f2,q,ft}
+    const t=ctx.currentTime+(o.at||0),src=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain(),dur=o.dur||.1;
+    src.buffer=noiseBuf;src.loop=true;fl.type=o.ft||"bandpass";fl.frequency.setValueAtTime(o.f||1000,t);if(o.f2)fl.frequency.exponentialRampToValueAtTime(o.f2,t+dur);fl.Q.value=o.q||1;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.vol||.2,t+(o.atk||.004));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    src.connect(fl);fl.connect(g);g.connect(o.bus||sfxBus);src.start(t,Math.random()*.5);src.stop(t+dur+.02);
+  }
+  const notes=(list,o={})=>list.forEach((n,i)=>tone({f:N(n),type:o.type||"triangle",at:(o.at||0)+i*(o.gap||.09),dur:o.dur||.18,vol:o.vol||.16}));
+  function chirp(at=0,vol=.06){for(let r=0;r<2;r++)for(let k=0;k<3;k++)tone({f:4300,type:"sine",at:at+r*.22+k*.045,dur:.03,vol})}   // 귀뚤귀뚤
+  const FX={
+    swing(){noise({dur:.16,vol:.07,f:500,f2:2200,q:.7})},
+    hit(kind){const s={speed:[1.4,140],drop:[.5,300],lob:[.8,260],volley:[.9,240]}[kind]||[1,200];
+      noise({dur:.045,vol:.32*s[0],f:2200,q:.8});tone({f:s[1],f2:s[1]*.45,type:"triangle",dur:.09,vol:.3*s[0]});
+      if(kind==="speed")noise({dur:.12,vol:.12,f:4000,ft:"highpass"})},
+    pow(){tone({f:90,f2:45,type:"sine",dur:.2,vol:.35})},
+    bounce(){tone({f:130,f2:70,dur:.06,vol:.22});noise({dur:.02,vol:.08,f:900})},
+    net(){tone({f:95,f2:55,type:"triangle",dur:.18,vol:.32});noise({dur:.14,vol:.14,f:420,ft:"lowpass"})},
+    netcord(){tone({f:700,dur:.05,vol:.12});tone({f:520,at:.06,dur:.05,vol:.1})},
+    buzz(){tone({f:185,type:"square",dur:.16,vol:.08});tone({f:140,type:"square",at:.17,dur:.2,vol:.08})},
+    let(){notes([76,72],{gap:.12,vol:.12})},
+    win(){notes([84,88,91],{gap:.08,vol:.15});chirp(.3,.04)},
+    lose(){notes([79,76,72],{gap:.12,vol:.12,dur:.22})},
+    cheer(big){noise({dur:big?2:1.3,vol:big?.16:.1,f:1300,q:.4,atk:.15});const n=big?22:12;for(let i=0;i<n;i++)noise({at:Math.random()*(big?1.6:1),dur:.03,vol:.06+Math.random()*.06,f:2500+Math.random()*2500,q:1.5})},
+    game(){notes([72,76,79,84],{gap:.11,vol:.15,type:"square",dur:.16});tone({f:N(84),type:"triangle",at:.44,dur:.5,vol:.14})},
+    set(){notes([72,76,79,84,88],{gap:.1,vol:.15,type:"square",dur:.15});[72,76,79].forEach(n=>tone({f:N(n),type:"triangle",at:.52,dur:.8,vol:.09}))},
+    victory(){notes([72,72,72,76,79,76,79,84],{gap:.13,vol:.15,type:"square",dur:.18});[72,76,79,84].forEach(n=>tone({f:N(n),type:"triangle",at:1.1,dur:1.2,vol:.08}));chirp(1.3,.05)},
+    defeat(){notes([76,74,72,71,67],{gap:.2,vol:.12,dur:.3})},
+    tiebreak(){tone({f:N(48),type:"sawtooth",dur:.35,vol:.08});tone({f:N(49),type:"sawtooth",at:.38,dur:.5,vol:.08})},
+    coin(){tone({f:988,type:"square",dur:.07,vol:.08});tone({f:1319,type:"square",at:.07,dur:.18,vol:.08})},
+    item(kind){const base={anchovy:60,milk:72,coupon:67}[kind]||67;notes([base,base+4,base+7,base+12,base+16],{gap:.05,vol:.1,type:"sine",dur:.2});if(kind==="anchovy")FX.pow()},
+    special(kind){
+      if(kind==="tornado"){tone({f:300,f2:1400,dur:.45,vol:.14});tone({f:1400,f2:300,at:.45,dur:.45,vol:.12});noise({dur:.9,vol:.08,f:600,f2:3000,q:2})}
+      else if(kind==="snake"){for(let i=0;i<6;i++)tone({f:i%2?520:380,type:"square",at:i*.07,dur:.08,vol:.06});noise({dur:.5,vol:.05,f:5000,ft:"highpass"})}
+      else if(kind==="fire"){noise({dur:.6,vol:.22,f:300,f2:3000,q:.6});tone({f:200,f2:900,type:"sawtooth",dur:.4,vol:.06})}
+      else{FX.quake()}},
+    quake(){tone({f:55,f2:35,type:"sine",dur:.8,vol:.4});noise({dur:.8,vol:.2,f:140,ft:"lowpass"})},
+    taunt(n){if(n===8){chirp(0,.07);chirp(.5,.07);return}
+      tone({f:220,f2:660,dur:.15,vol:.14});tone({f:660,f2:200,at:.15,dur:.25,vol:.12})},
+    whiff(){noise({dur:.2,vol:.06,f:400,f2:1500,q:.6})},
+    click(){tone({f:1100,dur:.03,vol:.05})}
+  };
+  function play(name,...a){if(!ctx||!pref.sfx||ctx.state!=="running")return;try{FX[name]&&FX[name](...a)}catch{}}
+  /* 배경음: 128BPM 스포츠 중계풍 — 킥·클랩·하이햇 드럼, 통통 튀는 베이스, 신스 스탭, 신나는 리드 멜로디
+     코드 C-G-Am-F 8마디 반복, 8마디째 끝에 스네어 필인. 경기 중에는 리드를 빼고 작게 */
+  const PROG=[[48,60,64,67],[43,55,59,62],[45,57,60,64],[41,53,57,60]],SPB=60/128/4;
+  const HOOK=[   // [16분음표 위치, 음] 마디별 멜로디
+    [[0,76],[2,79],[4,84],[6,79],[8,76],[10,79],[12,81],[14,79]],
+    [[0,83],[2,79],[4,86],[6,83],[8,79],[12,81],[14,83]],
+    [[0,84],[2,81],[4,88],[6,84],[8,81],[12,83],[14,84]],
+    [[0,81],[2,77],[4,84],[6,81],[8,77],[12,79],[14,81]],
+    [[0,76],[2,79],[4,84],[6,79],[8,76],[10,79],[12,81],[14,84]],
+    [[0,86],[2,83],[4,79],[6,83],[8,86],[12,88],[14,86]],
+    [[0,84],[2,88],[4,84],[6,81],[8,84],[10,81],[12,79],[14,81]],
+    [[0,81],[4,84],[8,86],[12,88]]];
+  function drum(kind,at,v=1){const B={bus:bgmBus,at};
+    if(kind==="kick"){tone({...B,f:160,f2:42,dur:.16,vol:.42*v});noise({...B,dur:.012,vol:.06*v,f:3000})}
+    else if(kind==="clap"){noise({...B,dur:.13,vol:.2*v,f:1700,q:.7});noise({...B,at:at+.012,dur:.09,vol:.12*v,f:2400,q:.9});tone({...B,f:210,f2:130,dur:.05,vol:.08*v})}
+    else if(kind==="hat")noise({...B,dur:.03,vol:.055*v,f:8500,ft:"highpass"});
+    else if(kind==="ohat")noise({...B,dur:.11,vol:.05*v,f:7500,ft:"highpass"});
+  }
+  function schedule(){
+    if(!ctx||ctx.state!=="running")return;
+    if(!pref.bgm){nextT=Math.max(nextT,ctx.currentTime+.05);return}   // 배경음을 끄면 소리를 아예 만들지 않음
+    while(nextT<ctx.currentTime+.12){
+      const bar=Math.floor(stepN/16)%8,s=stepN%16,ch=PROG[bar%4],at=nextT-ctx.currentTime,B={bus:bgmBus,at},lobby=scene!=="game";
+      // 드럼: 네 박자 킥, 2·4박 클랩, 8분 하이햇 + 엇박 오픈햇, 8마디째 끝 스네어 필인
+      if(s%4===0)drum("kick",at);
+      if(s===4||s===12)drum("clap",at);
+      if(s%2===0)drum(s%4===2?"ohat":"hat",at);else if(lobby)drum("hat",at,.5);
+      if(bar===7&&s>=12)drum("clap",at,.45+(s-12)*.15);
+      // 베이스: 8분음표로 근음-옥타브 통통
+      if(s%2===0)tone({...B,f:N(ch[0]-12+(s%4===2?12:0)),type:"sawtooth",lp:700,dur:SPB*1.7,vol:.11});
+      // 신스 스탭: 엇박에 짧게 끊는 화음
+      if(s===2||s===6||s===10||s===14)ch.slice(1).forEach(n=>tone({...B,f:N(n+12),type:"square",lp:2400,dur:SPB*.9,vol:.022}));
+      // 리드 멜로디(로비에서만)
+      if(lobby)for(const [ps,n] of HOOK[bar])if(ps===s){tone({...B,f:N(n),type:"square",lp:3200,dur:SPB*1.8,vol:.05});tone({...B,f:N(n)*1.006,type:"sawtooth",lp:2600,dur:SPB*1.8,vol:.025})}
+      nextT+=SPB;stepN++;
+    }
+    if(scene==="game"&&ctx.currentTime>chirpAt){chirpAt=ctx.currentTime+6+Math.random()*8;chirp(0,.025)}
+  }
+  function startAmb(){   // 관중 웅성임(경기 중에만 들림)
+    if(amb||!ctx)return;const src=ctx.createBufferSource(),fl=ctx.createBiquadFilter();amb=ctx.createGain();amb.gain.value=0;
+    src.buffer=noiseBuf;src.loop=true;fl.type="lowpass";fl.frequency.value=520;src.connect(fl);fl.connect(amb);amb.connect(bgmBus);src.start();
+  }
+  function setScene(v){scene=v;if(ctx){startAmb();apply()}}
+  function toggle(k){pref[k]=!pref[k];save();init();apply();return pref[k]}
+  document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else ctx.resume()});
+  return{init,play,setScene,toggle,pref};
+})();
+
 /* ───── 점수 표기 ───── */
 const PT=["0","15","30","40"];
 function pointLabel(i){
@@ -473,43 +595,47 @@ function handleEvent(e){
   const nextHint=mode==="solo"?" · Space로 다음 서브":" · 잠시 후 다음 서브(Space로 바로)";
   switch(e.type){
     case "toss":tossText+="동전 던지기 결과 "+who(e.server)+"의 서브로 시작합니다. ";break;
-    case "serve":if(e.side!==side)animateSwing("opponent");if(e.no===1&&chance3(e.id))say(e.side,pick(LINES.serve,e.id),1);break;
+    case "serve":Snd.play("swing");Snd.play("hit",e.no===1?"speed":"normal");if(e.side!==side)animateSwing("opponent");if(e.no===1&&chance3(e.id))say(e.side,pick(LINES.serve,e.id),1);break;
     case "hit":
+      if(e.skill!=="special")Snd.play("hit",e.skill);if(st.ball&&st.ball.pow)Snd.play("pow");
       if(e.side!==side)animateSwing("opponent");
       if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SMASH!",lob:"🌙 LOB!"}[e.skill],e.x,e.y);
       if(e.skill!=="special"&&chance3(e.id))say(e.side,pick(e.skill==="speed"?LINES.smash.concat(LINES.hit):LINES.hit,e.id),1);   // 칠 때는 3번에 1번꼴
       break;
-    case "whiff":animateSwing("opponent");popup("헛스윙!",st.players[e.side].x,st.players[e.side].y);break;
-    case "special":cutin(e.side,e.kind);if(e.kind==="quake")shake();if(LINES.special[e.kind])say(e.side,LINES.special[e.kind],3,true);break;
-    case "itemGet":{const it=ITEMS[e.item];if(!it)break;popup(it.emoji+" 획득!",st.players[e.side].x,st.players[e.side].y,"call");
+    case "whiff":Snd.play("whiff");animateSwing("opponent");popup("헛스윙!",st.players[e.side].x,st.players[e.side].y);break;
+    case "special":Snd.play("special",e.kind);cutin(e.side,e.kind);if(e.kind==="quake")shake();if(LINES.special[e.kind])say(e.side,LINES.special[e.kind],3,true);break;
+    case "itemGet":{const it=ITEMS[e.item];if(!it)break;if(e.side===side)Snd.play("coin");popup(it.emoji+" 획득!",st.players[e.side].x,st.players[e.side].y,"call");
       msg(curMsg+" · "+(e.side===side?"아이템 "+it.emoji+" "+it.name+" 획득!":who(e.side)+"이(가) "+it.emoji+" 획득"));break}
-    case "item":{const it=ITEMS[e.item];if(!it)break;say(e.side,pick(LINES.item[e.item],e.id),3,true);popup(it.emoji+" "+it.name+"!",st.players[e.side].x,st.players[e.side].y,"call");
+    case "item":{const it=ITEMS[e.item];if(!it)break;Snd.play("item",e.item);say(e.side,pick(LINES.item[e.item],e.id),3,true);popup(it.emoji+" "+it.name+"!",st.players[e.side].x,st.players[e.side].y,"call");
       msg((e.side===side?"":who(e.side)+"의 ")+it.emoji+" "+it.name+"! "+it.fx+" (이번 포인트 동안)");break}
-    case "taunt":playTaunt(e.side,e.n);say(e.side,pick(LINES.taunt[e.n]||LINES.win,e.id),3,true);break;
-    case "netcord":popup("NET CORD",e.x,e.y,"call");break;
-    case "net":popup("NET",e.x,e.y,"bad");break;
-    case "bounce":mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
-    case "quake":shake();popup("💫 기절!",st.players[e.side].x,st.players[e.side].y);break;
+    case "taunt":Snd.play("taunt",e.n);playTaunt(e.side,e.n);say(e.side,pick(LINES.taunt[e.n]||LINES.win,e.id),3,true);break;
+    case "netcord":Snd.play("netcord");popup("NET CORD",e.x,e.y,"call");break;
+    case "net":Snd.play("net");popup("NET",e.x,e.y,"bad");break;
+    case "bounce":Snd.play("bounce");if(e.out)Snd.play("buzz");mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
+    case "quake":Snd.play("quake");shake();popup("💫 기절!",st.players[e.side].x,st.players[e.side].y);break;
     case "fault":
+      if(e.reason!=="out")Snd.play("buzz");
       if(!e.double){popup("FAULT",0,(e.side===0?-1:1)*4,"bad");msg((e.reason==="net"?"네트에 걸렸어요. ":"서비스 박스 밖이에요. ")+"폴트! "+who(e.side)+"의 세컨드 서브입니다.")}
       else popup("DOUBLE FAULT",0,(e.side===0?-1:1)*4,"bad");
       break;
-    case "let":popup("LET",0,(e.side===0?-1:1)*4,"call");msg("레트! 네트에 맞고 박스에 들어가서 서브를 다시 넣습니다.");break;
+    case "let":Snd.play("let");popup("LET",0,(e.side===0?-1:1)*4,"call");msg("레트! 네트에 맞고 박스에 들어가서 서브를 다시 넣습니다.");break;
     case "point":{
       const r=REASON[e.reason]||"포인트";
+      Snd.play(e.winner===side?"win":"lose");Snd.play("cheer",e.reason==="ace");
       if(e.reason==="ace")popup("ACE!",0,(e.winner===0?-1:1)*8,"call");
       {const w=e.winner,deuce=!e.tb&&e.pts[0]>=3&&e.pts[0]===e.pts[1];
        say(w,e.reason==="ace"?pick(LINES.ace,e.id):deuce?pick(LINES.deuce,e.id):pick(LINES.win,e.id),2);
        say(1-w,pick(LINES.lose,e.id+2),2);}
       msg(r+"! "+who(e.winner)+" 포인트 · "+callScore(e.pts,e.server,e.tb)+nextHint);break}
     case "game":
+      if(!e.tb)Snd.play("game");
       say(e.winner,pick(LINES.game,e.id),4,true);
       banner(e.tb?"타이브레이크 승리":"게임 "+who(e.winner),"게임 스코어 "+e.games[side]+" - "+e.games[1-side]);
       msg("게임, "+who(e.winner)+"! 게임 스코어 "+e.games[side]+"-"+e.games[1-side]+" (나-"+who(1-side)+")"+nextHint);break;
-    case "tiebreak":banner("타이브레이크","7점 먼저 · 2점 차");msg("게임 스코어 동점! 타이브레이크로 세트를 결정합니다. 7점을 먼저, 2점 차로 따야 합니다."+nextHint);break;
+    case "tiebreak":Snd.play("tiebreak");banner("타이브레이크","7점 먼저 · 2점 차");msg("게임 스코어 동점! 타이브레이크로 세트를 결정합니다. 7점을 먼저, 2점 차로 따야 합니다."+nextHint);break;
     case "ends":msg(curMsg+" · 코트 체인지(화면은 그대로)");break;
-    case "set":banner("세트 "+who(e.winner),e.score[side]+" - "+e.score[1-side]);msg("세트, "+who(e.winner)+"! "+e.score[side]+"-"+e.score[1-side]+nextHint);break;
-    case "match":say(e.winner,pick(LINES.match,e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
+    case "set":Snd.play("set");Snd.play("cheer",true);banner("세트 "+who(e.winner),e.score[side]+" - "+e.score[1-side]);msg("세트, "+who(e.winner)+"! "+e.score[side]+"-"+e.score[1-side]+nextHint);break;
+    case "match":Snd.play(e.winner===side?"victory":"defeat");say(e.winner,pick(LINES.match,e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
   }
 }
 function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;lastEv=e.id;handleEvent(e)}}
@@ -527,7 +653,7 @@ function setGauge(prefix,v){v=clamp(v||0,0,100);const full=v>=100;$(prefix+"Gaug
 function isLocked(){return mode==="multi"&&!!(st&&st.phase!=="done")}
 function formatLocked(){return mode==="multi"&&!!room&&(side!==0||isLocked())}
 function showScreen(v){screen=v;$("lobby").classList.toggle("hidden",v!=="lobby");$("game").classList.toggle("hidden",v!=="game");keys={};joyEnd();window.scrollTo(0,0);
-  document.body.classList.toggle("playing",v==="game");lockScreen(v==="game");requestAnimationFrame(layoutView)}
+  document.body.classList.toggle("playing",v==="game");lockScreen(v==="game");Snd.setScene(v);requestAnimationFrame(layoutView)}
 let wakeLock=null;   // 경기 중에는 화면이 꺼지지 않도록
 async function lockScreen(on){try{if(on&&isMobile()&&!wakeLock&&navigator.wakeLock){wakeLock=await navigator.wakeLock.request("screen");wakeLock.addEventListener("release",()=>wakeLock=null)}else if(!on&&wakeLock){await wakeLock.release();wakeLock=null}}catch{}}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&screen==="game")lockScreen(true)});
@@ -753,7 +879,7 @@ function hitFeedback(r){if(HIT_TEXT[r])msg(HIT_TEXT[r]);else if(r==="ok"&&st.gau
 function hitBall(skill="normal"){
   if(!st||st.phase!=="rally")return;
   if(skill==="special"&&st.gauge[side]<100){msg("기가 아직 "+Math.floor(st.gauge[side])+"%예요. 공을 받아치거나 실점하면 기가 차오릅니다.");return}
-  animateSwing("player");
+  animateSwing("player");Snd.play("swing");
   if(mode==="multi"){send({type:"hit",skill,keys:worldKeys()});return}
   hitFeedback(E.tryHit(st,0,skill,{keys:worldKeys(),err:1}));
 }
@@ -862,6 +988,14 @@ let lastTouchEnd=0;
 document.addEventListener("touchend",e=>{const now=Date.now();if(screen==="game"&&now-lastTouchEnd<350&&!e.target.closest("button,input,textarea,select"))e.preventDefault();lastTouchEnd=now},{passive:false});   // 로비에서는 빠른 연속 탭(선수 선택→시작)이 막히지 않게 경기 화면에서만
 document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
 ["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>{if(screen==="game")e.preventDefault()},{passive:false}));   // 경기 중 두 손가락 확대도 막음
+["pointerdown","keydown","touchend"].forEach(t=>document.addEventListener(t,()=>Snd.init(),{passive:true}));
+function renderSnd(){$("sfxBtn").classList.toggle("off",!Snd.pref.sfx);$("bgmBtn").classList.toggle("off",!Snd.pref.bgm);
+  $("mSnd").textContent=Snd.pref.sfx&&Snd.pref.bgm?"🔊":Snd.pref.sfx?"🔉":"🔇"}
+$("sfxBtn").onclick=()=>{Snd.toggle("sfx");renderSnd()};
+$("bgmBtn").onclick=()=>{Snd.toggle("bgm");renderSnd()};
+// 휴대폰: 버튼 하나로 [모두 켬 → 배경음 끔 → 모두 끔] 순환
+$("mSnd").onclick=()=>{if(Snd.pref.sfx&&Snd.pref.bgm)Snd.toggle("bgm");else if(Snd.pref.sfx)Snd.toggle("sfx");else{Snd.toggle("sfx");Snd.toggle("bgm")}renderSnd()};
+renderSnd();
 function updateMobile(){const m=matchMedia("(pointer:coarse)").matches||innerWidth<600;if(m!==isMobile()){document.body.classList.toggle("mobile",m);lobbyCache="";msg(curMsg)}
   layoutView()}
 addEventListener("resize",updateMobile);
