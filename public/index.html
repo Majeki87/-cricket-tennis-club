@@ -525,9 +525,13 @@ const Snd=(()=>{
     taunt(n){if(n===8){chirp(0,.07);chirp(.5,.07);return}
       tone({f:220,f2:660,dur:.15,vol:.14});tone({f:660,f2:200,at:.15,dur:.25,vol:.12})},
     whiff(){noise({dur:.2,vol:.06,f:400,f2:1500,q:.6})},
-    click(){tone({f:1100,dur:.03,vol:.05})}
+    click(){tone({f:1100,dur:.03,vol:.05})},
+    pop(kind){   // 뿅: 위로 톡 튀어 오르는 귀여운 소리 (누를 때마다 높이가 살짝 달라짐)
+      const r=1+(Math.random()-.5)*.12,base=(kind==="char"?720:600)*r;
+      const one=(at,f)=>{tone({f,f2:f*2.3,at,dur:.09,vol:.17,atk:.003});tone({f:f*2,f2:f*4.2,at,dur:.05,vol:.04,atk:.002})};
+      one(0,base);if(kind==="big")one(.1,base*1.33)}
   };
-  function play(name,...a){if(!ctx||!pref.sfx||ctx.state!=="running")return;try{FX[name]&&FX[name](...a)}catch{}}
+  function play(name,...a){if(!ctx||!pref.sfx)return;if(ctx.state==="suspended"&&!document.hidden)ctx.resume();try{FX[name]&&FX[name](...a)}catch{}}
   /* 배경음: 숲속 자연의 소리 — 산들바람, 나뭇잎 바스락, 졸졸 시냇물, 찌르르 귀뚜라미, 여러 가지 새소리
      로비에서는 계속, 경기에 들어가면 처음 몇 초만 들리다가 조용히 사라져 경기에 집중할 수 있게 함 */
   const NAT=2.6;   // 자연 소리 전체 음량
@@ -1034,8 +1038,11 @@ document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
 ["pointerdown","keydown","touchend"].forEach(t=>document.addEventListener(t,()=>Snd.init(),{passive:true}));
 function renderSnd(){$("sfxBtn").classList.toggle("off",!Snd.pref.sfx);$("bgmBtn").classList.toggle("off",!Snd.pref.bgm);
   $("mSnd").textContent=Snd.pref.sfx&&Snd.pref.bgm?"🔊":Snd.pref.sfx?"🔉":"🔇"}
-$("sfxBtn").onclick=()=>{Snd.toggle("sfx");renderSnd()};
-$("bgmBtn").onclick=()=>{Snd.toggle("bgm");renderSnd()};
+$("sfxBtn").onclick=()=>{Snd.toggle("sfx");renderSnd();Snd.play("pop")};
+$("bgmBtn").onclick=()=>{Snd.toggle("bgm");renderSnd();Snd.play("pop")};
+// 로비 버튼을 누를 때마다 뿅! (경기 시작·방 참가는 뿅뿅)
+$("lobby").addEventListener("click",e=>{const b=e.target.closest("button,summary,label.chk");if(!b||b.disabled)return;
+  Snd.play("pop",b.id==="lobbyStart"||b.id==="createRoom"||b.id==="joinRoom"||b.dataset.join?"big":b.classList.contains("char")?"char":"")});
 // 휴대폰: 버튼 하나로 [모두 켬 → 배경음 끔 → 모두 끔] 순환
 $("mSnd").onclick=()=>{if(Snd.pref.sfx&&Snd.pref.bgm)Snd.toggle("bgm");else if(Snd.pref.sfx)Snd.toggle("sfx");else{Snd.toggle("sfx");Snd.toggle("bgm")}renderSnd()};
 renderSnd();
