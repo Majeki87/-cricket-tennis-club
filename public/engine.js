@@ -11,12 +11,16 @@ const G = 9.8, LINE = 0.04;
 const CHARS = ["tornado", "snake", "fire", "quake"];
 const SKILLS = ["normal", "volley", "drop", "speed", "lob", "special"];
 const FORMATS = { short: { games: 4, sets: 1 }, set1: { games: 6, sets: 1 }, set3: { games: 6, sets: 2 } };
+// 아이템: 경기 중 포인트가 끝날 때마다 무작위로 얻고(최대 3개), 쓰면 그 포인트가 끝날 때까지 효과 유지
+const ITEMS = ["anchovy", "milk", "coupon"];        // 죽방멸치 · 서울우유 · 로빈 쿠폰
+const ITEM_MAX = 3, ITEM_CHANCE = .25;
+const ITEM_FX = { anchovyT: .78, milkReach: 1.5, couponSig: .55 };
 const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.7, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
 const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, special: 1.7 };
 const AI = {
-  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15 },
-  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35 },
-  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55 }
+  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3 },
+  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35, item: .5 },
+  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55, item: .7 }
 };
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -50,7 +54,7 @@ function newMatch(opts = {}) {
     phase: "serve", timer: 0, autoNext: opts.autoNext || 0, serveWait: 1,
     players: [{ x: 0, y: COURT.L + .8 }, { x: 0, y: -COURT.L - .8 }],
     ball: idleBall(0), gauge: [0, 0], stun: [0, 0], winner: null, rally: 0,
-    events: [], evId: opts.evId || 0, ai: {}
+    events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0
   };
   pushEv(st, { type: "toss", server: st.server });
   startPoint(st);
@@ -115,13 +119,15 @@ function serve(st, side, aim = {}) {
   if (st.phase !== "serve" || side !== st.server) return false;
   const b = st.ball, d = dirOf(side), box = -stanceSign(st), first = st.serveNo === 1, k = aim.keys || {};
   const h = (k.right ? 1 : 0) - (k.left ? 1 : 0);          // 서브 코스: 센터(T) 쪽 / 와이드 쪽
-  const sig = (first ? .62 : .3) * (aim.err || 1);
+  const act = st.active[side];
+  const sig = (first ? .62 : .3) * (aim.err || 1) * (act.coupon ? ITEM_FX.couponSig : 1);
   const tx = clamp(box * COURT.S / 2 + h * 1.3, -COURT.S, COURT.S) + gauss() * sig;
   const ty = d * ((first ? 5.5 : 4.7) + gauss() * sig * .7);
   const p = st.players[side];
-  launch(b, { x: p.x + .2, y: p.y, z: 2.65 }, { x: tx, y: ty }, first ? .85 : 1.15, null);
-  if (first) b.vz += gauss() * .3 * (aim.err || 1);
+  launch(b, { x: p.x + .2, y: p.y, z: 2.65 }, { x: tx, y: ty }, (first ? .85 : 1.15) * (act.anchovy ? ITEM_FX.anchovyT : 1), act.anchovy ? .1 : null);
+  if (first) b.vz += gauss() * .3 * (aim.err || 1) * (act.coupon ? ITEM_FX.couponSig : 1);
   b.owner = side; b.serve = true; b.kind = first ? "speed" : "normal";
+  itemBall(st, side, b);
   st.phase = "rally"; st.rally = 0;
   pushEv(st, { type: "serve", side, no: st.serveNo });
   return true;
@@ -141,7 +147,7 @@ function tryHit(st, side, skill, aim = {}) {
   if (b.bounces >= 2) return "late";
   if (skill === "special" && (st.gauge[side] < 100 || !CHARS.includes(st.chars[side]))) return "noGauge";
   if (b.z > MAX_HIT_Z) return "high";
-  const reach = REACH[skill] * (b.kind === "fire" ? FIRE_REACH : 1);
+  const reach = REACH[skill] * (b.kind === "fire" ? FIRE_REACH : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
   if (ballDist(b, st.players[side]) > reach) return b.kind === "fire" ? "fireFar" : "far";
   shoot(st, side, skill, aim);
   return "ok";
@@ -167,6 +173,9 @@ function shoot(st, side, skill, aim) {
       break;
     default: tx = h ? h * 3 : clamp(-opp.x * .45 + (Math.random() - .5) * 3.2, -3.1, 3.1); depth = 8.6 + v * 1.4; T = 1.25 - v * .08; sig = .5;
   }
+  const act = st.active[side];
+  if (act.coupon) sig *= ITEM_FX.couponSig;             // 로빈 쿠폰: 집중력 → 정확도
+  if (act.anchovy) T *= ITEM_FX.anchovyT;               // 죽방멸치: 힘 → 공 속도
   tx += gauss() * sig * err;
   const ty = d * (depth + gauss() * sig * .8 * err);
   launch(b, { x: b.x, y: b.y, z: b.z }, { x: tx, y: ty }, T, margin);
@@ -175,12 +184,28 @@ function shoot(st, side, skill, aim) {
   if (skill === "drop") { b.e = .42; b.keep = .6; }
   if (skill === "lob") { b.e = .82; b.keep = .7; }
   if (kind === "fire") { b.e = .6; b.keep = .92; }
+  itemBall(st, side, b);
   st.rally++;
   if (skill === "special") { st.gauge[side] = 0; pushEv(st, { type: "special", side, kind }); }
   else st.gauge[side] = Math.min(100, st.gauge[side] + GAUGE_HIT);
   pushEv(st, { type: "hit", side, skill, x: b.x, y: b.y });
 }
 
+function itemBall(st, side, b) {
+  const act = st.active[side];
+  b.pow = !!act.anchovy;
+  b.spin = act.coupon ? (Math.random() < .5 ? -1 : 1) : 0;
+  if (b.spin) { b.e = Math.min(.9, b.e * 1.18); b.keep = Math.min(.95, b.keep * 1.15); }   // 로빈 쿠폰: 스핀 → 휘어 들어가고 튄 뒤 더 뻗음
+}
+function useItem(st, side, slot) {
+  if (st.phase === "done") return "idle";
+  const bag = st.items[side], item = bag[slot];
+  if (!item) return "empty";
+  if (st.active[side][item]) return "already";
+  bag.splice(slot, 1); st.active[side][item] = true;
+  pushEv(st, { type: "item", side, item });
+  return "ok";
+}
 function stepBall(st, dt) {
   const b = st.ball; if (!b.live) return;
   b.t += dt; b.bx += b.vx * dt; b.by += b.vy * dt; b.z += b.vz * dt - .5 * G * dt * dt; b.vz -= G * dt;
@@ -190,6 +215,7 @@ function stepBall(st, dt) {
     if (b.curve === "tornado") { const r = 1.5 * Math.sin(Math.PI * u), ph = u * Math.PI * 6; ox = r * Math.sin(ph); oy = r * .55 * (Math.cos(ph) - 1); }
     else if (b.curve === "snake") ox = 2.5 * Math.sin(3 * Math.PI * u);
   }
+  if (b.spin && b.bounces === 0 && b.t < b.T) ox += 0.9 * Math.sin(Math.PI * b.t / b.T) * b.spin;   // 스핀으로 바나나처럼 휘었다가 목표 지점에 떨어짐
   b.x = b.bx + ox; b.y = b.by + oy;
   if (!b.crossed && b.by * dirOf(b.owner) >= 0) {         // 네트 통과 판정
     b.crossed = true;
@@ -238,6 +264,11 @@ function letServe(st) { st.phase = "fault"; st.timer = 1.1; pushEv(st, { type: "
 
 function pointTo(st, w, reason) {
   st.ball.live = false; st.serveNo = 1;
+  st.active = [{}, {}]; st.pointNo++;                   // 점수를 따거나 잃으면 아이템 효과는 사라짐
+  for (let i = 0; i < 2; i++) if (st.items[i].length < ITEM_MAX && Math.random() < ITEM_CHANCE) {
+    const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+    st.items[i].push(item); pushEv(st, { type: "itemGet", side: i, item });
+  }
   st.gauge[1 - w] = Math.min(100, st.gauge[1 - w] + GAUGE_LOSE);
   st.pts[w]++;
   const gameOver = st.tb ? (st.pts[w] >= 7 && st.pts[w] - st.pts[1 - w] >= 2) : (st.pts[w] >= 4 && st.pts[w] - st.pts[1 - w] >= 2);
@@ -296,6 +327,10 @@ function aiThink(st, side, level, dt) {
   const cfg = AI[level] || AI.normal, me = st.players[side], b = st.ball, own = ownSign(side), base = own * (COURT.L + .9);
   const ai = st.ai[side] || (st.ai[side] = { ball: -1, leave: false, tried: false, off: 0 });
   const out = { speed: cfg.speed, target: { x: me.x, y: me.y } };
+  if ((st.phase === "serve" || st.phase === "rally") && st.items[side].length && ai.itemPoint !== st.pointNo) {
+    ai.itemPoint = st.pointNo;
+    if (Math.random() < cfg.item) useItem(st, side, Math.floor(Math.random() * st.items[side].length));
+  }
   if (st.phase === "serve") {
     if (st.server === side) {
       st.serveWait -= dt;
@@ -316,7 +351,7 @@ function aiThink(st, side, level, dt) {
   out.target = { x: spot.x + ai.off, y: spot.y + own * .35 };
   if (!ai.tried && b.crossed && b.z <= MAX_HIT_Z) {
     const canVolley = !b.serve && Math.abs(me.y) < 6;
-    const reach = REACH.normal * (b.kind === "fire" ? FIRE_REACH : 1);
+    const reach = REACH.normal * (b.kind === "fire" ? FIRE_REACH : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
     if ((b.bounces === 1 || (b.bounces === 0 && canVolley)) && ballDist(b, me) < reach) {
       ai.tried = true;
       const miss = cfg.error + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0);
@@ -335,7 +370,7 @@ function aiThink(st, side, level, dt) {
   return out;
 }
 
-const api = { COURT, CHARS, SKILLS, FORMATS, AI, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, useItem, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
