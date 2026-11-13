@@ -130,11 +130,11 @@ kbd{display:inline-block;min-width:18px;padding:0 4px;border:1px solid #52717a;b
 
 <div class="panel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message">캐릭터를 고른 뒤 경기를 시작하세요.</div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (R)</button><button id="reset" class="btn alt">초기화</button></div></div>
 
-<section class="panel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>1</kbd> 발리 · <kbd>2</kbd> 드롭 · <kbd>3</kbd> 스피드 · <kbd>4</kbd> 필살기 · <kbd>E</kbd> 강서브 · <kbd>R</kbd> 다음 서브</div>
+<section class="panel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>1</kbd> 발리 · <kbd>2</kbd> 드롭 · <kbd>3</kbd> 스피드 · <kbd>Q</kbd> 필살기 · <kbd>E</kbd> 강서브 · <kbd>R</kbd> 다음 서브 · 경기 종료 후 <kbd>Space</kbd>·<kbd>R</kbd> 새 경기</div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16">⚡ 강서브</button></div>
-<div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>네트 근처 빠른 타격 · 1</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>짧고 낮게 떨어짐 · 2</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>초고속 직선 타격 · 3</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · 4</small></button></div>
-<div class="muted" style="margin-top:7px;text-align:center">공을 받아칠 때마다 기가 차오릅니다. 기가 100%가 되면 숫자 4로 필살기!</div></section>
+<div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>네트 근처 빠른 타격 · 1</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>짧고 낮게 떨어짐 · 2</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>초고속 직선 타격 · 3</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
+<div class="muted" style="margin-top:7px;text-align:center">공을 받아칠 때마다 기가 차오릅니다. 기가 100%가 되면 Q 키로 필살기!</div></section>
 <footer class="muted" style="text-align:center;padding:14px">귀뚜라미 테니스 클럽 · 사내 친선 게임</footer>
 </main>
 <script>
@@ -227,10 +227,10 @@ function pickChar(k){
   myChar=k;
   document.querySelectorAll(".char").forEach(b=>{const on=b.dataset.char===k;b.classList.toggle("active",on);b.setAttribute("aria-pressed",on)});
   const c=CHARS[k];
-  $("specialBtn").innerHTML=c.emoji+" "+c.special+"<small>기 100% 필요 · 4</small>";
+  $("specialBtn").innerHTML=c.emoji+" "+c.special+"<small>기 100% 필요 · Q</small>";
   $("specialBtn").style.setProperty("--glow",c.glow);
   $("soloStart").disabled=false;$("soloStart").textContent="개인전 시작";
-  if(mode==="solo"&&!matchActive)overlay("🦗 "+c.name+" 출전!","개인전 시작 버튼 또는 R 키로 경기를 시작하세요");
+  if(mode==="solo"&&!matchActive)overlay("🦗 "+c.name+" 출전!","개인전 시작 버튼, Space 또는 R 키로 경기를 시작하세요");
   msg(c.emoji+" "+c.name+" 선택! 필살기 "+c.special+": "+c.desc+".");
   draw();
 }
@@ -303,7 +303,7 @@ function reset(){
   p=[{x:50,y:79},{x:50,y:21}];ball={x:50,y:50,vx:0,vy:0,active:false,hit:0,kind:"normal"};
   draw();$("gameStatus").textContent="대기 중";
   $("startPoint").disabled=mode==="multi"||!myChar;$("startPoint").textContent="경기 시작 (R)";
-  overlay("🦗 귀뚜라미 테니스",myChar?"개인전 시작 버튼 또는 R 키로 경기를 시작하세요":"먼저 캐릭터를 선택하세요!")}
+  overlay("🦗 귀뚜라미 테니스",myChar?"개인전 시작 버튼, Space 또는 R 키로 경기를 시작하세요":"먼저 캐릭터를 선택하세요!")}
 function soloStart(){
   if(mode!=="solo")return;
   if(!myChar){msg("먼저 캐릭터를 선택하세요.");return}
@@ -313,6 +313,9 @@ function soloStart(){
   $("startPoint").textContent="다음 서브 (R)";$("startPoint").disabled=true;
   msg("상대는 "+charLabel(chars[1])+"! 필살기 "+CHARS[chars[1]].special+"을(를) 조심하세요.");
   pointServe();last=performance.now();raf=requestAnimationFrame(soloLoop)}
+function canStartNewMatch(){ // 스페이스바: 경기 중이 아닐 때 새 경기 시작
+  if(mode==="multi")return side===0&&serverState?.status==="finished";
+  return !!myChar&&!running&&(finished||!matchActive)}
 function nextPoint(){
   if(mode==="multi"){if(ws?.readyState===1)ws.send(JSON.stringify({type:"next"}));return}
   if(running)return;
@@ -369,9 +372,9 @@ function award(w){
   gauge[1-w]=Math.min(100,gauge[1-w]+GAUGE_LOSE);
   if(score[w]>=5){
     finished=true;$("gameStatus").textContent="경기 종료";
-    overlay(w===side?"🏆 우승!":"😵 패배!",score[side]+" : "+score[1-side]+" · R 키로 새 경기 시작");
-    $("startPoint").disabled=false;$("startPoint").textContent="새 경기 (R)";
-    msg(w===side?"축하합니다! 챔피언입니다. R 키로 새 경기를 시작하세요.":"아쉽습니다. 캐릭터나 난이도를 바꿔 다시 도전해 보세요.");
+    overlay(w===side?"🏆 우승!":"😵 패배!",score[side]+" : "+score[1-side]+" · Space 또는 R 키로 새 경기");
+    $("startPoint").disabled=false;$("startPoint").textContent="새 경기 (Space/R)";
+    msg(w===side?"축하합니다! 챔피언입니다. Space 또는 R 키로 새 경기를 시작하세요.":"아쉽습니다. 캐릭터나 난이도를 바꾼 뒤 Space 또는 R 키로 다시 도전해 보세요.");
   }else{
     $("gameStatus").textContent="포인트 종료";$("startPoint").disabled=false;
     msg((w===side?"내가":"컴퓨터가")+" 득점했습니다. R 키를 누르면 바로 다음 서브로 넘어갑니다.");
@@ -394,7 +397,7 @@ function hitBall(skill="normal"){
   gauge[0]=Math.min(100,gauge[0]+GAUGE_HIT);
   const label=skill==="volley"?"🏐 VOLLEY!":skill==="drop"?"🪶 DROP SHOT!":skill==="speed"?"💥 SPEED SHOT!":"NICE RETURN!";
   effect(label,ball.x,ball.y);
-  msg(label+(gauge[0]>=100?" 기가 가득 찼어요! 4번 필살기 사용 가능!":" 상대 코트로 날아갑니다!"));
+  msg(label+(gauge[0]>=100?" 기가 가득 찼어요! Q 키로 필살기 사용 가능!":" 상대 코트로 날아갑니다!"));
 }
 
 /* ───── 실시간 대전 ───── */
@@ -421,9 +424,9 @@ function connect(create){
       $("gameStatus").textContent=d.status==="playing"?"경기 중":d.status==="finished"?"경기 종료":d.status==="ready"?"선수 준비 완료":d.status==="serve"?"서브 준비":d.status==="point"?"포인트 종료":"대기 중";
       const canStart=side===0&&["ready","point","finished"].includes(d.status);
       $("startPoint").disabled=!(canStart||d.status==="point");
-      $("startPoint").textContent=d.status==="finished"?"새 경기 (R)":d.status==="point"?"다음 서브 (R)":"경기 시작 (R)";
+      $("startPoint").textContent=d.status==="finished"?"새 경기 (Space/R)":d.status==="point"?"다음 서브 (R)":"경기 시작 (R)";
       msg(d.message);
-      if(d.status==="finished")overlay(d.winner===side?"🏆 우승!":"경기 종료",score[side]+" : "+score[1-side]+(side===0?" · R 키로 새 경기":""));
+      if(d.status==="finished")overlay(d.winner===side?"🏆 우승!":"경기 종료",score[side]+" : "+score[1-side]+(side===0?" · Space 또는 R 키로 새 경기":""));
       else if(d.status==="playing"||d.status==="serve")hide();
       if(d.status==="serve")msg(serveSide===side?"내 서브 차례! ⚡ 강서브 버튼 또는 E 키를 누르세요.":"상대의 서브를 기다리는 중...");
       $("serve").disabled=!(d.status==="serve"&&serveSide===side);
@@ -447,11 +450,11 @@ document.querySelectorAll("[data-skill]").forEach(b=>b.onclick=()=>hitBall(b.dat
 document.querySelectorAll("[data-key]").forEach(b=>{let k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true;sendInput()});["pointerup","pointercancel","pointerleave"].forEach(ev=>b.addEventListener(ev,()=>{keys[k]=false;sendInput()}))});
 // 한/영 상태와 상관없이 동작하도록 e.code(물리 키) 기준으로 처리
 const MOVE={ArrowUp:"up",KeyW:"up",ArrowDown:"down",KeyS:"down",ArrowLeft:"left",KeyA:"left",ArrowRight:"right",KeyD:"right"};
-const SKILL_KEY={Digit1:"volley",Numpad1:"volley",Digit2:"drop",Numpad2:"drop",Digit3:"speed",Numpad3:"speed",Digit4:"special",Numpad4:"special"};
+const SKILL_KEY={Digit1:"volley",Numpad1:"volley",Digit2:"drop",Numpad2:"drop",Digit3:"speed",Numpad3:"speed",KeyQ:"special"};
 window.addEventListener("keydown",e=>{
   if(e.target.closest("input,textarea"))return;
   const k=MOVE[e.code];if(k){keys[k]=true;sendInput();e.preventDefault()}
-  if(e.code==="Space"){e.preventDefault();if(!e.repeat)hitBall("normal")}
+  if(e.code==="Space"){e.preventDefault();if(!e.repeat){if(canStartNewMatch())nextPoint();else hitBall("normal")}}
   if(e.code==="KeyE"){e.preventDefault();serveBall()}
   if(e.code==="KeyR"){e.preventDefault();if(!e.repeat)nextPoint()}
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
