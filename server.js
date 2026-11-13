@@ -63,6 +63,10 @@ wss.on("connection", (ws) => {
     if (!room || !client) return;
     const st = room.match, side = client.side;
     if (msg.type === "input") room.inputs[side] = cleanKeys(msg.keys);
+    // 경기 시작 전(또는 경기가 끝난 뒤) 로비에서 선수·경기 방식 변경
+    const idle = !st || st.phase === "done";
+    if (msg.type === "char" && idle && E.CHARS.includes(msg.char)) client.char = msg.char;
+    if (msg.type === "format" && idle && side === 0 && E.FORMATS[msg.format]) room.format = msg.format;
     if (msg.type === "serve" && st) E.serve(st, side, { keys: cleanKeys(msg.keys), err: 1 });
     if (msg.type === "hit" && st) {
       const skill = E.SKILLS.includes(msg.skill) ? msg.skill : "normal";
