@@ -122,7 +122,7 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .pad button{font-size:20px;min-height:46px;background:#294650;color:#effaf5;border:1px solid #52717a;border-radius:10px;touch-action:none}
 .pad .blank{visibility:hidden}
 .status{font-size:13px;text-align:center;background:#10242d;color:#e7f4ee;padding:10px;border-radius:9px;margin-top:10px;line-height:1.5;min-height:58px}
-.skillrow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.skillrow{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px}
 .skill{background:#294650;border:1px solid #55747c;color:#eaf8f1;border-radius:10px;padding:10px 5px;font-weight:800;font-size:13px;cursor:pointer}
 .skill small{display:block;font-size:10px;font-weight:500;color:#b9d2c8;margin-top:3px}
 .skill:disabled{opacity:.38;cursor:default}
@@ -155,7 +155,7 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 .roomline{margin-top:9px;font-size:13px;font-weight:700;color:#ffe25a}
 .ov-btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .ov-btns .btn{font-size:14px;padding:10px 14px}
-@media (max-width:560px){.charpick,.skillrow{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.charpick{grid-template-columns:repeat(2,1fr)}.skillrow{grid-template-columns:repeat(3,1fr)}}
 @media (prefers-reduced-motion:reduce){.arena.shake,.bug,.bug.stunned svg,.gauge.full i,.skill.special.ready{animation:none}.cutin,.banner{animation-duration:.01s;animation-delay:1s}}
 </style></head><body><main class="wrap">
 <header class="top"><div><div class="sub">KRE TENNIS CLUB · 2026</div><div class="title">🦗 귀뚜라미 테니스</div></div><div style="font-size:12px;text-align:right;color:#657267">CRICKET<br>CHAMPIONSHIP</div></header>
@@ -213,10 +213,10 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 
 <section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
 
-<section class="panel" id="ctrlPanel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>1</kbd> 발리 · <kbd>2</kbd> 드롭 · <kbd>3</kbd> 스피드 · <kbd>Q</kbd> 필살기 · <kbd>E</kbd>/<kbd>Space</kbd> 서브 · 포인트가 끝난 뒤 <kbd>Space</kbd> 다음 서브 · 경기 종료 후 <kbd>Space</kbd> 새 경기<br>칠 때 ←→를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</div>
+<section class="panel" id="ctrlPanel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>Z</kbd> 발리 · <kbd>E</kbd> 드롭 · <kbd>F</kbd> 스피드 · <kbd>C</kbd> 로브 · <kbd>Q</kbd> 필살기 · <kbd>Space</kbd> 서브 · 포인트가 끝난 뒤 <kbd>Space</kbd> 다음 서브 · 경기 종료 후 <kbd>Space</kbd> 새 경기<br>칠 때 ←→를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
-<div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (E)</button></div>
-<div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · 1</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · 2</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>빠르지만 아웃 위험 · 3</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
+<div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
+<div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>빠르지만 아웃 위험 · F</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · C</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
 <div class="muted" style="margin-top:7px;text-align:center">공 아래 그림자가 공의 실제 위치입니다. 그림자가 내 선수에게 가까이 올 때 치세요.</div></section>
 
 </div>
@@ -293,7 +293,7 @@ function handleEvent(e){
     case "serve":if(e.side!==side)animateSwing("opponent");break;
     case "hit":
       if(e.side!==side)animateSwing("opponent");
-      if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SPEED SHOT!"}[e.skill],e.x,e.y);
+      if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SPEED SHOT!",lob:"🌙 LOB!"}[e.skill],e.x,e.y);
       break;
     case "whiff":animateSwing("opponent");popup("헛스윙!",st.players[e.side].x,st.players[e.side].y);break;
     case "special":cutin(e.side,e.kind);if(e.kind==="quake")shake();break;
@@ -323,7 +323,7 @@ function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;last
 function serveMessage(){
   const mine=st.server===side,court=E.serveCourt(st)==="deuce"?"듀스 코트(서버 기준 오른쪽)":"애드 코트(서버 기준 왼쪽)",no=st.serveNo===1?"퍼스트 서브":"세컨드 서브";
   const t=tossText;tossText="";
-  return t+(mine?"내 "+no+" · "+court+" — ←→로 위치를 잡고 E 또는 Space로 서브하세요. 키를 누른 채 서브하면 코스가 바뀌고, 노란 박스에 넣어야 합니다."
+  return t+(mine?"내 "+no+" · "+court+" — ←→로 위치를 잡고 Space로 서브하세요. 키를 누른 채 서브하면 코스가 바뀌고, 노란 박스에 넣어야 합니다."
     :who(st.server)+"의 "+no+" · "+court+" — 서브는 한 번 튄 다음에 받아치세요.");
 }
 
@@ -520,12 +520,11 @@ function sendKeys(){if(mode==="multi")send({type:"input",keys:worldKeys()})}
 document.querySelectorAll("[data-key]").forEach(b=>{let k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true;sendKeys()});["pointerup","pointercancel","pointerleave"].forEach(ev=>b.addEventListener(ev,()=>{keys[k]=false;sendKeys()}))});
 // 한/영 상태와 상관없이 동작하도록 e.code(물리 키) 기준
 const MOVE={ArrowUp:"up",KeyW:"up",ArrowDown:"down",KeyS:"down",ArrowLeft:"left",KeyA:"left",ArrowRight:"right",KeyD:"right"};
-const SKILL_KEY={Digit1:"volley",Numpad1:"volley",Digit2:"drop",Numpad2:"drop",Digit3:"speed",Numpad3:"speed",KeyQ:"special"};
+const SKILL_KEY={KeyZ:"volley",KeyE:"drop",KeyF:"speed",KeyC:"lob",KeyQ:"special"};
 window.addEventListener("keydown",e=>{
   if(e.target.closest("input,textarea"))return;
   const k=MOVE[e.code];if(k&&screen==="game"){e.preventDefault();if(!keys[k]){keys[k]=true;sendKeys()}}
   if(e.code==="Space"){e.preventDefault();if(e.repeat)return;if(canStartNewMatch()||canNextServe())nextPoint();else if(isMyServe())serveNow();else hitBall("normal")}
-  if(e.code==="KeyE"){e.preventDefault();serveNow()}
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
 });
 window.addEventListener("keyup",e=>{const k=MOVE[e.code];if(k){keys[k]=false;sendKeys()}});
