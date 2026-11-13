@@ -82,6 +82,31 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .bug .racket{transform-origin:78px 48px;transition:transform .12s ease}
 .bug.swinging .racket{transform:rotate(-72deg)}
 .bug.stunned svg{animation:dizzy .3s linear infinite}
+/* 도발 동작 (포인트가 끝난 뒤) */
+.bug .yawn,.bug .tongue,.char .yawn,.char .tongue{display:none}
+.bug.tz1 .butt{transform-origin:38px 60px;animation:tzWig .2s ease-in-out infinite alternate}
+.bug.tz1 svg{animation:tzSway .4s ease-in-out infinite alternate}
+.bug.tz2 .ant{transform-origin:50px 32px;animation:tzAnt .26s ease-in-out infinite alternate}
+.bug.tz3 svg{transform-origin:50% 70%;animation:tzDance .8s ease-in-out infinite}
+.bug.tz4 .racket{transform-origin:79px 42px;animation:tzSpin .5s linear infinite}
+.bug.tz5 svg{transform-origin:50% 96%;animation:tzStretch 1.6s ease-in-out}.bug.tz5 .yawn{display:inline}.bug.tz5 .mouth{display:none}
+.bug.tz6 svg{animation:tzJump .45s ease-in-out infinite}
+.bug.tz7 .tongue{display:inline}.bug.tz7 .hd{transform-origin:42px 40px;animation:tzNod .28s ease-in-out infinite alternate}
+.bug.tz8 svg{animation:tzBuzz .07s linear infinite alternate}
+.bug.tz8::before{content:"♪ ♫";position:absolute;left:55%;top:-6px;font-size:16px;color:#fff;text-shadow:0 1px 3px #000;animation:tzNote .8s ease-out infinite}
+.bug.opponent.tz8::before{top:auto;bottom:-6px;transform:rotate(180deg)}
+@keyframes tzWig{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
+@keyframes tzSway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+@keyframes tzAnt{from{transform:rotate(-16deg)}to{transform:rotate(10deg)}}
+@keyframes tzDance{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(-14%,0) rotate(-14deg)}50%{transform:translate(0,-10%) rotate(180deg)}75%{transform:translate(14%,0) rotate(346deg)}}
+@keyframes tzSpin{to{transform:rotate(360deg)}}
+@keyframes tzStretch{0%,100%{transform:scale(1,1)}35%,70%{transform:scale(.92,1.18)}}
+@keyframes tzJump{0%,100%{transform:translateY(0)}50%{transform:translateY(-28%)}}
+@keyframes tzNod{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+@keyframes tzBuzz{from{transform:translateX(-2%)}to{transform:translateX(2%)}}
+@keyframes tzNote{0%{opacity:0;translate:0 8px}25%{opacity:1}100%{opacity:0;translate:6px -22px}}
+.mtaunt{position:absolute;left:8px;top:8px;width:46px;height:46px;border-radius:50%;pointer-events:auto;touch-action:none;border:1.5px solid #ffffff60;background:#00000040;font-size:22px;line-height:1;padding:0}
+.mtaunt:disabled{opacity:.3}
 .bug.stunned::after{content:"💫";position:absolute;left:50%;top:-16px;transform:translateX(-50%);font-size:18px}
 .bug.opponent.stunned::after{top:auto;bottom:-16px;transform:translateX(-50%) rotate(180deg)}
 @keyframes idleBob{0%,100%{margin-top:0}50%{margin-top:-3px}}
@@ -282,7 +307,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <section class="panel" id="itemPanel"><div class="row"><b>🎒 아이템</b><span class="muted" style="text-align:right">숫자 1·2·3으로 사용</span></div>
 <div class="islots"><button class="islot" data-slot="0"></button><button class="islot" data-slot="1"></button><button class="islot" data-slot="2"></button></div>
 <div class="muted" id="itemInfo" style="margin-top:8px;line-height:1.6"></div></section>
-<section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
+<section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="tauntBtn" class="btn alt" disabled>😜 도발 (T)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
 </div>
 <div class="arena" id="arena">
 <svg class="court" viewBox="-7.3 -15.5 14.6 31" preserveAspectRatio="none" aria-hidden="true">
@@ -300,16 +325,16 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div id="mCtrl"><div class="joyzone" id="joyZone"><div class="joybase" id="joyBase"><div class="joyknob" id="joyKnob"></div></div><span class="zlabel">누른 곳에서 이동</span></div>
 <div class="actpad" id="actPad"><button class="dirb p-up" data-mskill="lob">🌙<small>로브</small></button><button class="dirb p-down" data-mskill="drop">🪶<small>드롭</small></button><button class="dirb p-left" data-mskill="volley">🏐<small>발리</small></button><button class="dirb p-right" data-mskill="speed">💥<small>스매쉬</small></button><b class="padlabel" id="padLabel">타격</b></div>
 <div class="mitems" id="mItems"><button class="mitem" data-slot="2"></button><button class="mitem" data-slot="1"></button><button class="mitem" data-slot="0"></button></div>
-<button class="mspecial" id="mSpecial" disabled>✨<small>0%</small></button></div>
+<button class="mtaunt" id="mTaunt" disabled aria-label="도발">😜</button><button class="mspecial" id="mSpecial" disabled>✨<small>0%</small></button></div>
 <div class="overlay" id="overlay"></div></div>
 <div class="col colR">
 <section class="panel" id="ctrlPanel"><b>🎮 조작</b>
-<div class="keys"><span><kbd>←↑↓→</kbd> <kbd>WASD</kbd></span><span>이동</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Z</kbd><kbd>E</kbd><kbd>F</kbd><kbd>C</kbd><kbd>Q</kbd></span><span>기술 (아래 버튼에 키 표시)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span></div>
+<div class="keys"><span><kbd>←↑↓→</kbd> <kbd>WASD</kbd></span><span>이동</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Z</kbd><kbd>E</kbd><kbd>F</kbd><kbd>C</kbd><kbd>Q</kbd></span><span>기술 (아래 버튼에 키 표시)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span><span><kbd>T</kbd></span><span>도발 (포인트가 끝난 뒤)</span></div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
 <div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="speed">💥 스매쉬<small>빠르지만 아웃 위험 · F</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · C</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
 </section>
-<section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
+<section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li><li>포인트가 끝난 뒤 <kbd>T</kbd>(휴대폰은 😜)를 누르면 상대를 약 올리는 동작을 해요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
 </div>
 <div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button>
 <div class="mp"><span class="mn" id="mMeName">나</span><span class="mg" id="mMeGames">0</span><span class="mpt" id="mMePts">0</span><i class="mgauge"><b id="mMeGauge"></b></i></div>
@@ -344,6 +369,9 @@ const LINES={
   lose:["앗, 귀뚤…","다음엔 안 놓쳐!","찌르… 아깝다","괜찮아, 아직 몰라!","더듬이가 미끄러졌어…"],
   special:{tornado:"회오리야, 휘몰아쳐라!",snake:"스르륵… 어디로 갈지 맞혀 봐!",fire:"타올라라, 불꽃샷!",quake:"땅이 울린다! 꼼짝 마!"},
   ace:["에이스다! 귀뚤귀뚤~"],serve:["서브 간다, 준비됐지?","안전 점검 완료, 서브 간다!"],
+  taunt:{1:["씰룩~씰룩~ 씰룩~씰룩~","메롱~ 여기 봐라~"],2:["승리가 뭐야","찌르르~ 별거 아니네?"],3:["귀뚤귀뚤 댄스 타임!","이 리듬 따라올 수 있어?"],
+         4:["이 정도는 껌이지~","라켓이 심심하대~"],5:["그건 모르겠고~","하암~ 졸려서 못 보겠네"],6:["신이 난다고","신난다 신난다!"],
+         7:["약이 오른다고","메~롱! 약 오르지?"],8:["새벽을 열고 있다고","찌르르르~ 승리의 노래~"]},
   game:["이 게임 가져간다~ 찌르르르!"],match:["우승이다! 귀뚤귀뚤귀뚤!"],deuce:["아직 안 끝났어!"]
 };
 const hash=id=>{let x=Math.imul(id|0,0x9E3779B1);x^=x>>>16;x=Math.imul(x,0x85EBCA6B);x^=x>>>13;x=Math.imul(x,0xC2B2AE35);x^=x>>>16;return x>>>0};   // 이벤트 번호를 섞어서 고르기(두 화면 결과는 같음)
@@ -361,7 +389,7 @@ const ITEMS={anchovy:{name:"죽방멸치",emoji:"🐟",fx:"순간 튼튼해져 �
   milk:{name:"서울우유",emoji:"🥛",fx:"몸이 커져서 공을 받기 쉬워져요"},
   coupon:{name:"로빈 쿠폰",emoji:"☕",fx:"공짜 커피로 집중력이 올라 정확도와 스핀이 좋아져요"}};
 const FORMAT_TEXT={short:"짧은 세트 · 4게임 먼저(2게임 차) · 4-4에서 타이브레이크",set1:"1세트 · 6게임 먼저(2게임 차) · 6-6에서 타이브레이크",set3:"3세트 2선승 · 세트마다 6게임 먼저(2게임 차) · 6-6에서 타이브레이크"};
-const BUG_SVG=`<svg viewBox="0 0 120 100" aria-hidden="true"><g stroke="#173c2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M48 34 Q22 2 15 17 M58 31 Q48 0 60 8" fill="none"/><path d="M42 66 L18 87 M54 70 L42 96 M72 66 L94 88 M78 57 L108 70" fill="none"/><path d="M36 48 Q18 42 16 57 M78 45 Q96 36 101 48" fill="none"/></g><ellipse class="c-body" cx="59" cy="60" rx="29" ry="21" stroke="#173c2b" stroke-width="4"/><ellipse class="c-belly" cx="48" cy="61" rx="12" ry="16"/><circle class="c-head" cx="42" cy="34" r="19" stroke="#173c2b" stroke-width="4"/><path class="c-band" d="M25 26 Q42 17 59 27" fill="none" stroke-width="5" stroke-linecap="round"/><circle cx="35" cy="31" r="5" fill="white"/><circle cx="36" cy="31" r="2.5" fill="#142a20"/><path d="M26 43 Q42 52 55 43" fill="none" stroke="#173c2b" stroke-width="3" stroke-linecap="round"/><g class="racket"><path d="M79 42 L95 18" stroke="#f5d58b" stroke-width="5" stroke-linecap="round"/><ellipse cx="101" cy="12" rx="10" ry="15" transform="rotate(35 101 12)" fill="none" stroke="#f5f1dd" stroke-width="4"/><path d="M94 3 L108 20 M91 10 L104 1 M98 24 L110 9" stroke="#f5f1dd" stroke-width="1.5"/></g><path d="M19 86 L10 91 M42 95 L34 99 M95 87 L104 92 M108 70 L115 70" stroke="#173c2b" stroke-width="4" stroke-linecap="round"/></svg>`;
+const BUG_SVG=`<svg viewBox="0 0 120 100" aria-hidden="true"><g class="ant"><path d="M48 34 Q22 2 15 17 M58 31 Q48 0 60 8" fill="none" stroke="#173c2b" stroke-width="4" stroke-linecap="round"/></g><g stroke="#173c2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M42 66 L18 87 M54 70 L42 96 M72 66 L94 88 M78 57 L108 70" fill="none"/><path d="M36 48 Q18 42 16 57 M78 45 Q96 36 101 48" fill="none"/></g><g class="butt"><ellipse class="c-body" cx="59" cy="60" rx="29" ry="21" stroke="#173c2b" stroke-width="4"/><ellipse class="c-belly" cx="48" cy="61" rx="12" ry="16"/></g><g class="hd"><circle class="c-head" cx="42" cy="34" r="19" stroke="#173c2b" stroke-width="4"/><path class="c-band" d="M25 26 Q42 17 59 27" fill="none" stroke-width="5" stroke-linecap="round"/><circle cx="35" cy="31" r="5" fill="white"/><circle cx="36" cy="31" r="2.5" fill="#142a20"/><path class="mouth" d="M26 43 Q42 52 55 43" fill="none" stroke="#173c2b" stroke-width="3" stroke-linecap="round"/><ellipse class="yawn" cx="40" cy="45" rx="6" ry="7" fill="#173c2b"/><path class="tongue" d="M37 46 Q38 60 47 49 Z" fill="#e8607a" stroke="#173c2b" stroke-width="2"/></g><g class="racket"><path d="M79 42 L95 18" stroke="#f5d58b" stroke-width="5" stroke-linecap="round"/><ellipse cx="101" cy="12" rx="10" ry="15" transform="rotate(35 101 12)" fill="none" stroke="#f5f1dd" stroke-width="4"/><path d="M94 3 L108 20 M91 10 L104 1 M98 24 L110 9" stroke="#f5f1dd" stroke-width="1.5"/></g><path d="M19 86 L10 91 M42 95 L34 99 M95 87 L104 92 M108 70 L115 70" stroke="#173c2b" stroke-width="4" stroke-linecap="round"/></svg>`;
 
 /* ───── 상태 ───── */
 let mode="solo",side=0,st=null,myChar=null,difficulty="easy",format="set1",keys={};
@@ -443,6 +471,7 @@ function handleEvent(e){
       msg(curMsg+" · "+(e.side===side?"아이템 "+it.emoji+" "+it.name+" 획득!":who(e.side)+"이(가) "+it.emoji+" 획득"));break}
     case "item":{const it=ITEMS[e.item];if(!it)break;say(e.side,pick(LINES.item[e.item],e.id),3,true);popup(it.emoji+" "+it.name+"!",st.players[e.side].x,st.players[e.side].y,"call");
       msg((e.side===side?"":who(e.side)+"의 ")+it.emoji+" "+it.name+"! "+it.fx+" (이번 포인트 동안)");break}
+    case "taunt":playTaunt(e.side,e.n);say(e.side,pick(LINES.taunt[e.n]||LINES.win,e.id),3,true);break;
     case "netcord":popup("NET CORD",e.x,e.y,"call");break;
     case "net":popup("NET",e.x,e.y,"bad");break;
     case "bounce":mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
@@ -560,6 +589,7 @@ function render(){
   if(!st)lastPhase="";
   renderItems();
   placeBubbles(pl);
+  {const ok=canTaunt();$("tauntBtn").disabled=!ok;$("mTaunt").disabled=!ok;}
   renderLobby();
   if(isMobile()&&screen==="game")renderMobile(g,mine,theirs);
 }
@@ -657,6 +687,20 @@ function nextPoint(){
   if(!myChar){msg("먼저 캐릭터를 선택하세요.");return}
   if(st&&(st.phase==="point"||st.phase==="fault"))E.startPoint(st);
 }
+const TAUNT_TIME=1700,tauntTimer=[0,0];
+function playTaunt(i,n){
+  const el=$(i===side?"player":"opponent");clearTimeout(tauntTimer[i]);
+  el.classList.remove("tz1","tz2","tz3","tz4","tz5","tz6","tz7","tz8");void el.offsetWidth;el.classList.add("tz"+n);
+  tauntTimer[i]=setTimeout(()=>el.classList.remove("tz"+n),TAUNT_TIME);
+}
+const canTaunt=()=>!!st&&(st.phase==="point"||st.phase==="done");
+let lastTauntAt=0;
+function tauntUI(){
+  if(!canTaunt()){msg("도발은 포인트가 끝난 뒤에 할 수 있어요.");return}
+  const now=performance.now();if(now-lastTauntAt<TAUNT_TIME)return;lastTauntAt=now;
+  const n=1+Math.floor(Math.random()*8);
+  if(mode==="multi")send({type:"taunt",n});else E.taunt(st,side,n);
+}
 function useItemUI(slot){
   if(!st)return;
   if(!st.items[side][slot]){msg("이 칸은 비어 있어요. 포인트가 끝날 때 가끔 아이템을 얻을 수 있어요.");return}
@@ -709,6 +753,7 @@ $("soloTab").onclick=()=>{leaveRoom();setMode("solo")};
 $("multiTab").onclick=()=>{st=null;setMode("multi")};
 $("lobbyStart").onclick=()=>{if(mode==="solo")startSolo();else send({type:"next"})};
 $("toLobby").onclick=toLobby;
+$("tauntBtn").onclick=tauntUI;
 $("overlay").addEventListener("click",e=>{const a=e.target.closest("[data-act]");if(!a)return;
   if(a.dataset.act==="lobby")toLobby();else if(mode==="solo")startSolo();else send({type:"next"})});
 $("createRoom").onclick=()=>{setMode("multi");connect(true)};
@@ -744,6 +789,7 @@ pad.addEventListener("contextmenu",e=>e.preventDefault());
 document.querySelectorAll(".dirb").forEach(b=>tapBtn(b,()=>hitBall(b.dataset.mskill)));
 document.querySelectorAll(".mitem").forEach(b=>tapBtn(b,()=>useItemUI(+b.dataset.slot)));
 tapBtn($("mSpecial"),()=>hitBall("special"));
+tapBtn($("mTaunt"),tauntUI);
 $("mExit").onclick=toLobby;
 // 두 번 탭 확대 막기: 아이폰 사파리는 확대 금지 설정을 무시해서 스크립트로도 막음
 let lastTouchEnd=0;
@@ -771,6 +817,7 @@ window.addEventListener("keydown",e=>{
   if(e.code==="Space"){e.preventDefault();if(e.repeat)return;primaryAction()}
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
   if(e.code in ITEM_KEY&&!e.repeat&&screen==="game"){e.preventDefault();useItemUI(ITEM_KEY[e.code])}
+  if(e.code==="KeyT"&&!e.repeat&&screen==="game"){e.preventDefault();tauntUI()}
 });
 window.addEventListener("keyup",e=>{const k=MOVE[e.code];if(k){keys[k]=false;sendKeys()}});
 window.addEventListener("blur",()=>{keys={};sendKeys()});
