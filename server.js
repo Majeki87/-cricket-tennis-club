@@ -13,7 +13,7 @@ app.get("/health", (_, res) => res.json({ ok: true }));
 const rooms = new Map();
 const PORT = process.env.PORT || 3000;
 const TICK = 1 / 30;
-const AUTO_NEXT = 2.5;   // 포인트가 끝나고 다음 서브까지(초). R 키로 바로 넘길 수 있음
+const AUTO_NEXT = 2.5;   // 포인트가 끝나고 다음 서브까지(초). Space로 바로 넘길 수 있음
 
 function code() { return crypto.randomBytes(3).toString("hex").toUpperCase(); }
 function send(ws, obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
@@ -68,7 +68,7 @@ wss.on("connection", (ws) => {
       const skill = E.SKILLS.includes(msg.skill) ? msg.skill : "normal";
       send(ws, { type: "hitResult", result: E.tryHit(st, side, skill, { keys: cleanKeys(msg.keys), err: 1 }) });
     }
-    // R 키 / 시작 버튼: 포인트·폴트 후에는 누구나 바로 다음 서브, 경기 시작·새 경기는 호스트만
+    // Space / 시작 버튼: 포인트·폴트 후에는 누구나 바로 다음 서브, 경기 시작·새 경기는 호스트만
     if (msg.type === "next" || msg.type === "start") {
       if (st && (st.phase === "point" || st.phase === "fault")) E.startPoint(st);
       else if (side === 0 && room.clients.length === 2 && (!st || st.phase === "done")) startMatch(room);
