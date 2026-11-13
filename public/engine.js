@@ -198,6 +198,13 @@ function itemBall(st, side, b) {
   b.spin = act.coupon ? (Math.random() < .5 ? -1 : 1) : 0;
   if (b.spin) { b.e = Math.min(.9, b.e * 1.18); b.keep = Math.min(.95, b.keep * 1.15); }   // 로빈 쿠폰: 스핀 → 휘어 들어가고 튄 뒤 더 뻗음
 }
+// 도발: 포인트가 끝난 뒤(또는 경기 종료 후)에만, 경기에는 영향 없음
+function taunt(st, side, n) {
+  if (st.phase !== "point" && st.phase !== "done") return false;
+  n = Math.max(1, Math.min(8, n | 0));
+  pushEv(st, { type: "taunt", side, n });
+  return true;
+}
 function useItem(st, side, slot) {
   if (st.phase === "done") return "idle";
   const bag = st.items[side], item = bag[slot];
@@ -265,7 +272,7 @@ function letServe(st) { st.phase = "fault"; st.timer = 1.1; pushEv(st, { type: "
 
 function pointTo(st, w, reason) {
   st.ball.live = false; st.serveNo = 1;
-  st.active = [{}, {}]; st.pointNo++;                   // 점수를 따거나 잃으면 아이템 효과는 사라짐
+  st.active = [{}, {}]; st.pointNo++; st.lastWinner = w;                   // 점수를 따거나 잃으면 아이템 효과는 사라짐
   for (let i = 0; i < 2; i++) if (st.items[i].length < ITEM_MAX && Math.random() < ITEM_CHANCE) {
     const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
     st.items[i].push(item); pushEv(st, { type: "itemGet", side: i, item });
@@ -332,6 +339,11 @@ function aiThink(st, side, level, dt) {
     ai.itemPoint = st.pointNo;
     if (Math.random() < cfg.item) useItem(st, side, Math.floor(Math.random() * st.items[side].length));
   }
+  if (st.phase === "point" || st.phase === "done") {   // 컴퓨터: 포인트를 따면 가끔 도발
+    if (ai.tauntPoint !== st.pointNo) { ai.tauntPoint = st.pointNo; ai.tauntWait = st.lastWinner === side && Math.random() < .3 ? .9 : -1; }
+    if (ai.tauntWait > 0 && (ai.tauntWait -= dt) <= 0) taunt(st, side, 1 + Math.floor(Math.random() * 8));
+    return out;
+  }
   if (st.phase === "serve") {
     if (st.server === side) {
       st.serveWait -= dt;
@@ -371,7 +383,7 @@ function aiThink(st, side, level, dt) {
   return out;
 }
 
-const api = { COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, useItem, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, useItem, taunt, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
