@@ -15,25 +15,25 @@ const PORT = process.env.PORT || 3000;
 function code() { return crypto.randomBytes(3).toString("hex").toUpperCase(); }
 function freshGame() {
   return { score:[0,0], players:[{x:50,y:79},{x:50,y:21}],
-    ball:{x:50,y:50,vx:0,vy:0,active:false,hit:0}, status:"waiting",
+    ball:{x:50,y:50,vx:0,vy:0,active:false,hit:0}, status:"waiting", serveSide:0,
     message:"두 명이 입장하면 경기를 시작할 수 있습니다.", pointAt:0, winner:null };
 }
 function send(ws, obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
 function broadcast(room, obj) { room.clients.forEach(c => send(c.ws,obj)); }
 function snapshot(room) {
-  return {type:"state", room:room.id, players:room.game.players, ball:room.game.ball,
+  return {type:"state", room:room.id, players:room.game.players, ball:room.game.ball, serveSide:room.game.serveSide,
     score:room.game.score, status:room.game.status, message:room.game.message,
     winner:room.game.winner, names:room.clients.map(c=>c.name)};
 }
 function resetPoint(room) {
-  const g=room.game; g.ball={x:50,y:g.score[0]===g.score[1]?50:50,vx:0,vy:0,active:true,hit:0};
-  const serverSide = Math.random()<.5 ? 0 : 1;
-  g.ball.x=50; g.ball.y=serverSide===0?25:75;
-  g.ball.vx=(Math.random()-.5)*.28;
-  g.ball.vy=serverSide===0?.52:-.52;
-  g.message="서브! 공을 받아쳐 보세요.";
-  g.status="playing";
+  const g=room.game;
+  g.serveSide=Math.random()<.5 ? 0 : 1;
+  const server=g.players[g.serveSide];
+  g.ball={x:server.x,y:g.serveSide===0?server.y-10:server.y+10,vx:0,vy:0,active:false,hit:0};
+  g.message=(g.serveSide===0?"왼쪽":"오른쪽")+" 선수의 서브 차례! 강서브 버튼을 누르세요.";
+  g.status="serve";
 }
+
 function scorePoint(room, side) {
   const g=room.game;
   g.score[side]++;
@@ -51,6 +51,21 @@ function tick(room) {
   if(room.clients.length<2) {g.status="waiting";g.ball.active=false;return;}
   if(g.status==="waiting") {g.status="ready";g.message="두 선수 준비 완료! 호스트가 시작하세요.";return;}
   if(g.status==="point" && Date.now()>=g.pointAt) { resetPoint(room); return; }
+  if(g.status==="serve") {
+    for(let i=0;i<2;i++) {
+      const inp=room.inputs[i];
+      if(inp.serve && g.serveSide===i) {
+        const server=g.players[i];
+        g.ball={x:server.x,y:i===0?server.y-10:server.y+10,vx:(Math.random()-.5)*.42,vy:i===0?-1.25:1.25,active:true,hit:1-i};
+        g.status="playing";
+        g.message="⚡ 강서브 발사! 공이 빠르게 날아갑니다.";
+        inp.serve=false;
+        break;
+      }
+      inp.serve=false;
+    }
+    return;
+  }
   if(g.status!=="playing" || !g.ball.active) return;
   const dt=1;
   for(let i=0;i<2;i++) {
@@ -106,6 +121,7 @@ wss.on("connection",(ws)=>{
       const inp=room.inputs[client.side]||(room.inputs[client.side]={});
       ["up","down","left","right"].forEach(k=>inp[k]=!!msg.keys?.[k]);
       inp.hit=!!msg.hit;
+      inp.serve=!!msg.serve;
     }
     if(msg.type==="start" && client.side===0 && room.clients.length===2 && ["ready","point","finished"].includes(room.game.status)) {
       if(room.game.status==="finished"){room.game=freshGame();room.inputs=[{},{}];}
