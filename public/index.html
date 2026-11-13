@@ -2,7 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#176b42"><title>귀뚜라미 테니스 클럽</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);color:#edf5f1;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);color:#edf5f1;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
 .wrap{max-width:1180px;margin:auto;padding:16px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .sub{font-size:12px;color:#a9c2b8;font-weight:700;letter-spacing:1px}
@@ -14,11 +14,10 @@ body{margin:0;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#1
 
 /* 레이아웃: 넓은 화면은 왼쪽 코트 + 오른쪽 패널 */
 .layout{display:grid;gap:12px;margin-top:12px;grid-template-columns:minmax(0,1fr)}
-#charPanel{grid-area:auto}
 @media (min-width:900px){
-  .layout{grid-template-columns:auto minmax(360px,1fr);grid-template-areas:"arena board" "arena status" "arena char" "arena mode" "arena ctrl" "arena rules" "arena .";align-items:start}
+  .layout{grid-template-columns:auto minmax(360px,1fr);grid-template-areas:"arena board" "arena status" "arena ctrl" "arena .";align-items:start}
   #arena{grid-area:arena;position:sticky;top:12px;width:calc(min(100vh - 90px,960px) * .471)}
-  #charPanel{grid-area:char}#modePanel{grid-area:mode}#boardPanel{grid-area:board}#statusPanel{grid-area:status}#ctrlPanel{grid-area:ctrl}#rulesPanel{grid-area:rules}
+  #boardPanel{grid-area:board}#statusPanel{grid-area:status}#ctrlPanel{grid-area:ctrl}
 }
 
 /* 캐릭터 선택 */
@@ -140,25 +139,62 @@ label.muted{display:block;margin-top:10px}
 kbd{display:inline-block;min-width:18px;padding:0 4px;border:1px solid #52717a;border-bottom-width:2px;border-radius:4px;background:#10242d;font:inherit;font-size:11px;text-align:center}
 details.panel summary{cursor:pointer;font-weight:800}
 details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;line-height:1.65}
+
+/* 로비(선수 선택 대시보드) */
+.lobby{display:grid;gap:12px;margin:12px auto 0;max-width:1000px}
+@media (min-width:900px){.lobby{grid-template-columns:1.1fr 1fr;align-items:start}.lobby #charPanel{grid-column:1/-1}}
+.h2{font-size:17px}
+.lobby .char{padding:14px 8px 14px}
+.lobby .char svg{width:110px;height:92px;margin-bottom:6px}
+.lobby .char b{font-size:15px}
+.lobby .char .sp{font-size:14px;margin-top:5px}
+.lobby .char small{font-size:12px;margin-top:5px}
+.btn.big{width:100%;margin-top:12px;padding:15px;font-size:17px}
+.summary{margin-top:12px;background:#10242d;border:1px solid #34515a;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6}
+.hint{margin-top:8px;font-size:12px;color:#b5c9c2;min-height:16px;text-align:center}
+.roomline{margin-top:9px;font-size:13px;font-weight:700;color:#ffe25a}
+.ov-btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.ov-btns .btn{font-size:14px;padding:10px 14px}
 @media (max-width:560px){.charpick,.skillrow{grid-template-columns:repeat(2,1fr)}}
 @media (prefers-reduced-motion:reduce){.arena.shake,.bug,.bug.stunned svg,.gauge.full i,.skill.special.ready{animation:none}.cutin,.banner{animation-duration:.01s;animation-delay:1s}}
 </style></head><body><main class="wrap">
 <header class="top"><div><div class="sub">KRE TENNIS CLUB · 2026</div><div class="title">🦗 귀뚜라미 테니스</div></div><div style="font-size:12px;text-align:right;color:#657267">CRICKET<br>CHAMPIONSHIP</div></header>
 
-<div class="layout">
-<section class="panel" id="charPanel"><b>캐릭터 선택</b><div class="muted" style="margin-top:4px">선수마다 필살기가 다릅니다. 경기 전에 한 명을 골라 주세요.</div>
+
+<div id="lobby" class="lobby">
+<section class="panel" id="charPanel"><b class="h2">선수 선택</b><div class="muted" style="margin-top:4px">선수마다 필살기가 다릅니다. 함께 뛸 귀뚜라미를 골라 주세요.</div>
 <div class="charpick" id="charPick"></div></section>
 
-<section class="panel" id="modePanel"><b>게임 모드</b><div class="row" style="margin-top:9px"><button id="soloTab" class="btn">개인 연습</button><button id="multiTab" class="btn alt">실시간 대전</button></div>
+<section class="panel" id="modePanel"><b class="h2">경기 설정</b>
+<div class="row" style="margin-top:9px"><button id="soloTab" class="btn">개인 연습</button><button id="multiTab" class="btn alt">실시간 대전</button></div>
 <label class="muted">경기 방식</label><div class="seg" id="formatPick"><button data-format="short">짧은 세트<br><small>4게임</small></button><button data-format="set1" class="active">1세트<br><small>6게임</small></button><button data-format="set3">3세트<br><small>2세트 선승</small></button></div>
-<div id="soloSetup"><label class="muted">컴퓨터 난이도</label><div class="seg" id="levelPick"><button data-level="easy" class="active">쉬움</button><button data-level="normal">보통</button><button data-level="hard">어려움</button></div><button id="soloStart" class="btn" style="width:100%;margin-top:10px" disabled>캐릭터를 먼저 선택하세요</button></div>
-<div id="multiSetup" class="hidden" style="margin-top:10px"><label class="muted" style="margin-top:0">내 닉네임</label><input id="name" class="field" maxlength="12" value="귀뚜라미 선수"><div class="row" style="margin-top:8px"><button id="createRoom" class="btn">방 만들기</button><input id="roomCode" class="field" placeholder="방 코드"><button id="joinRoom" class="btn alt">참가</button></div><div class="muted" style="margin-top:7px">경기 방식은 방을 만든 사람의 선택을 따릅니다. 방 코드를 상대에게 공유하세요.</div></div></section>
 
+<div id="soloSetup"><label class="muted">컴퓨터 난이도</label><div class="seg" id="levelPick"><button data-level="easy" class="active">쉬움</button><button data-level="normal">보통</button><button data-level="hard">어려움</button></div></div>
+<div id="multiSetup" class="hidden" style="margin-top:10px"><label class="muted" style="margin-top:0">내 닉네임</label><input id="name" class="field" maxlength="12" value="귀뚜라미 선수"><div class="row" style="margin-top:8px"><button id="createRoom" class="btn">방 만들기</button><input id="roomCode" class="field" placeholder="방 코드"><button id="joinRoom" class="btn alt">참가</button></div><div class="roomline" id="roomLine">아직 방에 들어가지 않았습니다.</div><div class="muted" style="margin-top:5px">경기 방식은 방을 만든 사람이 정합니다. 두 명이 모이면 호스트가 경기를 시작합니다.</div></div>
+<div class="summary" id="pickSummary">선수를 먼저 골라 주세요.</div>
+<button id="lobbyStart" class="btn big" disabled>선수를 먼저 선택하세요</button>
+<div class="hint" id="lobbyHint"></div>
+</section>
+
+<details class="panel" id="rulesPanel" open><summary>📘 경기 규칙 (실제 테니스 단식 규칙)</summary><ul>
+<li>코트는 실제 규격(길이 23.77m, 단식 폭 8.23m)입니다. 단식이므로 양옆의 어두운 복식 앨리는 아웃입니다.</li>
+<li>서브는 베이스라인 뒤에서 대각선 서비스 박스(노란색 표시)로 넣습니다. 포인트마다 듀스 코트(오른쪽)와 애드 코트(왼쪽)를 번갈아 서브합니다.</li>
+<li>서브가 박스 밖에 떨어지거나 네트에 걸리면 폴트, 두 번 연속 폴트면 더블 폴트로 실점합니다. 네트에 맞고 박스에 들어가면 레트로 다시 서브합니다.</li>
+<li>서브는 반드시 한 번 튄 뒤에 받아쳐야 합니다. 랠리 중에는 한 번 튄 공이나 튀기 전의 공(발리)을 칠 수 있고, 두 번 튀면 실점입니다.</li>
+<li>친 공이 처음 떨어진 곳이 라인 밖이면 친 선수가 실점합니다(라인에 걸치면 인). 아웃될 공이라도 튀기 전에 쳐 버리면 경기는 계속됩니다.</li>
+<li>점수는 0(러브)·15·30·40·게임 순서이고, 40-40은 듀스로 2점을 연속으로 따야 게임을 가져갑니다.</li>
+<li>6게임을 먼저, 2게임 차로 따면 세트를 가져갑니다. 6-6이면 타이브레이크(7점 먼저, 2점 차)로 세트를 결정합니다. 서브권은 게임마다 바뀌고, 타이브레이크에서는 첫 1포인트 뒤 2포인트마다 바뀝니다.</li>
+<li>실제 경기는 홀수 게임마다 코트를 바꾸지만, 이 게임은 내 선수가 항상 화면 아래에 보이도록 화면을 유지합니다.</li>
+</ul></details>
+</div>
+
+<div id="game" class="layout hidden">
 <section class="panel" id="boardPanel"><div class="board">
 <span></span><span class="h">선수</span><span class="h" id="setHead"></span><span class="h" style="text-align:center">게임</span><span class="h" style="text-align:center" id="ptHead">포인트</span>
 <span class="srv" id="meSrv"></span><span class="nm"><b id="meName">나</b><div class="gauge" id="myGaugeBar"><i id="myGauge"></i></div><div class="gaugetxt" id="myGaugeTxt">기 0%</div></span><span class="sets" id="meSets"></span><span class="gm" id="meGames">0</span><span class="pt" id="mePts">0</span>
 <span class="srv" id="opSrv"></span><span class="nm"><b id="opName">컴퓨터</b><div class="gauge" id="oppGaugeBar"><i id="oppGauge"></i></div><div class="gaugetxt" id="oppGaugeTxt">기 0%</div></span><span class="sets" id="opSets"></span><span class="gm" id="opGames">0</span><span class="pt" id="opPts">0</span>
 </div><div class="fmt" id="formatInfo"></div></section>
+
 
 <div class="arena" id="arena">
 <svg class="court" viewBox="-7.3 -15.5 14.6 31" preserveAspectRatio="none" aria-hidden="true">
@@ -174,7 +210,8 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 <div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
 <div class="overlay" id="overlay"></div></div>
 
-<section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message">캐릭터를 고른 뒤 경기를 시작하세요.</div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>경기 시작 (Space)</button><button id="reset" class="btn alt">초기화</button></div></section>
+
+<section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
 
 <section class="panel" id="ctrlPanel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>1</kbd> 발리 · <kbd>2</kbd> 드롭 · <kbd>3</kbd> 스피드 · <kbd>Q</kbd> 필살기 · <kbd>E</kbd>/<kbd>Space</kbd> 서브 · 포인트가 끝난 뒤 <kbd>Space</kbd> 다음 서브 · 경기 종료 후 <kbd>Space</kbd> 새 경기<br>칠 때 ←→를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
@@ -182,16 +219,6 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 <div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · 1</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · 2</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>빠르지만 아웃 위험 · 3</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
 <div class="muted" style="margin-top:7px;text-align:center">공 아래 그림자가 공의 실제 위치입니다. 그림자가 내 선수에게 가까이 올 때 치세요.</div></section>
 
-<details class="panel" id="rulesPanel"><summary>📘 경기 규칙 (실제 테니스 단식 규칙)</summary><ul>
-<li>코트는 실제 규격(길이 23.77m, 단식 폭 8.23m)입니다. 단식이므로 양옆의 어두운 복식 앨리는 아웃입니다.</li>
-<li>서브는 베이스라인 뒤에서 대각선 서비스 박스(노란색 표시)로 넣습니다. 포인트마다 듀스 코트(오른쪽)와 애드 코트(왼쪽)를 번갈아 서브합니다.</li>
-<li>서브가 박스 밖에 떨어지거나 네트에 걸리면 폴트, 두 번 연속 폴트면 더블 폴트로 실점합니다. 네트에 맞고 박스에 들어가면 레트로 다시 서브합니다.</li>
-<li>서브는 반드시 한 번 튄 뒤에 받아쳐야 합니다. 랠리 중에는 한 번 튄 공이나 튀기 전의 공(발리)을 칠 수 있고, 두 번 튀면 실점입니다.</li>
-<li>친 공이 처음 떨어진 곳이 라인 밖이면 친 선수가 실점합니다(라인에 걸치면 인). 아웃될 공이라도 튀기 전에 쳐 버리면 경기는 계속됩니다.</li>
-<li>점수는 0(러브)·15·30·40·게임 순서이고, 40-40은 듀스로 2점을 연속으로 따야 게임을 가져갑니다.</li>
-<li>6게임을 먼저, 2게임 차로 따면 세트를 가져갑니다. 6-6이면 타이브레이크(7점 먼저, 2점 차)로 세트를 결정합니다. 서브권은 게임마다 바뀌고, 타이브레이크에서는 첫 1포인트 뒤 2포인트마다 바뀝니다.</li>
-<li>실제 경기는 홀수 게임마다 코트를 바꾸지만, 이 게임은 내 선수가 항상 화면 아래에 보이도록 화면을 유지합니다.</li>
-</ul></details>
 </div>
 <footer class="muted" style="text-align:center;padding:14px">귀뚜라미 테니스 클럽 · 사내 친선 게임</footer>
 </main>
@@ -214,11 +241,12 @@ const BUG_SVG=`<svg viewBox="0 0 120 100" aria-hidden="true"><g stroke="#173c2b"
 
 /* ───── 상태 ───── */
 let mode="solo",side=0,st=null,myChar=null,difficulty="easy",format="set1",keys={};
+let screen="lobby",roomChars=[null,null],lobbyCache="";
 let ws=null,room="",roomStatus="",roomFormat="set1",names=["",""],lastEv=0,last=performance.now(),lastPhase="",lastTrail=0,curMsg="",tossText="",lookCache=["",""];
 const IDLE_PLAYERS=[{x:0,y:C.L+.8},{x:0,y:-C.L-.8}];
 
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-function msg(t){curMsg=t;$("message").textContent=t}
+function msg(t){curMsg=t;$("message").textContent=t;$("lobbyHint").textContent=t}
 function who(i){return i===side?"나":(mode==="solo"?"컴퓨터":(names[i]||"상대"))}
 function charLabel(k){const c=CHARS[k];return c?c.emoji+" "+c.name:""}
 function setLook(el,k){const c=CHARS[k];["body","belly","head","band","glow"].forEach(v=>c?el.style.setProperty("--"+v,c[v]):el.style.removeProperty("--"+v))}
@@ -236,7 +264,7 @@ function cutin(i,kind){const c=CHARS[kind];if(!c)return;const el=document.create
   el.innerHTML="<b>"+c.emoji+" "+c.special+"!</b><span>"+(i===side?"나의 필살기":who(i)+"의 필살기")+" · "+c.name+"</span>";$("arena").appendChild(el);setTimeout(()=>el.remove(),1200)}
 function banner(t,s){const el=document.createElement("div");el.className="banner";el.innerHTML="<b>"+t+"</b>"+(s?"<span>"+s+"</span>":"");$("arena").appendChild(el);setTimeout(()=>el.remove(),1650)}
 function shake(){const a=$("arena");a.classList.remove("shake");void a.offsetWidth;a.classList.add("shake");setTimeout(()=>a.classList.remove("shake"),520)}
-function overlay(a,b){const h="<div>"+a+"<br><span>"+b+"</span></div>";const o=$("overlay");o.classList.remove("hidden");if(o.innerHTML!==h)o.innerHTML=h}
+function overlay(a,b,btns=""){const h="<div>"+a+"<br><span>"+b+"</span>"+btns+"</div>";const o=$("overlay");o.classList.remove("hidden");if(o.innerHTML!==h)o.innerHTML=h}
 function hideOverlay(){$("overlay").classList.add("hidden")}
 
 /* ───── 점수 표기 ───── */
@@ -302,7 +330,9 @@ function serveMessage(){
 /* ───── 화면 그리기 ───── */
 function setGauge(prefix,v){v=clamp(v||0,0,100);const full=v>=100;$(prefix+"Gauge").style.width=v+"%";$(prefix+"GaugeBar").classList.toggle("full",full);
   $(prefix+"GaugeTxt").textContent=full?"기 100% · 필살기 준비!":"기 "+Math.floor(v)+"%";$(prefix+"GaugeTxt").classList.toggle("full",full)}
-function isLocked(){return mode==="solo"?!!(st&&st.phase!=="done"):!!(ws&&ws.readyState<=1)}
+function isLocked(){return mode==="multi"&&!!(st&&st.phase!=="done")}
+function formatLocked(){return mode==="multi"&&!!room&&(side!==0||isLocked())}
+function showScreen(v){screen=v;$("lobby").classList.toggle("hidden",v!=="lobby");$("game").classList.toggle("hidden",v!=="game");keys={};window.scrollTo(0,0)}
 let phaseAt=0;const settled=()=>performance.now()-phaseAt>400;   // 포인트가 끝난 직후 스페이스 연타로 안내를 놓치지 않도록 0.4초 여유
 function canStartNewMatch(){
   if(mode==="multi")return side===0&&((!st&&roomStatus==="ready")||(st?.phase==="done"&&settled()));
@@ -358,7 +388,7 @@ function render(){
   else{sp.textContent="다음 서브 (Space)";sp.disabled=st.phase!=="point"}
   const locked=isLocked();
   $("charPick").classList.toggle("locked",locked);document.querySelectorAll(".char").forEach(x=>x.disabled=locked);
-  $("formatPick").classList.toggle("locked",locked);document.querySelectorAll("[data-format]").forEach(x=>x.disabled=locked);
+  const fl=formatLocked();$("formatPick").classList.toggle("locked",fl);document.querySelectorAll("[data-format]").forEach(x=>x.disabled=fl);
   // 상태 줄
   let status="대기 중";
   if(!st)status=mode==="multi"?({waiting:"상대를 기다리는 중",ready:"선수 준비 완료"}[roomStatus]||"대기 중"):"대기 중";
@@ -367,11 +397,30 @@ function render(){
   // 오버레이
   if(st&&st.phase!==lastPhase){phaseAt=performance.now();
     if(st.phase==="serve")msg(serveMessage());
-    if(st.phase==="done"){const sets=st.history.map(h=>h[side]+"-"+h[1-side]).join(", ");overlay(st.winner===side?"🏆 우승!":"😵 패배",sets+(canStartNewMatch()?" · Space로 새 경기":""))}
+    if(st.phase==="done"){const sets=st.history.map(h=>h[side]+"-"+h[1-side]).join(", "),host=mode==="solo"||side===0;
+      overlay(st.winner===side?"🏆 우승!":"😵 패배","세트 스코어 "+sets,`<div class="ov-btns">${host?'<button class="btn" data-act="again">다시 하기 (Space)</button>':""}<button class="btn alt" data-act="lobby">선수 다시 고르기</button></div>`)}
     else hideOverlay();
     lastPhase=st.phase;
   }
-  if(!st){lastPhase="";overlay("🦗 귀뚜라미 테니스",!myChar?"먼저 캐릭터를 선택하세요":mode==="multi"?(room?"상대를 기다리거나, 호스트가 Space로 시작하세요":"방을 만들거나 방 코드로 참가하세요"):"Space로 경기를 시작하세요")}
+  if(!st)lastPhase="";
+  renderLobby();
+}
+const FORMAT_SHORT={short:"짧은 세트(4게임)",set1:"1세트(6게임)",set3:"3세트 2선승"},LEVEL={easy:"쉬움",normal:"보통",hard:"어려움"};
+function renderLobby(){
+  const c=CHARS[myChar],connected=!!(ws&&ws.readyState===1&&room),roomReady=roomStatus==="ready"||st?.phase==="done";
+  let t="경기 시작 (Space)",dis=false;
+  if(!myChar){t="선수를 먼저 선택하세요";dis=true}
+  else if(mode==="multi"){
+    if(!connected){t="방을 만들거나 참가하세요";dis=true}
+    else if(!roomReady){t="상대를 기다리는 중…";dis=true}
+    else if(side!==0){t="호스트가 시작하면 경기 화면으로 넘어갑니다";dis=true}
+  }
+  const fm=mode==="multi"&&room?roomFormat:format;
+  const sum=c?`${c.emoji} <b>${c.name}</b> · 필살기 <b>${c.special}</b><br>${FORMAT_SHORT[fm]} · ${mode==="solo"?"컴퓨터 난이도 "+LEVEL[difficulty]:"실시간 대전"}`:"선수를 먼저 골라 주세요.";
+  const opp=roomChars[1-side];
+  const line=room?`방 코드 ${room} · ${side===0?"호스트":"참가자"} · ${roomStatus==="waiting"?"상대를 기다리는 중":"상대 "+(names[1-side]||"선수")+(opp?" ("+charLabel(opp)+")":"")}`:"아직 방에 들어가지 않았습니다.";
+  const key=t+dis+sum+line;
+  if(key!==lobbyCache){lobbyCache=key;$("lobbyStart").textContent=t;$("lobbyStart").disabled=dis;$("pickSummary").innerHTML=sum;$("roomLine").textContent=line}
 }
 
 /* ───── 캐릭터 · 모드 선택 ───── */
@@ -384,7 +433,7 @@ function pickChar(k){
   myChar=k;const c=CHARS[k];
   document.querySelectorAll(".char").forEach(b=>{const on=b.dataset.char===k;b.classList.toggle("active",on);b.setAttribute("aria-pressed",on)});
   $("specialBtn").innerHTML=c.emoji+" "+c.special+"<small>기 100% 필요 · Q</small>";$("specialBtn").style.setProperty("--glow",c.glow);
-  $("soloStart").disabled=false;$("soloStart").textContent="개인전 시작";
+  if(mode==="multi"&&room)send({type:"char",char:k});
   msg(c.emoji+" "+c.name+" 선택! 필살기 "+c.special+": "+c.desc+".");
 }
 function setMode(m){mode=m;if(m==="solo")side=0;
@@ -399,6 +448,12 @@ function startSolo(){
   const others=SPECIALS.filter(k=>k!==myChar),ai=others[Math.floor(Math.random()*others.length)];
   st=E.newMatch({format,chars:[myChar,ai],autoNext:0});lastEv=0;lastPhase="";
   tossText="상대는 "+charLabel(ai)+"! ";processEvents();
+  showScreen("game");
+}
+function toLobby(){
+  if(mode==="solo"){st=null;showScreen("lobby");msg("선수와 경기 방식을 고른 뒤 경기 시작을 누르세요.");return}
+  if(st&&st.phase!=="done"){if(!confirm("경기를 그만두고 로비로 나갈까요? 방에서도 나가게 됩니다."))return;leaveRoom();msg("방에서 나왔습니다.")}
+  showScreen("lobby");
 }
 function nextPoint(){
   if(mode==="multi"){send({type:"next"});return}
@@ -435,27 +490,31 @@ function connect(create){
     if(d.type==="joined"){room=d.room;side=d.side;$("roomCode").value=room;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자");msg("방에 입장했습니다. 상대에게 방 코드를 공유하세요.");return}
     if(d.type==="hitResult"){hitFeedback(d.result);return}
     if(d.type==="state"){
-      const prevStatus=roomStatus;roomStatus=d.status;names=d.names||["",""];roomFormat=d.format||roomFormat;setSeg("format",roomFormat);
+      const prevStatus=roomStatus;roomStatus=d.status;names=d.names||["",""];roomChars=d.chars||[null,null];roomFormat=d.format||roomFormat;setSeg("format",roomFormat);
       st=d.match||null;
+      if(st&&st.phase!=="done"&&screen!=="game")showScreen("game");          // 호스트가 시작하면 두 사람 모두 경기 화면으로
       if(st)processEvents();
       else if(prevStatus!==roomStatus)msg(roomStatus==="ready"?(side===0?"두 선수 준비 완료! Space 또는 경기 시작 버튼을 누르세요.":"두 선수 준비 완료! 호스트가 경기를 시작합니다."):"상대방을 기다리는 중...");
+      if(!st&&screen==="game"){showScreen("lobby");msg("상대가 나가서 경기가 중단되었습니다. 새 상대를 기다리는 중입니다.")}
     }};
-  ws.onclose=()=>{if(mode==="multi")msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")};
+  ws.onclose=()=>{room="";st=null;if(mode==="multi"){if(screen==="game")showScreen("lobby");msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")}};
 }
-function leaveRoom(){if(ws){ws.onclose=null;ws.close();ws=null}room="";roomStatus="";names=["",""];st=null;$("roomInfo").textContent=mode==="solo"?"개인 연습 모드":"온라인 대전"}
+function leaveRoom(){if(ws){ws.onclose=null;ws.close();ws=null}room="";roomStatus="";names=["",""];roomChars=[null,null];st=null;$("roomInfo").textContent=mode==="solo"?"개인 연습 모드":"온라인 대전"}
 
 /* ───── 이벤트 연결 ───── */
 $("soloTab").onclick=()=>{leaveRoom();setMode("solo")};
 $("multiTab").onclick=()=>{st=null;setMode("multi")};
-$("soloStart").onclick=()=>{if(mode==="solo")startSolo()};
+$("lobbyStart").onclick=()=>{if(mode==="solo")startSolo();else send({type:"next"})};
+$("toLobby").onclick=toLobby;
+$("overlay").addEventListener("click",e=>{const a=e.target.closest("[data-act]");if(!a)return;
+  if(a.dataset.act==="lobby")toLobby();else if(mode==="solo")startSolo();else send({type:"next"})});
 $("createRoom").onclick=()=>{setMode("multi");connect(true)};
 $("joinRoom").onclick=()=>{if(!$("roomCode").value.trim()){msg("방 코드를 입력하세요.");return}connect(false)};
 $("startPoint").onclick=nextPoint;
-$("reset").onclick=()=>{if(mode==="solo")st=null;else leaveRoom();msg("초기화했습니다. 캐릭터와 경기 방식을 고른 뒤 시작하세요.")};
 $("hit").onclick=()=>hitBall("normal");
 $("serve").onclick=serveNow;
 document.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>{difficulty=b.dataset.level;setSeg("level",difficulty);msg("컴퓨터 난이도: "+({easy:"쉬움 · 느리고 실수가 잦아요",normal:"보통 · 적당한 발과 정확도",hard:"어려움 · 빠른 발, 아웃 공은 정확히 보내 줘요"}[difficulty]))});
-document.querySelectorAll("[data-format]").forEach(b=>b.onclick=()=>{if(isLocked())return;format=b.dataset.format;setSeg("format",format)});
+document.querySelectorAll("[data-format]").forEach(b=>b.onclick=()=>{if(formatLocked())return;format=b.dataset.format;setSeg("format",format);if(mode==="multi"&&room)send({type:"format",format})});
 document.querySelectorAll("[data-skill]").forEach(b=>b.onclick=()=>hitBall(b.dataset.skill));
 function sendKeys(){if(mode==="multi")send({type:"input",keys:worldKeys()})}
 document.querySelectorAll("[data-key]").forEach(b=>{let k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true;sendKeys()});["pointerup","pointercancel","pointerleave"].forEach(ev=>b.addEventListener(ev,()=>{keys[k]=false;sendKeys()}))});
@@ -464,7 +523,7 @@ const MOVE={ArrowUp:"up",KeyW:"up",ArrowDown:"down",KeyS:"down",ArrowLeft:"left"
 const SKILL_KEY={Digit1:"volley",Numpad1:"volley",Digit2:"drop",Numpad2:"drop",Digit3:"speed",Numpad3:"speed",KeyQ:"special"};
 window.addEventListener("keydown",e=>{
   if(e.target.closest("input,textarea"))return;
-  const k=MOVE[e.code];if(k){e.preventDefault();if(!keys[k]){keys[k]=true;sendKeys()}}
+  const k=MOVE[e.code];if(k&&screen==="game"){e.preventDefault();if(!keys[k]){keys[k]=true;sendKeys()}}
   if(e.code==="Space"){e.preventDefault();if(e.repeat)return;if(canStartNewMatch()||canNextServe())nextPoint();else if(isMyServe())serveNow();else hitBall("normal")}
   if(e.code==="KeyE"){e.preventDefault();serveNow()}
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
