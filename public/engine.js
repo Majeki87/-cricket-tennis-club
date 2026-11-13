@@ -14,7 +14,7 @@ const FORMATS = { short: { games: 4, sets: 1 }, set1: { games: 6, sets: 1 }, set
 // 아이템: 경기 중 포인트가 끝날 때마다 무작위로 얻고(최대 3개), 쓰면 그 포인트가 끝날 때까지 효과 유지
 const ITEMS = ["anchovy", "milk", "coupon"];        // 죽방멸치 · 서울우유 · 로빈 쿠폰
 const ITEM_MAX = 3, ITEM_CHANCE = .25;
-const ITEM_FX = { anchovyT: .78, milkReach: 1.5, couponSig: .55 };
+const ITEM_FX = { anchovyT: .55, anchovyKeep: .93, anchovyE: .6, anchovyRecv: .75, anchovyMiss: .15, milkReach: 1.5, couponSig: .55 };
 const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.7, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
 const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, special: 1.7 };
 const AI = {
@@ -147,7 +147,7 @@ function tryHit(st, side, skill, aim = {}) {
   if (b.bounces >= 2) return "late";
   if (skill === "special" && (st.gauge[side] < 100 || !CHARS.includes(st.chars[side]))) return "noGauge";
   if (b.z > MAX_HIT_Z) return "high";
-  const reach = REACH[skill] * (b.kind === "fire" ? FIRE_REACH : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
+  const reach = REACH[skill] * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
   if (ballDist(b, st.players[side]) > reach) return b.kind === "fire" ? "fireFar" : "far";
   shoot(st, side, skill, aim);
   return "ok";
@@ -194,6 +194,7 @@ function shoot(st, side, skill, aim) {
 function itemBall(st, side, b) {
   const act = st.active[side];
   b.pow = !!act.anchovy;
+  if (b.pow) { b.e = Math.min(b.e, ITEM_FX.anchovyE); b.keep = Math.max(b.keep, ITEM_FX.anchovyKeep); }   // 죽방멸치: 낮고 빠르게 깔려 들어가 튄 뒤에도 속도가 거의 안 줄어듦
   b.spin = act.coupon ? (Math.random() < .5 ? -1 : 1) : 0;
   if (b.spin) { b.e = Math.min(.9, b.e * 1.18); b.keep = Math.min(.95, b.keep * 1.15); }   // 로빈 쿠폰: 스핀 → 휘어 들어가고 튄 뒤 더 뻗음
 }
@@ -351,10 +352,10 @@ function aiThink(st, side, level, dt) {
   out.target = { x: spot.x + ai.off, y: spot.y + own * .35 };
   if (!ai.tried && b.crossed && b.z <= MAX_HIT_Z) {
     const canVolley = !b.serve && Math.abs(me.y) < 6;
-    const reach = REACH.normal * (b.kind === "fire" ? FIRE_REACH : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
+    const reach = REACH.normal * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
     if ((b.bounces === 1 || (b.bounces === 0 && canVolley)) && ballDist(b, me) < reach) {
       ai.tried = true;
-      const miss = cfg.error + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0);
+      const miss = cfg.error + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
       if (Math.random() < miss) pushEv(st, { type: "whiff", side });
       else {
         let skill = "normal";
