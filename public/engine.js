@@ -54,7 +54,8 @@ function newMatch(opts = {}) {
     phase: "serve", timer: 0, autoNext: opts.autoNext || 0, serveWait: 1,
     players: [{ x: 0, y: COURT.L + .8 }, { x: 0, y: -COURT.L - .8 }],
     ball: idleBall(0), gauge: [0, 0], stun: [0, 0], winner: null, rally: 0,
-    events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0
+    events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
+    posEpoch: Math.floor(Math.random() * 1e6), hist: []
   };
   pushEv(st, { type: "toss", server: st.server });
   startPoint(st);
@@ -69,6 +70,7 @@ function startPoint(st) {
   st.ball = idleBall(st.ball.id); st.ball.held = true;
   holdBall(st);
   st.phase = "serve"; st.stun = [0, 0]; st.rally = 0;
+  st.posEpoch = (st.posEpoch || 0) + 1; st.hist = [];     // 실시간 대전: 선수 위치를 새로 맞추는 기준
   st.serveWait = 1 + Math.random() * .6;
 }
 function holdBall(st) { const p = st.players[st.server], b = st.ball; b.x = b.bx = b.px = p.x + .25; b.y = b.by = b.py = p.y; b.z = 1.1; }
@@ -138,7 +140,7 @@ function ballDist(b, p) {   // 이번 프레임 동안 공(그림자)이 지나�
   const t = L2 ? clamp(((p.x - ax) * dx + (p.y - ay) * dy) / L2, 0, 1) : 0;
   return Math.hypot(p.x - (ax + dx * t), p.y - (ay + dy * t));
 }
-function tryHit(st, side, skill, aim = {}) {
+function tryHit(st, side, skill, aim = {}, lookback = 0) {
   const b = st.ball;
   if (!SKILLS.includes(skill)) skill = "normal";
   if (st.phase !== "rally" || !b.live) return "idle";
@@ -146,9 +148,15 @@ function tryHit(st, side, skill, aim = {}) {
   if (b.serve && b.bounces === 0) return "serveBounce";    // 서브는 반드시 한 번 튄 뒤에 리턴
   if (b.bounces >= 2) return "late";
   if (skill === "special" && (st.gauge[side] < 100 || !CHARS.includes(st.chars[side]))) return "noGauge";
-  if (b.z > MAX_HIT_Z) return "high";
   const reach = REACH[skill] * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
-  if (ballDist(b, st.players[side]) > reach) return b.kind === "fire" ? "fireFar" : "far";
+  const pl = st.players[side];
+  let best = b.z <= MAX_HIT_Z ? ballDist(b, pl) : Infinity;
+  // 실시간 대전: 상대 화면에 보이던 조금 전 공 위치까지 인정(네트워크 지연 보정)
+  if (lookback && st.hist) for (const hp of st.hist.slice(-lookback))
+    if (hp.id === b.id && hp.owner === b.owner && hp.crossed && !(hp.serve && hp.bounces === 0) && hp.bounces <= 1 && hp.z <= MAX_HIT_Z)
+      best = Math.min(best, Math.hypot(pl.x - hp.x, pl.y - hp.y));
+  if (best === Infinity) return "high";
+  if (best > reach) return b.kind === "fire" ? "fireFar" : "far";
   shoot(st, side, skill, aim);
   return "ok";
 }
@@ -205,6 +213,9 @@ function taunt(st, side, n) {
   pushEv(st, { type: "taunt", side, n });
   return true;
 }
+// 실시간 대전: 내 화면에서 먼저 움직이는 선수 위치 계산(서버와 같은 규칙)
+function moveLocal(view, i, keys, dt) { movePlayer(view, i, { keys }, dt); }
+function constrainPos(st, i) { constrain(st, i); }
 function useItem(st, side, slot) {
   if (st.phase === "done") return "idle";
   const bag = st.items[side], item = bag[slot];
@@ -319,6 +330,8 @@ function step(st, dt, inputs = []) {
     if (st.phase !== "rally") return;
     stepBall(st, h);
   }
+  const b = st.ball;   // 실시간 대전 지연 보정용: 최근 공 위치 기록(약 0.4초)
+  if (b.live) { (st.hist || (st.hist = [])).push({ x: b.x, y: b.y, z: b.z, id: b.id, owner: b.owner, crossed: b.crossed, serve: b.serve, bounces: b.bounces }); if (st.hist.length > 14) st.hist.shift(); }
 }
 
 /* ───── 컴퓨터 선수 ───── */
@@ -383,7 +396,7 @@ function aiThink(st, side, level, dt) {
   return out;
 }
 
-const api = { COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, useItem, taunt, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
