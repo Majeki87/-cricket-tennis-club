@@ -9,14 +9,14 @@
 const COURT = { L: 11.885, S: 4.115, D: 5.485, SV: 6.40, NET: 0.914, POST: 1.07, POSTX: 6.4, AX: 7.3, AY: 15.5 };
 const G = 9.8, LINE = 0.04;
 const CHARS = ["tornado", "snake", "fire", "quake"];
-const SKILLS = ["normal", "volley", "drop", "speed", "special"];
+const SKILLS = ["normal", "volley", "drop", "speed", "lob", "special"];
 const FORMATS = { short: { games: 4, sets: 1 }, set1: { games: 6, sets: 1 }, set3: { games: 6, sets: 2 } };
 const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.7, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
-const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, special: 1.7 };
+const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, special: 1.7 };
 const AI = {
-  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35 },
-  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7 },
-  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9 }
+  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15 },
+  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35 },
+  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55 }
 };
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -156,6 +156,8 @@ function shoot(st, side, skill, aim) {
     case "volley": tx = h ? h * 3.4 : away * 3.3; depth = 5.6; T = .95; sig = .65; break;
     case "drop":   tx = h ? h * 2.4 : (Math.random() - .5) * 3; depth = 2.3; T = 1.3; sig = .4; break;
     case "speed":  tx = h ? h * 3.1 : away * 2.7; depth = 9.7; T = .8; sig = .9; margin = 0; zSig = .45; break;
+    // 탑스핀 로브: 상대 머리 위로 높이 띄워 베이스라인 근처에 떨어지고, 튄 뒤에도 높이 솟아오름
+    case "lob":    tx = h ? h * 2.4 : away * 1.8; depth = 10.1; T = 2.05; sig = .6; margin = .6; zSig = .2; break;
     case "special":
       kind = char; tx = away * 3.1; sig = .2; zSig = 0; margin = .3;
       if (char === "tornado") { depth = 9; T = 1.35; curve = "tornado"; }
@@ -171,6 +173,7 @@ function shoot(st, side, skill, aim) {
   if (zSig) b.vz += gauss() * zSig * err;
   b.owner = side; b.serve = false; b.kind = kind; b.curve = curve;
   if (skill === "drop") { b.e = .42; b.keep = .6; }
+  if (skill === "lob") { b.e = .82; b.keep = .7; }
   if (kind === "fire") { b.e = .6; b.keep = .92; }
   st.rally++;
   if (skill === "special") { st.gauge[side] = 0; pushEv(st, { type: "special", side, kind }); }
@@ -321,6 +324,7 @@ function aiThink(st, side, level, dt) {
       else {
         let skill = "normal";
         if (st.gauge[side] >= 100 && CHARS.includes(st.chars[side]) && Math.random() < cfg.special) skill = "special";
+        else if (Math.abs(st.players[1 - side].y) < 6 && Math.random() < cfg.lob) skill = "lob";       // 상대가 네트에 붙으면 로브로 넘김
         else if (Math.abs(st.players[1 - side].y) > COURT.L - .5 && Math.random() < cfg.drop) skill = "drop";
         else if (Math.random() < cfg.power) skill = "speed";
         const ox = st.players[1 - side].x;
