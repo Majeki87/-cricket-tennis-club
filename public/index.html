@@ -208,6 +208,16 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 .btn.big{width:100%;margin-top:12px;padding:15px;font-size:17px}
 .summary{margin-top:12px;background:#10242d;border:1px solid #34515a;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6}
 .hint{margin-top:8px;font-size:12px;color:#b5c9c2;min-height:16px;text-align:center}
+.chk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.rl-head{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.mini{background:#294650;color:#e4f4ee;border:1px solid #52717a;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.roomlist{margin-top:7px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.room{display:flex;align-items:center;gap:8px;background:#10242d;border:1px solid #34515a;border-radius:10px;padding:8px 10px}
+.room .rinfo{flex:1;min-width:0}
+.room .rname{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room .rsub{font-size:11px;color:#9fb8af;margin-top:2px}
+.room .btn{padding:7px 12px;font-size:13px}
+.room.busy{opacity:.55}
 .roomline{margin-top:9px;font-size:13px;font-weight:700;color:#ffe25a}
 .ov-btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .ov-btns .btn{font-size:14px;padding:10px 14px}
@@ -278,7 +288,9 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <label class="muted">경기 방식</label><div class="seg" id="formatPick"><button data-format="short">짧은 세트<br><small>4게임</small></button><button data-format="set1" class="active">1세트<br><small>6게임</small></button><button data-format="set3">3세트<br><small>2세트 선승</small></button></div>
 
 <div id="soloSetup"><label class="muted">컴퓨터 난이도</label><div class="seg" id="levelPick"><button data-level="easy" class="active">쉬움</button><button data-level="normal">보통</button><button data-level="hard">어려움</button></div></div>
-<div id="multiSetup" class="hidden" style="margin-top:10px"><label class="muted" style="margin-top:0">내 닉네임</label><input id="name" class="field" maxlength="12" value="귀뚜라미 선수"><div class="row" style="margin-top:8px"><button id="createRoom" class="btn">방 만들기</button><input id="roomCode" class="field" placeholder="방 코드"><button id="joinRoom" class="btn alt">참가</button></div><div class="roomline" id="roomLine">아직 방에 들어가지 않았습니다.</div><div class="muted" style="margin-top:5px">경기 방식은 방을 만든 사람이 정합니다. 두 명이 모이면 호스트가 경기를 시작합니다.</div></div>
+<div id="multiSetup" class="hidden" style="margin-top:10px"><label class="muted" style="margin-top:0">내 닉네임</label><input id="name" class="field" maxlength="12" value="귀뚜라미 선수"><div class="row" style="margin-top:8px"><button id="createRoom" class="btn">방 만들기</button><input id="roomCode" class="field" placeholder="방 코드"><button id="joinRoom" class="btn alt">참가</button></div><label class="muted chk"><input type="checkbox" id="privateRoom"> 비공개 방으로 만들기 (방 코드를 아는 사람만 참가)</label>
+<div class="roomline" id="roomLine">아직 방에 들어가지 않았습니다.</div>
+<div id="roomBrowser"><div class="rl-head"><b>열린 방</b><button id="refreshRooms" class="mini">새로고침</button></div><div class="roomlist" id="roomList"><div class="muted">불러오는 중…</div></div></div><div class="muted" style="margin-top:5px">경기 방식은 방을 만든 사람이 정합니다. 두 명이 모이면 호스트가 경기를 시작합니다. 만든 방은 비공개로 하지 않으면 모든 사람의 '열린 방' 목록에 보입니다.</div></div>
 <div class="summary" id="pickSummary">선수를 먼저 골라 주세요.</div>
 <button id="lobbyStart" class="btn big" disabled>선수를 먼저 선택하세요</button>
 <div class="hint" id="lobbyHint"></div>
@@ -752,7 +764,7 @@ function connect(create){
   if(ws)ws.close();
   const proto=location.protocol==="https:"?"wss":"ws";
   ws=new WebSocket(proto+"://"+location.host);lastEv=0;lastPhase="";st=null;snaps=[];myPos=null;rtt=0;
-  ws.onopen=()=>{clearInterval(pingTimer);pingTimer=setInterval(()=>send({type:"ping",t:performance.now(),rtt:Math.round(rtt)}),2000);send({type:"ping",t:performance.now(),rtt:0});send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format})};
+  ws.onopen=()=>{clearInterval(pingTimer);pingTimer=setInterval(()=>send({type:"ping",t:performance.now(),rtt:Math.round(rtt)}),2000);send({type:"ping",t:performance.now(),rtt:0});send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format,private:create&&$("privateRoom").checked})};
   ws.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch{return}
     if(d.type==="error"){msg(d.message);return}
     if(d.type==="joined"){room=d.room;side=d.side;$("roomCode").value=room;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자");msg("방에 입장했습니다. 상대에게 방 코드를 공유하세요.");return}
@@ -772,18 +784,39 @@ function connect(create){
       else if(prevStatus!==roomStatus)msg(roomStatus==="ready"?(side===0?"두 선수 준비 완료! Space 또는 경기 시작 버튼을 누르세요.":"두 선수 준비 완료! 호스트가 경기를 시작합니다."):"상대방을 기다리는 중...");
       if(!st&&screen==="game"){showScreen("lobby");msg("상대가 나가서 경기가 중단되었습니다. 새 상대를 기다리는 중입니다.")}
     }};
-  ws.onclose=()=>{clearInterval(pingTimer);pingText="";room="";st=null;snaps=[];myPos=null;if(mode==="multi"){if(screen==="game")showScreen("lobby");msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")}};
+  ws.onclose=()=>{clearInterval(pingTimer);pingText="";room="";st=null;snaps=[];myPos=null;setTimeout(()=>loadRooms(true),50);if(mode==="multi"){if(screen==="game")showScreen("lobby");msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")}};
 }
 function showPing(){
   const ms=Math.round(rtt),q=ms<80?"좋음":ms<160?"보통":"느림";
   pingText=`연결 ${q} (${ms}ms)`;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자")+" · "+pingText;lobbyCache="";
 }
 let pingText="";
-function leaveRoom(){clearInterval(pingTimer);pingText="";if(ws){ws.onclose=null;ws.close();ws=null}room="";roomStatus="";names=["",""];roomChars=[null,null];st=null;$("roomInfo").textContent=mode==="solo"?"개인 연습 모드":"온라인 대전"}
+/* 열린 방 목록: 방에 들어가기 전 로비에서 3초마다 새로 불러옴 */
+const FMT_SHORT={short:"짧은 세트",set1:"1세트",set3:"3세트"};
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let roomListKey="";
+async function loadRooms(force){
+  const show=mode==="multi"&&screen==="lobby"&&!room;
+  $("roomBrowser").classList.toggle("hidden",!!room);
+  if(!show)return;
+  try{
+    const r=await fetch("rooms",{cache:"no-store"});if(!r.ok)throw 0;
+    const list=await r.json(),key=JSON.stringify(list);if(key===roomListKey&&!force)return;roomListKey=key;
+    $("roomList").innerHTML=list.length?list.map(x=>{const c=CHARS[x.char],busy=x.status!=="waiting";
+      return `<div class="room${busy?" busy":""}"><div class="rinfo"><div class="rname">${c?c.emoji+" ":""}${esc(x.name)}의 방</div><div class="rsub">${FMT_SHORT[x.format]||""} · ${x.count}/2명 · ${busy?(x.status==="playing"?"경기 중":"자리 없음"):"참가 가능"}</div></div>${busy?"":`<button class="btn" data-join="${esc(x.id)}">참가</button>`}</div>`}).join("")
+      :'<div class="muted">아직 열린 방이 없어요. 방을 만들어 보세요.</div>';
+  }catch{roomListKey="";$("roomList").innerHTML='<div class="muted">방 목록을 불러올 수 없어요. 게임 서버 주소로 접속했는지 확인해 주세요.</div>'}
+}
+setInterval(loadRooms,3000);
+function leaveRoom(){clearInterval(pingTimer);pingText="";setTimeout(()=>loadRooms(true),50);if(ws){ws.onclose=null;ws.close();ws=null}room="";roomStatus="";names=["",""];roomChars=[null,null];st=null;$("roomInfo").textContent=mode==="solo"?"개인 연습 모드":"온라인 대전"}
 
 /* ───── 이벤트 연결 ───── */
 $("soloTab").onclick=()=>{leaveRoom();setMode("solo")};
-$("multiTab").onclick=()=>{st=null;setMode("multi")};
+$("multiTab").onclick=()=>{st=null;setMode("multi");loadRooms(true)};
+$("refreshRooms").onclick=()=>loadRooms(true);
+$("roomList").addEventListener("click",e=>{const b=e.target.closest("[data-join]");if(!b)return;
+  if(!myChar){msg("먼저 캐릭터를 선택하세요.");return}
+  $("roomCode").value=b.dataset.join;connect(false)});
 $("lobbyStart").onclick=()=>{if(mode==="solo")startSolo();else send({type:"next"})};
 $("toLobby").onclick=toLobby;
 $("tauntBtn").onclick=tauntUI;
