@@ -69,6 +69,7 @@ wss.on("connection", (ws) => {
     if (msg.type === "format" && idle && side === 0 && E.FORMATS[msg.format]) room.format = msg.format;
     if (msg.type === "serve" && st) E.serve(st, side, { keys: cleanKeys(msg.keys), err: 1 });
     if (msg.type === "item" && st) E.useItem(st, side, Number(msg.slot) | 0);
+    if (msg.type === "taunt" && st) E.taunt(st, side, Number(msg.n) | 0);
     if (msg.type === "hit" && st) {
       const skill = E.SKILLS.includes(msg.skill) ? msg.skill : "normal";
       send(ws, { type: "hitResult", result: E.tryHit(st, side, skill, { keys: cleanKeys(msg.keys), err: 1 }) });
