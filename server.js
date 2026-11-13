@@ -62,7 +62,7 @@ function scorePoint(room, side) {
   g.message=sideName(side)+" 선수 득점! R 키를 누르면 바로 다음 서브로 넘어갑니다.";
   if(g.score[side]>=5) {
     g.status="finished"; g.winner=side;
-    g.message=sideName(side)+" 선수 우승!";
+    g.message=sideName(side)+" 선수 우승! 호스트는 Space 또는 R 키로 새 경기를 시작할 수 있습니다.";
   } else {
     g.status="point"; g.pointAt=Date.now()+1300;
   }
