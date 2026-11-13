@@ -3,8 +3,8 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);color:#edf5f1;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
-.wrap{max-width:1180px;margin:auto;padding:16px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.wrap{max-width:1360px;margin:auto;padding:16px}
+.top{text-align:center}
 .sub{font-size:12px;color:#a9c2b8;font-weight:700;letter-spacing:1px}
 .title{font-size:25px;font-weight:900}
 .panel{background:linear-gradient(145deg,#172b35,#203a42);border:1px solid #41616a;border-radius:15px;padding:13px;box-shadow:0 10px 24px #0004}
@@ -14,10 +14,14 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 
 /* 레이아웃: 넓은 화면은 왼쪽 코트 + 오른쪽 패널 */
 .layout{display:grid;gap:12px;margin-top:12px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:900px){
-  .layout{grid-template-columns:auto minmax(360px,1fr);grid-template-areas:"arena board" "arena status" "arena ctrl" "arena .";align-items:start}
+/* 경기 화면: 넓은 화면은 [점수판·안내 | 코트 | 조작] 3단, 중간 화면은 코트 + 오른쪽 패널을 가운데 정렬 */
+@media (min-width:760px){
+  .layout{grid-template-columns:auto minmax(320px,440px);justify-content:center;grid-template-areas:"arena board" "arena status" "arena ctrl" "arena tip" "arena .";align-items:start}
   #arena{grid-area:arena;position:sticky;top:12px;width:calc(min(100vh - 90px,960px) * .471)}
-  #boardPanel{grid-area:board}#statusPanel{grid-area:status}#ctrlPanel{grid-area:ctrl}
+  #boardPanel{grid-area:board}#statusPanel{grid-area:status}#ctrlPanel{grid-area:ctrl}#tipPanel{grid-area:tip}
+}
+@media (min-width:980px){
+  .layout{grid-template-columns:minmax(280px,420px) auto minmax(280px,420px);grid-template-rows:auto auto auto 1fr;grid-template-areas:"board arena ctrl" "status arena ctrl" "tip arena ctrl" ". arena ctrl"}
 }
 
 /* 캐릭터 선택 */
@@ -121,12 +125,16 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-width:250px;margin:auto}
 .pad button{font-size:20px;min-height:46px;background:#294650;color:#effaf5;border:1px solid #52717a;border-radius:10px;touch-action:none}
 .pad .blank{visibility:hidden}
+@media (hover:hover) and (pointer:fine){.pad{display:none}}   /* 마우스·키보드 환경에서는 화면 방향키 숨김 */
+.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin:8px 0 10px;font-size:12px;color:#c7d9d2}
+.keys kbd{margin-right:2px}
+.tips{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;line-height:1.7}
 .status{font-size:13px;text-align:center;background:#10242d;color:#e7f4ee;padding:10px;border-radius:9px;margin-top:10px;line-height:1.5;min-height:58px}
-.skillrow{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px}
+.skillrow{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:9px}
 .skill{background:#294650;border:1px solid #55747c;color:#eaf8f1;border-radius:10px;padding:10px 5px;font-weight:800;font-size:13px;cursor:pointer}
 .skill small{display:block;font-size:10px;font-weight:500;color:#b9d2c8;margin-top:3px}
 .skill:disabled{opacity:.38;cursor:default}
-.skill.special{--glow:#ffd04a;border-style:dashed}
+.skill.special{--glow:#ffd04a;border-style:dashed;grid-column:1/-1}
 .skill.special.ready{background:linear-gradient(135deg,#e59a35,#bd5d19);border:1px solid #ffe08a;color:#fff;box-shadow:0 0 14px -2px var(--glow);animation:readyPulse 1s ease-in-out infinite}
 .skill.special.ready small{color:#fff3cf}
 @keyframes readyPulse{50%{box-shadow:0 0 22px 2px var(--glow)}}
@@ -155,10 +163,10 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 .roomline{margin-top:9px;font-size:13px;font-weight:700;color:#ffe25a}
 .ov-btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .ov-btns .btn{font-size:14px;padding:10px 14px}
-@media (max-width:560px){.charpick{grid-template-columns:repeat(2,1fr)}.skillrow{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.charpick{grid-template-columns:repeat(2,1fr)}}
 @media (prefers-reduced-motion:reduce){.arena.shake,.bug,.bug.stunned svg,.gauge.full i,.skill.special.ready{animation:none}.cutin,.banner{animation-duration:.01s;animation-delay:1s}}
 </style></head><body><main class="wrap">
-<header class="top"><div><div class="sub">KRE TENNIS CLUB · 2026</div><div class="title">🦗 귀뚜라미 테니스</div></div><div style="font-size:12px;text-align:right;color:#657267">CRICKET<br>CHAMPIONSHIP</div></header>
+<header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div></header>
 
 
 <div id="lobby" class="lobby">
@@ -213,11 +221,14 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 
 <section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
 
-<section class="panel" id="ctrlPanel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>Z</kbd> 발리 · <kbd>E</kbd> 드롭 · <kbd>F</kbd> 스피드 · <kbd>C</kbd> 로브 · <kbd>Q</kbd> 필살기 · <kbd>Space</kbd> 서브 · 포인트가 끝난 뒤 <kbd>Space</kbd> 다음 서브 · 경기 종료 후 <kbd>Space</kbd> 새 경기<br>칠 때 ←→를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</div>
+
+<section class="panel" id="ctrlPanel"><b>🎮 조작</b>
+<div class="keys"><span><kbd>←↑↓→</kbd> <kbd>WASD</kbd></span><span>이동</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Z</kbd><kbd>E</kbd><kbd>F</kbd><kbd>C</kbd><kbd>Q</kbd></span><span>기술 (아래 버튼에 키 표시)</span></div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
 <div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>빠르지만 아웃 위험 · F</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · C</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
-<div class="muted" style="margin-top:7px;text-align:center">공 아래 그림자가 공의 실제 위치입니다. 그림자가 내 선수에게 가까이 올 때 치세요.</div></section>
+</section>
+<section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li></ul></section>
 
 </div>
 <footer class="muted" style="text-align:center;padding:14px">귀뚜라미 테니스 클럽 · 사내 친선 게임</footer>
