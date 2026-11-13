@@ -19,22 +19,41 @@ function code() { return crypto.randomBytes(3).toString("hex").toUpperCase(); }
 function send(ws, obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
 function clientAt(room, side) { return room.clients.find(c => c.side === side); }
 function cleanKeys(k) { return { up: !!k?.up, down: !!k?.down, left: !!k?.left, right: !!k?.right }; }
+const r2 = v => Math.round(v * 100) / 100;
+// 화면에 필요한 값만 골라서 보냄(이벤트는 새로 생긴 것만) → 데이터가 작아져 덜 끊김
+function packMatch(room) {
+  const st = room.match; if (!st) return null;
+  const b = st.ball, events = st.events.filter(e => e.id > room.sentEv);
+  return { format: st.format, phase: st.phase, server: st.server, serveNo: st.serveNo, pts: st.pts, games: st.games, sets: st.sets,
+    history: st.history, tb: st.tb, winner: st.winner, chars: st.chars, items: st.items, active: st.active, rally: st.rally,
+    gauge: st.gauge.map(Math.round), stun: st.stun.map(r2), posEpoch: st.posEpoch,
+    players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
+    ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spin: b.spin, id: b.id },
+    events };
+}
 function snapshot(room) {
   return { type: "state", room: room.id, status: room.status, format: room.format,
     names: [0, 1].map(s => clientAt(room, s)?.name || ""),
     chars: [0, 1].map(s => clientAt(room, s)?.char || null),
-    match: room.match };
+    match: packMatch(room) };
 }
-function broadcast(room) { const msg = snapshot(room); room.clients.forEach(c => send(c.ws, msg)); }
+function broadcast(room) {
+  const msg = JSON.stringify(snapshot(room));
+  if (room.match) room.sentEv = room.match.evId;
+  room.clients.forEach(c => { if (c.ws.readyState === 1) c.ws.send(msg); });
+}
 function startMatch(room) {
   room.match = E.newMatch({ format: room.format, chars: [clientAt(room, 0).char, clientAt(room, 1).char], autoNext: AUTO_NEXT, evId: room.evId });
+  room.sentEv = room.evId;
   room.status = "playing";
 }
 function tick(room) {
   if (room.clients.length < 2) { room.status = "waiting"; room.match = null; return; }
   if (room.status === "waiting") room.status = "ready";
   if (!room.match) return;
-  E.step(room.match, TICK, [{ keys: room.inputs[0] }, { keys: room.inputs[1] }]);
+  // 자기 위치를 직접 보내는 화면(새 버전)은 서버가 키로 움직이지 않음
+  const inp = [0, 1].map(s => clientAt(room, s)?.posMode ? {} : { keys: room.inputs[s] });
+  E.step(room.match, TICK, inp);
   room.evId = room.match.evId;
 }
 
@@ -47,7 +66,7 @@ wss.on("connection", (ws) => {
       if (!id) id = code();
       room = rooms.get(id);
       if (!room) {
-        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0,
+        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0, sentEv: 0,
           format: E.FORMATS[msg.format] ? msg.format : "set1" };     // 경기 방식은 방을 만든 사람 기준
         rooms.set(id, room);
       }
@@ -62,7 +81,20 @@ wss.on("connection", (ws) => {
     }
     if (!room || !client) return;
     const st = room.match, side = client.side;
-    if (msg.type === "input") room.inputs[side] = cleanKeys(msg.keys);
+    if (msg.type === "ping") { client.rtt = Math.min(1000, Math.max(0, Number(msg.rtt) || 0)); send(ws, { type: "pong", t: msg.t }); return; }
+    if (msg.type === "input") { room.inputs[side] = cleanKeys(msg.keys); return; }
+    // 내 선수 위치: 화면에서 먼저 움직이고 서버는 속도·코트 범위만 검사
+    if (msg.type === "pos") {
+      client.posMode = true;
+      if (!st || (st.phase !== "serve" && st.phase !== "rally") || msg.e !== st.posEpoch || st.stun[side] > 0) return;
+      let x = Number(msg.x), y = Number(msg.y); if (!isFinite(x) || !isFinite(y)) return;
+      const now = Date.now(), p = st.players[side], dts = Math.min(.25, (now - (client.lastPos || now - 33)) / 1000);
+      client.lastPos = now;
+      const dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy), max = E.MOVE_SPEED * dts * 1.4 + .15;
+      if (d > max) { x = p.x + dx / d * max; y = p.y + dy / d * max; }
+      p.x = x; p.y = y; E.constrainPos(st, side);
+      return;
+    }
     // 경기 시작 전(또는 경기가 끝난 뒤) 로비에서 선수·경기 방식 변경
     const idle = !st || st.phase === "done";
     if (msg.type === "char" && idle && E.CHARS.includes(msg.char)) client.char = msg.char;
@@ -72,7 +104,9 @@ wss.on("connection", (ws) => {
     if (msg.type === "taunt" && st) E.taunt(st, side, Number(msg.n) | 0);
     if (msg.type === "hit" && st) {
       const skill = E.SKILLS.includes(msg.skill) ? msg.skill : "normal";
-      send(ws, { type: "hitResult", result: E.tryHit(st, side, skill, { keys: cleanKeys(msg.keys), err: 1 }) });
+      // 지연 보정: (왕복 시간의 절반 + 화면 보간 0.1초)만큼 조금 전 공 위치까지 인정
+      const lookback = Math.max(3, Math.min(12, Math.round(((client.rtt || 80) / 2 + 100) / (1000 * TICK)) + 2));
+      send(ws, { type: "hitResult", result: E.tryHit(st, side, skill, { keys: cleanKeys(msg.keys), err: 1 }, lookback) });
     }
     // Space / 시작 버튼: 포인트·폴트 후에는 누구나 바로 다음 서브, 경기 시작·새 경기는 호스트만
     if (msg.type === "next" || msg.type === "start") {
