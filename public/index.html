@@ -457,7 +457,7 @@ function hideOverlay(){$("overlay").classList.add("hidden")}
 
 /* ───── 소리: 모든 효과음·배경음을 브라우저에서 직접 만들어 냄(음원 파일 없음) ───── */
 const Snd=(()=>{
-  let ctx=null,master,sfxBus,bgmBus,natBus,noiseBuf,scene="lobby",timer=0,natStarted=false,nextCricket=0,nextBird=0,nextRustle=0,gameFadeAt=0;
+  let ctx=null,master,sfxBus,bgmBus,natBus,musBus,noiseBuf,scene="lobby",timer=0,natStarted=false,nextCricket=0,nextBird=0,nextRustle=0,gameFadeAt=0,musicAt=0,nextT=0,stepN=0;
   const pref={sfx:true,bgm:true};
   try{Object.assign(pref,JSON.parse(localStorage.getItem("ct_sound")||"{}"))}catch{}
   const save=()=>{try{localStorage.setItem("ct_sound",JSON.stringify(pref))}catch{}};
@@ -465,11 +465,14 @@ const Snd=(()=>{
   function init(){
     if(ctx){if(ctx.state==="suspended")ctx.resume();return}
     const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-    ctx=new AC();master=ctx.createGain();master.gain.value=.8;master.connect(ctx.destination);
+    ctx=new AC();master=ctx.createGain();master.gain.value=.8;
+    const comp=ctx.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.attack.value=.003;comp.release.value=.2;   // 큰 소리가 겹쳐도 찢어지지 않게
+    master.connect(comp);comp.connect(ctx.destination);
     sfxBus=ctx.createGain();sfxBus.connect(master);bgmBus=ctx.createGain();bgmBus.connect(master);
     noiseBuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
     natBus=ctx.createGain();natBus.gain.value=scene==="game"?0:NAT;natBus.connect(bgmBus);
-    startNature();apply();timer=setInterval(schedule,25);
+    musBus=ctx.createGain();musBus.gain.value=0;musBus.connect(bgmBus);
+    startNature();if(scene!=="game")lobbyIntro();apply();timer=setInterval(schedule,25);
   }
   function apply(){
     if(!ctx)return;const t=ctx.currentTime;
@@ -552,21 +555,59 @@ const Snd=(()=>{
     else if(kind===3){tone({...B,f:N(81),at,dur:.32,vol:.05,atk:.03});tone({...B,f:N(77),at:at+.38,dur:.45,vol:.045,atk:.03})}  // 멀리서 뻐꾹(두 음)
     else{const f=5200+Math.random()*900;for(let i=0;i<14;i++)tone({...B,f:f-i*120,at:at+i*.035,dur:.025,vol:.03})}          // 또르르르 내려가는 트릴
   }
+  /* 신나는 음악: 숲속 소리가 8초쯤 이어진 뒤 마림바 반주로 시작해 드럼·베이스·멜로디가 들어오는 경쾌한 곡(116BPM)
+     부드러운 마림바·삼각파 음색만 써서 귀에 거슬리지 않게. 음악이 나오면 숲속 소리는 작게 깔림 */
+  const SPB=60/116/4,MUS_AT=8;
+  const CH=[{b:48,p:[60,64,67]},{b:43,p:[59,62,67]},{b:45,p:[57,60,64]},{b:41,p:[57,60,65]}];   // C G Am F
+  const MEL_A=[[[0,76],[2,79],[4,84],[8,83],[10,81],[12,79]],[[0,79],[2,77],[4,76],[6,74],[8,74],[12,71]],
+               [[0,72],[2,76],[4,81],[8,79],[10,77],[12,76]],[[0,77],[4,76],[6,74],[8,72],[12,74],[14,76]]];
+  const MEL_B=[[[0,84],[2,83],[4,84],[6,88],[8,86],[12,84]],[[0,83],[4,79],[8,86],[12,83]],
+               [[0,84],[2,81],[4,76],[8,81],[10,83],[12,84]],[[0,81],[4,77],[8,79],[10,77],[12,76],[14,74]]];
+  function marimba(at,n,vol){const f=N(n),M={bus:musBus,at};
+    tone({...M,f,dur:.42,vol,atk:.003});tone({...M,f:f*4,dur:.07,vol:vol*.22,atk:.002});tone({...M,f:f*2,dur:.18,vol:vol*.18,atk:.003})}
+  function musicStep(at){
+    const bar=Math.floor(stepN/16),s=stepN%16,intro=bar<4,k=intro?bar:(bar-4)%16,ch=CH[k%4],M={bus:musBus,at};
+    // 패드: 마디 첫 박에 부드럽게
+    if(s===0)ch.p.forEach(n=>{tone({...M,f:N(n),type:"triangle",dur:SPB*15,vol:.022,atk:.4});tone({...M,f:N(n)*1.004,type:"sine",dur:SPB*15,vol:.015,atk:.4})});
+    // 마림바 아르페지오
+    if(s%2===0){const ix=[0,1,2,1][(s/2)%4];marimba(at,ch.p[ix]+12,intro?.075:.032)}
+    // 셰이커: 16분음표, 엇박 강조
+    noise({...M,dur:.035,vol:s%2?.016:.008,f:7000,ft:"highpass"});
+    if(intro)return;
+    // 드럼: 1·3박 킥, 2·4박 클랩, 프레이즈 끝 필인
+    const end=(k===7||k===15);
+    if(s===0||s===8||(s===10&&k%2===1))tone({...M,f:125,f2:48,dur:.14,vol:.3});
+    if(s===4||s===12){noise({...M,dur:.11,vol:.12,f:1600,q:.8});noise({...M,at:at+.01,dur:.07,vol:.07,f:2600,q:1})}
+    if(end&&s>=12)noise({...M,dur:.06,vol:.06+(s-12)*.02,f:1800,q:.8});
+    // 베이스: 통통 튀는 리듬
+    const bp={0:0,6:0,8:0,12:7,14:12}[s];if(bp!==undefined)tone({...M,f:N(ch.b-12+bp),type:"triangle",lp:900,dur:SPB*2.4,vol:.13,atk:.004});
+    // 멜로디: 앞 8마디 A, 뒤 8마디 B
+    const mel=(k<8?MEL_A:MEL_B)[k%4];for(const [ps,n] of mel)if(ps===s)marimba(at,n,.085);
+  }
+  function lobbyIntro(){   // 로비에 들어올 때: 숲속 소리 → 8초 뒤 음악
+    const t=ctx.currentTime;musicAt=t+MUS_AT;nextT=musicAt;stepN=0;
+    musBus.gain.cancelScheduledValues(t);musBus.gain.setValueAtTime(0,t);musBus.gain.setValueAtTime(0,musicAt);musBus.gain.linearRampToValueAtTime(1,musicAt+3);
+    natBus.gain.cancelScheduledValues(t);natBus.gain.setValueAtTime(natBus.gain.value,t);natBus.gain.linearRampToValueAtTime(NAT,t+2);
+    natBus.gain.setValueAtTime(NAT,musicAt+5);natBus.gain.linearRampToValueAtTime(NAT*.35,musicAt+10);   // 드럼이 들어올 즈음 자연 소리는 작게
+  }
   function schedule(){
     if(!ctx||ctx.state!=="running")return;
     const t=ctx.currentTime,audible=pref.bgm&&(scene!=="game"||t<gameFadeAt);
-    if(!audible){nextCricket=Math.max(nextCricket,t+.3);nextBird=Math.max(nextBird,t+.6);nextRustle=Math.max(nextRustle,t+1);return}
+    if(!audible){nextCricket=Math.max(nextCricket,t+.3);nextBird=Math.max(nextBird,t+.6);nextRustle=Math.max(nextRustle,t+1);nextT=Math.max(nextT,t+.05);return}
     if(nextCricket<t+.15){                                            // 귀뚜라미 두세 마리가 다른 높이·위치에서
       const c=Math.floor(Math.random()*3);cricket(nextCricket-t,[4300,4800,5300][c],[-.6,.5,.1][c],.022+Math.random()*.012);
       nextCricket+=1.1+Math.random()*2.2}
     if(nextBird<t+.15){bird(nextBird-t);nextBird+=2.2+Math.random()*4.5}
     if(nextRustle<t+.15){noise({bus:natBus,at:nextRustle-t,dur:.9+Math.random()*.8,vol:.03,f:3200,q:.4,atk:.35,pan:Math.random()*1.4-.7});nextRustle+=4+Math.random()*6}   // 나뭇잎 바스락
+    if(scene!=="game"&&t>=musicAt-.15)while(nextT<t+.15){musicStep(nextT-t);nextT+=SPB;stepN++}
   }
   function setScene(v){
-    const prev=scene;scene=v;if(!ctx)return;const t=ctx.currentTime;
-    natBus.gain.cancelScheduledValues(t);natBus.gain.setValueAtTime(natBus.gain.value,t);
-    if(v==="game"){gameFadeAt=t+7;natBus.gain.setValueAtTime(natBus.gain.value,t+2.5);natBus.gain.linearRampToValueAtTime(0,t+7)}   // 경기 시작: 2.5초 뒤부터 서서히 사라짐
-    else natBus.gain.linearRampToValueAtTime(NAT,t+2);
+    scene=v;if(!ctx)return;const t=ctx.currentTime;
+    if(v==="game"){
+      musBus.gain.cancelScheduledValues(t);musBus.gain.setValueAtTime(musBus.gain.value,t);musBus.gain.linearRampToValueAtTime(0,t+1.5);   // 음악은 빨리 사라지고
+      natBus.gain.cancelScheduledValues(t);natBus.gain.setValueAtTime(natBus.gain.value,t);natBus.gain.linearRampToValueAtTime(NAT,t+1);
+      gameFadeAt=t+7;natBus.gain.setValueAtTime(NAT,t+2.5);natBus.gain.linearRampToValueAtTime(0,t+7);   // 자연 소리는 처음에만 들리다가 사라짐
+    }else lobbyIntro();
     apply();
   }
   function toggle(k){pref[k]=!pref[k];save();init();apply();return pref[k]}
