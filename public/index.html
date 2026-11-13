@@ -2,6 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="귀뚜라미 테니스"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon.svg"><meta name="theme-color" content="#176b42"><title>귀뚜라미 테니스 클럽</title>
 <style>
 *{box-sizing:border-box}
+html,body{touch-action:manipulation}   /* 두 번 탭해도 화면이 확대되지 않게 */
 body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d3442,#0b1722 55%,#101d27);color:#edf5f1;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
 .wrap{max-width:1360px;margin:auto;padding:16px}
 .top{text-align:center}
@@ -194,16 +195,16 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 .zlabel{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:11px;font-weight:700;color:#ffffffb0;text-shadow:0 1px 2px #000;pointer-events:none}
 /* 오른쪽 아래: 탭 = 타격(서브·다음 서브), 밀기 = 기술 */
 .actpad{position:absolute;right:0;bottom:0;width:50%;height:40%;pointer-events:auto;touch-action:none}
-.actpad::before{content:"";position:absolute;left:50%;top:56%;width:116px;height:116px;margin:-58px 0 0 -58px;border-radius:50%;border:2px solid #ffffff55;background:#00000024;transition:background .1s}
+.actpad::before{content:"";position:absolute;left:50%;top:56%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;border:2px solid #ffffff55;background:#00000024;transition:background .1s}
 .actpad.down::before{background:#ffffff26;border-color:#ffffffc0}
 .actpad.serve::before{border-color:#ffd18a;background:#c66b1626}
 .actpad.next::before{border-color:#9cc4ff;background:#3a7bd526}
-.padlabel{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);font-size:16px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none;white-space:nowrap;text-align:center;line-height:1.2}
+.padlabel{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);font-size:14px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none;white-space:nowrap;text-align:center;line-height:1.2}
 .padlabel small{display:block;font-size:10px;font-weight:700;opacity:.85}
 .dir{position:absolute;transform:translate(-50%,-50%);font-size:15px;line-height:1.05;text-align:center;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none;opacity:.8;transition:transform .15s,opacity .15s}
 .dir small{display:block;font-size:10px;font-weight:800;white-space:nowrap}
-.dir.up{left:50%;top:calc(56% - 82px)}.dir.down{left:50%;top:calc(56% + 80px)}
-.dir.left{left:calc(50% - 76px);top:56%}.dir.right{left:calc(50% + 76px);top:56%}
+.dir.up{left:50%;top:calc(56% - 66px)}.dir.down{left:50%;top:calc(56% + 64px)}
+.dir.left{left:calc(50% - 64px);top:56%}.dir.right{left:calc(50% + 64px);top:56%}
 .dir.flash{opacity:1;transform:translate(-50%,-50%) scale(1.45)}
 .actpad.busy .dir{opacity:.35}
 /* 필살기: 따로 둔 버튼 */
@@ -265,7 +266,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div class="bug" id="player" role="img" aria-label="내 귀뚜라미 선수"></div>
 <div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
 <div id="mCtrl"><div class="joyzone" id="joyZone"><div class="joybase" id="joyBase"><div class="joyknob" id="joyKnob"></div></div><span class="zlabel">누른 곳에서 이동</span></div>
-<div class="actpad" id="actPad"><span class="dir up" data-dir="up">🌙<small>로브</small></span><span class="dir down" data-dir="down">🪶<small>드롭</small></span><span class="dir left" data-dir="left">🏐<small>발리</small></span><span class="dir right" data-dir="right">💥<small>스피드</small></span><b class="padlabel" id="padLabel">타격<small>탭</small></b></div>
+<div class="actpad" id="actPad"><span class="dir up" data-dir="up">🌙<small>로브</small></span><span class="dir down" data-dir="down">🪶<small>드롭</small></span><span class="dir left" data-dir="left">🏐<small>발리</small></span><span class="dir right" data-dir="right">💥<small>스매쉬</small></span><b class="padlabel" id="padLabel">타격<small>탭</small></b></div>
 <button class="mspecial" id="mSpecial" disabled>✨<small>0%</small></button></div>
 <div class="overlay" id="overlay"></div></div>
 
@@ -277,7 +278,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div class="keys"><span><kbd>←↑↓→</kbd> <kbd>WASD</kbd></span><span>이동</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Z</kbd><kbd>E</kbd><kbd>F</kbd><kbd>C</kbd><kbd>Q</kbd></span><span>기술 (아래 버튼에 키 표시)</span></div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
-<div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>빠르지만 아웃 위험 · F</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · C</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
+<div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="speed">💥 스매쉬<small>빠르지만 아웃 위험 · F</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · C</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
 </section>
 <div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button>
 <div class="mp"><span class="mn" id="mMeName">나</span><span class="mg" id="mMeGames">0</span><span class="mpt" id="mMePts">0</span><i class="mgauge"><b id="mMeGauge"></b></i></div>
@@ -720,7 +721,7 @@ function handleEvent(e){
     case "serve":if(e.side!==side)animateSwing("opponent");break;
     case "hit":
       if(e.side!==side)animateSwing("opponent");
-      if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SPEED SHOT!",lob:"🌙 LOB!"}[e.skill],e.x,e.y);
+      if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SMASH!",lob:"🌙 LOB!"}[e.skill],e.x,e.y);
       break;
     case "whiff":animateSwing("opponent");popup("헛스윙!",st.players[e.side].x,st.players[e.side].y);break;
     case "special":cutin(e.side,e.kind);if(e.kind==="quake")shake();break;
@@ -983,7 +984,7 @@ $("joyZone").addEventListener("pointermove",e=>{if(e.pointerId!==joyId)return;co
 function buzz(){try{navigator.vibrate?.(12)}catch{}}
 function tapBtn(el,fn){el.addEventListener("pointerdown",e=>{e.preventDefault();el.classList.add("down");buzz();fn()});["pointerup","pointercancel","pointerleave"].forEach(ev=>el.addEventListener(ev,()=>el.classList.remove("down")));el.addEventListener("contextmenu",e=>e.preventDefault())}
 // 오른쪽 패드: 탭 = 타격(상황에 따라 서브·다음 서브·새 경기), 밀기 = 기술
-// ↑ 로브(높이 띄움) · ↓ 드롭(짧게 떨어뜨림) · ← 발리(짧게 끊어 막기) · → 스피드(힘껏 휘두르기)
+// ↑ 로브(높이 띄움) · ↓ 드롭(짧게 떨어뜨림) · ← 발리(짧게 끊어 막기) · → 스매쉬(힘껏 내려치기)
 const SWIPE={up:"lob",down:"drop",left:"volley",right:"speed"},SWIPE_PX=22;let padId=null,padX=0,padY=0,padDone=false;
 const pad=$("actPad");
 pad.addEventListener("pointerdown",e=>{if(padId!==null)return;e.preventDefault();padId=e.pointerId;padX=e.clientX;padY=e.clientY;padDone=false;pad.setPointerCapture(e.pointerId);pad.classList.add("down")});
@@ -1001,6 +1002,11 @@ pad.addEventListener("pointerup",e=>padEnd(e,true));
 pad.addEventListener("contextmenu",e=>e.preventDefault());
 tapBtn($("mSpecial"),()=>hitBall("special"));
 $("mExit").onclick=toLobby;
+// 두 번 탭 확대 막기: 아이폰 사파리는 확대 금지 설정을 무시해서 스크립트로도 막음
+let lastTouchEnd=0;
+document.addEventListener("touchend",e=>{const now=Date.now();if(screen==="game"&&now-lastTouchEnd<350&&!e.target.closest("button,input,textarea,select"))e.preventDefault();lastTouchEnd=now},{passive:false});   // 로비에서는 빠른 연속 탭(선수 선택→시작)이 막히지 않게 경기 화면에서만
+document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
+["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>{if(screen==="game")e.preventDefault()},{passive:false}));   // 경기 중 두 손가락 확대도 막음
 function updateMobile(){const m=matchMedia("(pointer:coarse)").matches||innerWidth<600;if(m!==isMobile()){document.body.classList.toggle("mobile",m);lobbyCache="";msg(curMsg)}
   layoutView()}
 addEventListener("resize",updateMobile);
