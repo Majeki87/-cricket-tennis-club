@@ -394,6 +394,8 @@ const BUG_SVG=`<svg viewBox="0 0 120 100" aria-hidden="true"><g class="ant"><pat
 /* ───── 상태 ───── */
 let mode="solo",side=0,st=null,myChar=null,difficulty="easy",format="set1",keys={};
 let screen="lobby",roomChars=[null,null],lobbyCache="";
+/* 실시간 대전 부드럽게: 서버 상태를 잠깐 모아 두고 그 사이를 이어서 그림, 내 선수는 내 화면에서 바로 움직임 */
+const INTERP=100;let snaps=[],myPos=null,myEpoch=null,lastPosSend=0,lastSent="",rtt=0,pingTimer=0;
 let ws=null,room="",roomStatus="",roomFormat="set1",names=["",""],lastEv=0,last=performance.now(),lastPhase="",lastTrail=0,curMsg="",tossText="",lookCache=["",""];
 const IDLE_PLAYERS=[{x:0,y:C.L+.8},{x:0,y:-C.L-.8}];
 
@@ -523,8 +525,27 @@ function canStartNewMatch(){
   return !!myChar&&(!st||(st.phase==="done"&&settled()));
 }
 function canNextServe(){return !!st&&(st.phase==="point"||st.phase==="fault")&&settled()}
+const lerp=(a,b,t)=>a+(b-a)*t;
+function viewState(){
+  if(!st)return{players:IDLE_PLAYERS,ball:null};
+  if(mode!=="multi")return{players:st.players,ball:st.ball};
+  const active=st.phase==="serve"||st.phase==="rally";
+  let opp=st.players[1-side],ball=st.ball;
+  if(snaps.length>=2){
+    const rt=performance.now()-INTERP;let k=-1;
+    for(let i=snaps.length-1;i>=0;i--)if(snaps[i].t<=rt){k=i;break}
+    if(k>=0&&k<snaps.length-1){
+      const s0=snaps[k],s1=snaps[k+1],a=Math.min(1,(rt-s0.t)/Math.max(1,s1.t-s0.t));
+      const p0=s0.players[1-side],p1=s1.players[1-side];opp={x:lerp(p0.x,p1.x,a),y:lerp(p0.y,p1.y,a)};
+      const b0=s0.ball,b1=s1.ball;
+      ball=(b0.id===b1.id&&b0.live===b1.live&&b0.held===b1.held)?{...b1,x:lerp(b0.x,b1.x,a),y:lerp(b0.y,b1.y,a),z:lerp(b0.z,b1.z,a)}:b1;
+    }else if(k<0){opp=snaps[0].players[1-side];ball=snaps[0].ball}
+  }
+  const players=[];players[side]=active&&myPos?myPos:st.players[side];players[1-side]=opp;
+  return{players,ball};
+}
 function render(){
-  const pl=st?st.players:IDLE_PLAYERS,b=st?.ball;
+  const vs=viewState(),pl=vs.players,b=vs.ball;
   $("player").style.left=sx(pl[side].x)+"%";$("player").style.top=clamp(sy(pl[side].y),3,97)+"%";
   $("opponent").style.left=sx(pl[1-side].x)+"%";$("opponent").style.top=clamp(sy(pl[1-side].y),3,97)+"%";
   const show=!!b&&(b.held||b.live||st.phase==="point"||st.phase==="fault");
@@ -644,7 +665,7 @@ function renderLobby(){
   const fm=mode==="multi"&&room?roomFormat:format;
   const sum=c?`${c.emoji} <b>${c.name}</b> · 필살기 <b>${c.special}</b><br>${FORMAT_SHORT[fm]} · ${mode==="solo"?"컴퓨터 난이도 "+LEVEL[difficulty]:"실시간 대전"}`:"선수를 먼저 골라 주세요.";
   const opp=roomChars[1-side];
-  const line=room?`방 코드 ${room} · ${side===0?"호스트":"참가자"} · ${roomStatus==="waiting"?"상대를 기다리는 중":"상대 "+(names[1-side]||"선수")+(opp?" ("+charLabel(opp)+")":"")}`:"아직 방에 들어가지 않았습니다.";
+  const line=room?`방 코드 ${room} · ${side===0?"호스트":"참가자"} · ${roomStatus==="waiting"?"상대를 기다리는 중":"상대 "+(names[1-side]||"선수")+(opp?" ("+charLabel(opp)+")":"")}${pingText?" · "+pingText:""}`:"아직 방에 들어가지 않았습니다.";
   const key=t+dis+sum+line;
   if(key!==lobbyCache){lobbyCache=key;$("lobbyStart").textContent=mt(t);$("lobbyStart").disabled=dis;$("pickSummary").innerHTML=sum;$("roomLine").textContent=line}
 }
@@ -730,23 +751,35 @@ function connect(create){
   if(!myChar){msg("먼저 캐릭터를 선택하세요.");return}
   if(ws)ws.close();
   const proto=location.protocol==="https:"?"wss":"ws";
-  ws=new WebSocket(proto+"://"+location.host);lastEv=0;lastPhase="";st=null;
-  ws.onopen=()=>send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format});
+  ws=new WebSocket(proto+"://"+location.host);lastEv=0;lastPhase="";st=null;snaps=[];myPos=null;rtt=0;
+  ws.onopen=()=>{clearInterval(pingTimer);pingTimer=setInterval(()=>send({type:"ping",t:performance.now(),rtt:Math.round(rtt)}),2000);send({type:"ping",t:performance.now(),rtt:0});send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format})};
   ws.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch{return}
     if(d.type==="error"){msg(d.message);return}
     if(d.type==="joined"){room=d.room;side=d.side;$("roomCode").value=room;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자");msg("방에 입장했습니다. 상대에게 방 코드를 공유하세요.");return}
     if(d.type==="hitResult"){hitFeedback(d.result);return}
+    if(d.type==="pong"){const r=performance.now()-d.t;rtt=rtt?rtt*.7+r*.3:r;showPing();return}
     if(d.type==="state"){
       const prevStatus=roomStatus;roomStatus=d.status;names=d.names||["",""];roomChars=d.chars||[null,null];roomFormat=d.format||roomFormat;setSeg("format",roomFormat);
       st=d.match||null;
+      if(st){
+        snaps.push({t:performance.now(),players:st.players,ball:st.ball});if(snaps.length>12)snaps.shift();
+        const sp=st.players[side],active=st.phase==="serve"||st.phase==="rally";
+        // 새 포인트·폴트로 서버가 자리를 다시 잡았거나, 기절했거나, 너무 어긋나면 서버 위치로 맞춤
+        if(!myPos||st.posEpoch!==myEpoch||!active||st.stun[side]>0||Math.hypot(myPos.x-sp.x,myPos.y-sp.y)>2.5){myPos={x:sp.x,y:sp.y};myEpoch=st.posEpoch}
+      }else{snaps=[];myPos=null}
       if(st&&st.phase!=="done"&&screen!=="game")showScreen("game");          // 호스트가 시작하면 두 사람 모두 경기 화면으로
       if(st)processEvents();
       else if(prevStatus!==roomStatus)msg(roomStatus==="ready"?(side===0?"두 선수 준비 완료! Space 또는 경기 시작 버튼을 누르세요.":"두 선수 준비 완료! 호스트가 경기를 시작합니다."):"상대방을 기다리는 중...");
       if(!st&&screen==="game"){showScreen("lobby");msg("상대가 나가서 경기가 중단되었습니다. 새 상대를 기다리는 중입니다.")}
     }};
-  ws.onclose=()=>{room="";st=null;if(mode==="multi"){if(screen==="game")showScreen("lobby");msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")}};
+  ws.onclose=()=>{clearInterval(pingTimer);pingText="";room="";st=null;snaps=[];myPos=null;if(mode==="multi"){if(screen==="game")showScreen("lobby");msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")}};
 }
-function leaveRoom(){if(ws){ws.onclose=null;ws.close();ws=null}room="";roomStatus="";names=["",""];roomChars=[null,null];st=null;$("roomInfo").textContent=mode==="solo"?"개인 연습 모드":"온라인 대전"}
+function showPing(){
+  const ms=Math.round(rtt),q=ms<80?"좋음":ms<160?"보통":"느림";
+  pingText=`연결 ${q} (${ms}ms)`;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자")+" · "+pingText;lobbyCache="";
+}
+let pingText="";
+function leaveRoom(){clearInterval(pingTimer);pingText="";if(ws){ws.onclose=null;ws.close();ws=null}room="";roomStatus="";names=["",""];roomChars=[null,null];st=null;$("roomInfo").textContent=mode==="solo"?"개인 연습 모드":"온라인 대전"}
 
 /* ───── 이벤트 연결 ───── */
 $("soloTab").onclick=()=>{leaveRoom();setMode("solo")};
@@ -826,6 +859,12 @@ window.addEventListener("blur",()=>{keys={};sendKeys()});
 function loop(t){
   const dt=Math.min((t-last)/1000,.05);last=t;
   if(mode==="solo"&&st){E.step(st,dt,[{keys:worldKeys()},E.aiThink(st,1,difficulty,dt)]);processEvents()}
+  if(mode==="multi"&&st&&myPos&&(st.phase==="serve"||st.phase==="rally")){
+    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,players:[...st.players]};view.players[side]=myPos;
+    E.moveLocal(view,side,worldKeys(),dt);
+    const now=performance.now(),key=myPos.x.toFixed(2)+","+myPos.y.toFixed(2);
+    if(now-lastPosSend>=33&&key!==lastSent){lastPosSend=now;lastSent=key;send({type:"pos",x:+myPos.x.toFixed(3),y:+myPos.y.toFixed(3),e:myEpoch})}
+  }
   render();
   requestAnimationFrame(loop);
 }
