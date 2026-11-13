@@ -9,6 +9,15 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 app.use(express.static("public"));
 app.get("/health", (_, res) => res.json({ ok: true }));
+// 공개된 방 목록: 로비에서 3초마다 불러감 (비공개 방은 빠짐)
+app.get("/rooms", (_, res) => {
+  const list = [...rooms.values()].filter(r => !r.private && r.clients.length > 0).map(r => {
+    const host = r.clients[0];
+    return { id: r.id, name: host.name, char: host.char, format: r.format, count: r.clients.length,
+      status: r.clients.length >= 2 ? (r.match && r.match.phase !== "done" ? "playing" : "full") : "waiting", created: r.created };
+  }).sort((a, b) => (a.status === "waiting" ? 0 : 1) - (b.status === "waiting" ? 0 : 1) || b.created - a.created).slice(0, 30);
+  res.set("Cache-Control", "no-store").json(list);
+});
 
 const rooms = new Map();
 const PORT = process.env.PORT || 3000;
@@ -66,7 +75,7 @@ wss.on("connection", (ws) => {
       if (!id) id = code();
       room = rooms.get(id);
       if (!room) {
-        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0, sentEv: 0,
+        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0, sentEv: 0, created: Date.now(), private: !!msg.private,
           format: E.FORMATS[msg.format] ? msg.format : "set1" };     // 경기 방식은 방을 만든 사람 기준
         rooms.set(id, room);
       }
