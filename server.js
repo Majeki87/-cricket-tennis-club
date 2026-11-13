@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 function code() { return crypto.randomBytes(3).toString("hex").toUpperCase(); }
 function freshGame() {
   return { score:[0,0], players:[{x:50,y:79},{x:50,y:21}],
-    ball:{x:50,y:50,vx:0,vy:0,active:false,hit:0}, status:"waiting", serveSide:0,
+    ball:{x:50,y:50,vx:0,vy:0,active:false,hit:0,kind:"normal"}, status:"waiting", serveSide:0,
     message:"두 명이 입장하면 경기를 시작할 수 있습니다.", pointAt:0, winner:null };
 }
 function send(ws, obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
@@ -77,12 +77,15 @@ function tick(room) {
     p.y=i===0?Math.max(53,Math.min(91,p.y+dy/mag*.78)):Math.max(9,Math.min(47,p.y+dy/mag*.78));
     if(inp.hit) {
       const b=g.ball;
-      if(b.active && Math.hypot(p.x-b.x,p.y-b.y)<14 && b.hit===i) {
-        b.hit=1-i; b.vx=Math.max(-.75,Math.min(.75,(b.x-p.x)*.035+(Math.random()-.5)*.16));
-        b.vy=i===0?-.78:.78;
-        g.message="라켓에 맞았습니다! 멋진 리턴!";
+      if(b.active && Math.hypot(p.x-b.x,p.y-b.y)<(inp.skill==="volley"?22:18) && b.hit===i) {
+        const skill=["volley","drop","speed"].includes(inp.skill)?inp.skill:"normal";
+        b.hit=1-i;
+        b.vx=skill==="drop"?Math.max(-.32,Math.min(.32,(b.x-p.x)*.018)):Math.max(-.9,Math.min(.9,(b.x-p.x)*.035+(Math.random()-.5)*.12));
+        const velocity=skill==="speed"?1.48:skill==="volley"?1.08:skill==="drop"?.40:.78;
+        b.vy=i===0?-velocity:velocity; b.kind=skill;
+        g.message=skill==="volley"?"🏐 발리샷!":skill==="drop"?"🪶 드롭샷!":skill==="speed"?"💥 스피드샷!":"멋진 리턴!";
       }
-      inp.hit=false;
+      inp.hit=false; inp.skill="normal";
     }
   }
   const b=g.ball;
@@ -121,6 +124,7 @@ wss.on("connection",(ws)=>{
       const inp=room.inputs[client.side]||(room.inputs[client.side]={});
       ["up","down","left","right"].forEach(k=>inp[k]=!!msg.keys?.[k]);
       inp.hit=!!msg.hit;
+      inp.skill=["volley","drop","speed"].includes(msg.skill)?msg.skill:"normal";
       inp.serve=!!msg.serve;
     }
     if(msg.type==="start" && client.side===0 && room.clients.length===2 && ["ready","point","finished"].includes(room.game.status)) {
