@@ -174,9 +174,9 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 <div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
 <div class="overlay" id="overlay"></div></div>
 
-<section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message">캐릭터를 고른 뒤 경기를 시작하세요.</div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>경기 시작 (R)</button><button id="reset" class="btn alt">초기화</button></div></section>
+<section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message">캐릭터를 고른 뒤 경기를 시작하세요.</div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>경기 시작 (Space)</button><button id="reset" class="btn alt">초기화</button></div></section>
 
-<section class="panel" id="ctrlPanel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>1</kbd> 발리 · <kbd>2</kbd> 드롭 · <kbd>3</kbd> 스피드 · <kbd>Q</kbd> 필살기 · <kbd>E</kbd>/<kbd>Space</kbd> 서브 · <kbd>R</kbd> 다음 서브 · 경기 종료 후 <kbd>Space</kbd>·<kbd>R</kbd> 새 경기<br>칠 때 ←→를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</div>
+<section class="panel" id="ctrlPanel"><b>🎮 조작</b><div class="muted" style="margin:5px 0 10px;line-height:1.9">방향키·<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Space</kbd> 기본 타격 · <kbd>1</kbd> 발리 · <kbd>2</kbd> 드롭 · <kbd>3</kbd> 스피드 · <kbd>Q</kbd> 필살기 · <kbd>E</kbd>/<kbd>Space</kbd> 서브 · 포인트가 끝난 뒤 <kbd>Space</kbd> 다음 서브 · 경기 종료 후 <kbd>Space</kbd> 새 경기<br>칠 때 ←→를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (E)</button></div>
 <div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · 1</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · 2</small></button><button class="skill" data-skill="speed">💥 스피드샷<small>빠르지만 아웃 위험 · 3</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
@@ -259,7 +259,7 @@ function callScore(pts,server,tb){   // 심판 콜: 서버 점수를 먼저 부�
 /* ───── 경기 이벤트 → 메시지 · 연출 ───── */
 const REASON={out:"아웃",net:"네트",double:"더블 폴트",ace:"에이스",winner:"위너"};
 function handleEvent(e){
-  const nextHint=mode==="solo"?" · R 키로 다음 서브":" · 잠시 후 다음 서브(R로 바로)";
+  const nextHint=mode==="solo"?" · Space로 다음 서브":" · 잠시 후 다음 서브(Space로 바로)";
   switch(e.type){
     case "toss":tossText+="동전 던지기 결과 "+who(e.server)+"의 서브로 시작합니다. ";break;
     case "serve":if(e.side!==side)animateSwing("opponent");break;
@@ -288,7 +288,7 @@ function handleEvent(e){
     case "tiebreak":banner("타이브레이크","7점 먼저 · 2점 차");msg("게임 스코어 동점! 타이브레이크로 세트를 결정합니다. 7점을 먼저, 2점 차로 따야 합니다."+nextHint);break;
     case "ends":msg(curMsg+" · 코트 체인지(화면은 그대로)");break;
     case "set":banner("세트 "+who(e.winner),e.score[side]+" - "+e.score[1-side]);msg("세트, "+who(e.winner)+"! "+e.score[side]+"-"+e.score[1-side]+nextHint);break;
-    case "match":msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space 또는 R 키로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
+    case "match":msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
   }
 }
 function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;lastEv=e.id;handleEvent(e)}}
@@ -303,10 +303,12 @@ function serveMessage(){
 function setGauge(prefix,v){v=clamp(v||0,0,100);const full=v>=100;$(prefix+"Gauge").style.width=v+"%";$(prefix+"GaugeBar").classList.toggle("full",full);
   $(prefix+"GaugeTxt").textContent=full?"기 100% · 필살기 준비!":"기 "+Math.floor(v)+"%";$(prefix+"GaugeTxt").classList.toggle("full",full)}
 function isLocked(){return mode==="solo"?!!(st&&st.phase!=="done"):!!(ws&&ws.readyState<=1)}
+let phaseAt=0;const settled=()=>performance.now()-phaseAt>400;   // 포인트가 끝난 직후 스페이스 연타로 안내를 놓치지 않도록 0.4초 여유
 function canStartNewMatch(){
-  if(mode==="multi")return side===0&&((!st&&roomStatus==="ready")||st?.phase==="done");
-  return !!myChar&&(!st||st.phase==="done");
+  if(mode==="multi")return side===0&&((!st&&roomStatus==="ready")||(st?.phase==="done"&&settled()));
+  return !!myChar&&(!st||(st.phase==="done"&&settled()));
 }
+function canNextServe(){return !!st&&(st.phase==="point"||st.phase==="fault")&&settled()}
 function render(){
   const pl=st?st.players:IDLE_PLAYERS,b=st?.ball;
   $("player").style.left=sx(pl[side].x)+"%";$("player").style.top=sy(pl[side].y)+"%";
@@ -350,10 +352,10 @@ function render(){
   const ready=!!mine&&g[side]>=100;$("specialBtn").disabled=!ready;$("specialBtn").classList.toggle("ready",ready);
   $("serve").disabled=!(st&&st.phase==="serve"&&st.server===side);
   const sp=$("startPoint");
-  if(!st){sp.textContent="경기 시작 (R)";sp.disabled=!canStartNewMatch()}
-  else if(st.phase==="done"){sp.textContent="새 경기 (Space/R)";sp.disabled=!canStartNewMatch()}
-  else if(st.phase==="fault"){sp.textContent="바로 서브 준비 (R)";sp.disabled=false}
-  else{sp.textContent="다음 서브 (R)";sp.disabled=st.phase!=="point"}
+  if(!st){sp.textContent="경기 시작 (Space)";sp.disabled=!canStartNewMatch()}
+  else if(st.phase==="done"){sp.textContent="새 경기 (Space)";sp.disabled=!canStartNewMatch()}
+  else if(st.phase==="fault"){sp.textContent="바로 서브 준비 (Space)";sp.disabled=false}
+  else{sp.textContent="다음 서브 (Space)";sp.disabled=st.phase!=="point"}
   const locked=isLocked();
   $("charPick").classList.toggle("locked",locked);document.querySelectorAll(".char").forEach(x=>x.disabled=locked);
   $("formatPick").classList.toggle("locked",locked);document.querySelectorAll("[data-format]").forEach(x=>x.disabled=locked);
@@ -363,13 +365,13 @@ function render(){
   else status=({serve:(st.serveNo===1?"퍼스트":"세컨드")+" 서브 · "+(E.serveCourt(st)==="deuce"?"듀스 코트":"애드 코트"),rally:"랠리 중",point:"포인트 종료",fault:st.serveNo===2?"폴트":"레트",done:"경기 종료"})[st.phase]+(st.tb&&st.phase!=="done"?" · 타이브레이크":"");
   $("gameStatus").textContent=status;
   // 오버레이
-  if(st&&st.phase!==lastPhase){
+  if(st&&st.phase!==lastPhase){phaseAt=performance.now();
     if(st.phase==="serve")msg(serveMessage());
-    if(st.phase==="done"){const sets=st.history.map(h=>h[side]+"-"+h[1-side]).join(", ");overlay(st.winner===side?"🏆 우승!":"😵 패배",sets+(canStartNewMatch()?" · Space 또는 R 키로 새 경기":""))}
+    if(st.phase==="done"){const sets=st.history.map(h=>h[side]+"-"+h[1-side]).join(", ");overlay(st.winner===side?"🏆 우승!":"😵 패배",sets+(canStartNewMatch()?" · Space로 새 경기":""))}
     else hideOverlay();
     lastPhase=st.phase;
   }
-  if(!st){lastPhase="";overlay("🦗 귀뚜라미 테니스",!myChar?"먼저 캐릭터를 선택하세요":mode==="multi"?(room?"상대를 기다리거나, 호스트가 R 키로 시작하세요":"방을 만들거나 방 코드로 참가하세요"):"Space 또는 R 키로 경기를 시작하세요")}
+  if(!st){lastPhase="";overlay("🦗 귀뚜라미 테니스",!myChar?"먼저 캐릭터를 선택하세요":mode==="multi"?(room?"상대를 기다리거나, 호스트가 Space로 시작하세요":"방을 만들거나 방 코드로 참가하세요"):"Space로 경기를 시작하세요")}
 }
 
 /* ───── 캐릭터 · 모드 선택 ───── */
@@ -436,7 +438,7 @@ function connect(create){
       const prevStatus=roomStatus;roomStatus=d.status;names=d.names||["",""];roomFormat=d.format||roomFormat;setSeg("format",roomFormat);
       st=d.match||null;
       if(st)processEvents();
-      else if(prevStatus!==roomStatus)msg(roomStatus==="ready"?(side===0?"두 선수 준비 완료! R 키 또는 경기 시작 버튼을 누르세요.":"두 선수 준비 완료! 호스트가 경기를 시작합니다."):"상대방을 기다리는 중...");
+      else if(prevStatus!==roomStatus)msg(roomStatus==="ready"?(side===0?"두 선수 준비 완료! Space 또는 경기 시작 버튼을 누르세요.":"두 선수 준비 완료! 호스트가 경기를 시작합니다."):"상대방을 기다리는 중...");
     }};
   ws.onclose=()=>{if(mode==="multi")msg("서버 연결이 끊어졌습니다. 다시 접속해 주세요.")};
 }
@@ -463,9 +465,8 @@ const SKILL_KEY={Digit1:"volley",Numpad1:"volley",Digit2:"drop",Numpad2:"drop",D
 window.addEventListener("keydown",e=>{
   if(e.target.closest("input,textarea"))return;
   const k=MOVE[e.code];if(k){e.preventDefault();if(!keys[k]){keys[k]=true;sendKeys()}}
-  if(e.code==="Space"){e.preventDefault();if(e.repeat)return;if(canStartNewMatch())nextPoint();else if(isMyServe())serveNow();else hitBall("normal")}
+  if(e.code==="Space"){e.preventDefault();if(e.repeat)return;if(canStartNewMatch()||canNextServe())nextPoint();else if(isMyServe())serveNow();else hitBall("normal")}
   if(e.code==="KeyE"){e.preventDefault();serveNow()}
-  if(e.code==="KeyR"){e.preventDefault();if(!e.repeat)nextPoint()}
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
 });
 window.addEventListener("keyup",e=>{const k=MOVE[e.code];if(k){keys[k]=false;sendKeys()}});
