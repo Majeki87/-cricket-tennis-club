@@ -202,6 +202,21 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .exit-sign b{font-size:14px;letter-spacing:1px}.exit-sign small{font-size:10px;font-weight:800}
 .exit-run{font-size:16px;transform:scaleX(-1)}
 @keyframes exitBlink{50%{filter:brightness(1.35)}}
+#freshFx{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,#c8ffe655,#ffffff00 60%)}
+#freshFx span{position:absolute;top:-10%;font-size:18px;opacity:.85;animation:breeze 6s linear infinite}
+#freshFx span:nth-child(1){left:8%;animation-delay:0s}#freshFx span:nth-child(2){left:22%;animation-delay:-1.4s;font-size:13px}#freshFx span:nth-child(3){left:38%;animation-delay:-3s}
+#freshFx span:nth-child(4){left:52%;animation-delay:-4.2s;font-size:13px}#freshFx span:nth-child(5){left:66%;animation-delay:-.8s}#freshFx span:nth-child(6){left:78%;animation-delay:-2.3s;font-size:13px}
+#freshFx span:nth-child(7){left:90%;animation-delay:-5s}#freshFx span:nth-child(8){left:30%;animation-delay:-3.7s;font-size:12px}
+@keyframes breeze{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(28px,55vh) rotate(180deg)}100%{transform:translate(-10px,110vh) rotate(360deg);opacity:0}}
+#heatFx{position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,#ff8a3d40,#ff8a3d00 55%),radial-gradient(ellipse at 50% 0%,#ffb34730,#ffb34700 50%);box-shadow:inset 0 0 50px 10px #ff7a2e55;animation:heatPulse 2.4s ease-in-out infinite}
+#heatFx::after{content:"♨️ ♨️ ♨️";position:absolute;left:0;right:0;bottom:3%;text-align:center;font-size:16px;letter-spacing:40px;opacity:.6;animation:heatRise 2.4s ease-in-out infinite}
+@keyframes heatPulse{50%{box-shadow:inset 0 0 70px 18px #ff7a2e88}}
+@keyframes heatRise{0%{transform:translateY(6px);opacity:.2}50%{opacity:.7}100%{transform:translateY(-14px);opacity:0}}
+#buffChip{position:absolute;left:6px;top:30px;z-index:6;background:#0b5a3aaa;color:#fff;border-radius:12px;padding:3px 9px;font-size:11px;font-weight:800;pointer-events:none}
+#buffChip.top{top:6px}
+.hzann.fresh{background:linear-gradient(135deg,#1fa37a,#147a5c);border:2px solid #b8ffe2}
+.hzann.heat{background:linear-gradient(135deg,#e2701f,#b24410);border:2px solid #ffd9a8}
+.hzann.buff{top:40%}
 #hzChip{position:absolute;left:6px;top:6px;z-index:6;background:#000000aa;color:#fff;border-radius:12px;padding:3px 9px;font-size:11px;font-weight:800;pointer-events:none}
 .hzann{position:absolute;z-index:8;left:4%;right:4%;top:18%;padding:12px 10px;border-radius:14px;text-align:center;pointer-events:none;color:#fff;font-weight:1000;font-size:clamp(15px,4.2vw,21px);line-height:1.45;word-break:keep-all;box-shadow:0 8px 24px #000a;animation:hzIn 3.2s ease-out forwards}
 .hzann .ic{display:block;font-size:34px;margin-bottom:4px}
@@ -382,6 +397,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <li>6게임을 먼저, 2게임 차로 따면 세트를 가져갑니다. 6-6이면 타이브레이크(7점 먼저, 2점 차)로 세트를 결정합니다. 서브권은 게임마다 바뀌고, 타이브레이크에서는 첫 1포인트 뒤 2포인트마다 바뀝니다.</li>
 <li>🎒 아이템: 포인트가 끝날 때마다 무작위로 얻을 수 있고 최대 3개까지 모입니다. 🐟 죽방멸치는 공이 빨라지고, 🥛 서울우유는 몸이 커져 공을 받기 쉬워지고, ☕ 로빈 쿠폰은 정확도와 스핀이 좋아집니다. 효과는 쓴 포인트가 끝나면 사라집니다.</li>
 <li>⚠️ 환경 디버프: 세트마다 1~2번, 2게임 동안 🌿 잡초(공이 아무 데로나 튀고 밟으면 느려짐), 🚨 비상벨(모두 우왕좌왕, 조작이 틀어짐), 🌧️ 비(웅덩이에서 공이 멈추거나 엉뚱하게 튀고 밟으면 느려짐)가 생겨요.</li>
+<li>✨ 환경 버프: 디버프와 같은 빈도로 🍃 맑은 공기(두 선수 모든 능력치 +1), ♨️ AI 코트 난방(선수·공이 빨라짐)이 2게임 동안 생겨요. 디버프와 겹칠 수도 있어요.</li>
 <li>실제 경기는 홀수 게임마다 코트를 바꾸지만, 이 게임은 내 선수가 항상 화면 아래에 보이도록 화면을 유지합니다.</li>
 </ul></details>
 </div>
@@ -408,7 +424,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <line class="netshadow" x1="-6.4" y1=".28" x2="6.4" y2=".28"/><line class="net" x1="-6.4" y1="0" x2="6.4" y2="0"/><line class="netmesh" x1="-6.3" y1="0" x2="6.3" y2="0"/>
 <rect class="post" x="-6.55" y="-.16" width=".3" height=".32"/><rect class="post" x="6.25" y="-.16" width=".3" height=".32"/>
 </svg>
-<div id="hzLayer"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="hzChip" class="hidden"></div>
+<div id="hzLayer"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="freshFx" class="hidden"><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span></div><div id="heatFx" class="hidden"></div><div id="hzChip" class="hidden"></div><div id="buffChip" class="hidden"></div>
 <div class="bug opponent" id="opponent" role="img" aria-label="상대 귀뚜라미 선수"></div>
 <div class="bug" id="player" role="img" aria-label="내 귀뚜라미 선수"></div>
 <div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
@@ -483,6 +499,18 @@ function say(i,text,prio,big){   // 더 중요한 멘트(prio 높음)가 떠 있
 const HZ={weeds:{ic:"🌿",name:"잡초",ann:"아앗! 잡초가 자라났다!!<br>모두 뽑을 준비해!!",fx:"잡초에 공이 떨어지면 어디로 튈지 몰라요. 잡초를 밟으면 느려져요.",end:"잡초를 다 뽑았다! 코트가 깨끗해졌어요."},
   alarm:{ic:"🚨",name:"비상벨",ann:"비상구는 이쪽입니다.<span class='en'>Here is emergency exit!</span>",fx:"비상벨에 모두 우왕좌왕! 조작이 마음대로 안 돼요.",end:"비상 상황 해제! 다시 침착하게~"},
   rain:{ic:"🌧️",name:"비",ann:"아앗 하늘에서 비가 온다.",fx:"웅덩이에 공이 떨어지면 멈추거나 엉뚱하게 튀어요. 웅덩이를 밟으면 느려져요.",end:"비가 그쳤다! 웅덩이도 말랐어요."}};
+const BF={fresh:{ic:"🍃",name:"맑은 공기",ann:"숲속같이 맑은 공기가 들어온다!!",fx:"두 선수 모두 모든 능력치 +1!",chip:"모든 능력치 +1",end:"맑은 공기가 빠져나갔어요."},
+  heat:{ic:"♨️",name:"AI 코트 난방",ann:"아니! 이거슨 방방 난방기술을 활용한<br>AI 코트 난방?!",fx:"몸이 풀려서 선수도 공도 빨라져요!",chip:"선수·공 속도 UP",end:"코트 난방이 꺼졌어요."}};
+function renderBuff(){
+  const bf=st?.buff,game=screen==="game"&&!!st;
+  $("freshFx").classList.toggle("hidden",!(game&&bf?.type==="fresh"));$("heatFx").classList.toggle("hidden",!(game&&bf?.type==="heat"));
+  const chip=$("buffChip");chip.classList.toggle("hidden",!(game&&bf));chip.classList.toggle("top",!st?.hazard);
+  if(bf)chip.textContent=`${BF[bf.type].ic} ${BF[bf.type].name} · ${BF[bf.type].chip} · ${bf.gamesLeft}게임 남음`;
+}
+function buffAnnounce(kind){
+  const b=BF[kind];if(!b)return;const el=document.createElement("div");el.className="hzann buff "+kind;el.innerHTML=`<span class="ic">${b.ic}</span>${b.ann}`;
+  $("arena").appendChild(el);setTimeout(()=>el.remove(),3300);Snd.play(kind);msg(b.ic+" "+b.fx+" (2게임 동안)");
+}
 let hzKey="",nextSiren=0;
 function renderHazard(){
   const hz=st?.hazard,game=screen==="game"&&!!st;
@@ -638,6 +666,8 @@ const Snd=(()=>{
     rustle(){for(let i=0;i<6;i++)noise({at:i*.07+Math.random()*.04,dur:.12,vol:.09,f:2600+Math.random()*1500,q:.8})},
     splash(){noise({dur:.35,vol:.2,f:1200,f2:500,q:.6});for(let i=0;i<5;i++)tone({f:900+Math.random()*900,f2:400,at:.04+i*.04,dur:.06,vol:.04})},
     thunder(){noise({dur:2.2,vol:.3,f:120,ft:"lowpass",atk:.05});noise({at:.08,dur:1.6,vol:.12,f:420,q:.5})},
+    fresh(){noise({dur:1.6,vol:.12,f:500,f2:2400,q:.5,atk:.4});for(let i=0;i<5;i++){const f=2800+Math.random()*1200,at=.3+i*.22;tone({f,f2:f*1.5,at,dur:.08,vol:.05,pan:Math.random()*1.4-.7})}notes([84,88,91,96],{at:.2,gap:.12,vol:.07,type:"sine",dur:.4})},
+    heat(){tone({f:110,f2:220,type:"sawtooth",lp:500,dur:1.4,vol:.08,atk:.3});notes([72,76,79,84,88],{at:.5,gap:.08,vol:.1,type:"triangle",dur:.3});tone({f:1568,at:1.0,dur:.6,vol:.07})},
     oooh(){tone({f:300,f2:520,type:"sawtooth",lp:900,dur:.9,vol:.05,atk:.2});tone({f:360,f2:600,type:"sawtooth",lp:900,dur:.9,vol:.04,atk:.25});FX.cheer(true)},
     click(){tone({f:1100,dur:.03,vol:.05})},
     pop(kind){   // 뿅: 위로 톡 튀어 오르는 귀여운 소리 (누를 때마다 높이가 살짝 달라짐)
@@ -779,6 +809,8 @@ function handleEvent(e){
       msg((e.side===side?"":who(e.side)+"의 ")+it.emoji+" "+it.name+"! "+it.fx+" (이번 포인트 동안)");break}
     case "taunt":onTaunt(e);break;
     case "hazard":setTimeout(()=>hazardAnnounce(e.kind),900);break;   // 게임 결과 배너 뒤에 이어서
+    case "buff":setTimeout(()=>buffAnnounce(e.kind),st.hazard&&st.hazard.gamesLeft===2?2400:900);break;   // 디버프와 동시에 시작하면 뒤이어 안내
+    case "buffEnd":{const b=BF[e.kind];if(b){popup(b.ic+" 끝!",0,2,"call");setTimeout(()=>msg(b.end),1000)}break}
     case "hazardEnd":{const h=HZ[e.kind];if(h){popup(h.ic+" 끝!",0,0,"call");setTimeout(()=>msg(h.end),900)}break}
     case "hzBounce":{const t={weeds:"🌿 어디로 튈지 몰라!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~ 미끄러졌다!"}[e.mode];popup(t,e.x,e.y,"call");Snd.play(e.kind==="weeds"?"rustle":"splash");break}
     case "netcord":Snd.play("netcord");popup("NET CORD",e.x,e.y,"call");break;
@@ -909,6 +941,7 @@ function render(){
   if(!st)status=mode==="multi"?({waiting:"상대를 기다리는 중",ready:"선수 준비 완료"}[roomStatus]||"대기 중"):"대기 중";
   else status=({serve:(st.serveNo===1?"퍼스트":"세컨드")+" 서브 · "+(E.serveCourt(st)==="deuce"?"듀스 코트":"애드 코트"),rally:"랠리 중",point:"포인트 종료",fault:st.serveNo===2?"폴트":"레트",done:"경기 종료"})[st.phase]+(st.tb&&st.phase!=="done"?" · 타이브레이크":"");
   if(st?.hazard&&HZ[st.hazard.type])status+=" · "+HZ[st.hazard.type].ic+" "+HZ[st.hazard.type].name;
+  if(st?.buff&&BF[st.buff.type])status+=" · "+BF[st.buff.type].ic+" "+BF[st.buff.type].name;
   $("gameStatus").textContent=status;
   // 오버레이
   if(st&&st.phase!==lastPhase){phaseAt=performance.now();
@@ -921,6 +954,7 @@ function render(){
   if(!st)lastPhase="";
   renderItems();
   renderHazard();
+  renderBuff();
   renderChatUI();
   placeBubbles(pl);
   {const ok=canTaunt();$("tauntBtn").disabled=!ok;$("mTaunt").disabled=!ok;}
@@ -1303,7 +1337,7 @@ function loop(t){
   const dt=Math.min((t-last)/1000,.05);last=t;
   if(mode==="solo"&&st){E.step(st,dt,[{keys:worldKeys()},E.aiThink(st,1,difficulty,dt)]);processEvents()}
   if(mode==="multi"&&st&&myPos&&(st.phase==="serve"||st.phase==="rally")){
-    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,hazard:st.hazard,clock:st.clock,players:[...st.players]};view.players[side]=myPos;
+    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,hazard:st.hazard,buff:st.buff,clock:st.clock,players:[...st.players]};view.players[side]=myPos;
     E.moveLocal(view,side,worldKeys(),dt);
     const now=performance.now(),key=myPos.x.toFixed(2)+","+myPos.y.toFixed(2);
     if(now-lastPosSend>=33&&key!==lastSent){lastPosSend=now;lastSent=key;send({type:"pos",x:+myPos.x.toFixed(3),y:+myPos.y.toFixed(3),e:myEpoch})}
