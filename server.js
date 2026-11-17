@@ -36,6 +36,7 @@ function packMatch(room) {
   return { format: st.format, phase: st.phase, server: st.server, serveNo: st.serveNo, pts: st.pts, games: st.games, sets: st.sets,
     history: st.history, tb: st.tb, winner: st.winner, chars: st.chars, items: st.items, active: st.active, rally: st.rally,
     gauge: st.gauge.map(Math.round), stun: st.stun.map(r2), freeze: (st.freeze || [0, 0]).map(r2), posEpoch: st.posEpoch,
+    buff: st.buff ? { type: st.buff.type, gamesLeft: st.buff.gamesLeft } : null,
     clock: r2(st.clock || 0), hazard: st.hazard ? { type: st.hazard.type, gamesLeft: st.hazard.gamesLeft, patches: st.hazard.patches.map(p => ({ x: r2(p.x), y: r2(p.y), r: r2(p.r) })) } : null,
     players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
     ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id },
