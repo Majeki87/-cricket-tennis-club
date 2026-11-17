@@ -51,6 +51,13 @@ function broadcast(room) {
   if (room.match) room.sentEv = room.match.evId;
   room.clients.forEach(c => { if (c.ws.readyState === 1) c.ws.send(msg); });
 }
+// 채팅: 같은 방 두 사람끼리. 최근 30개는 새로 들어온 사람에게도 보여 줌
+function pushChat(room, m) {
+  m.t = Date.now(); room.chat.push(m); if (room.chat.length > 30) room.chat.shift();
+  const msg = JSON.stringify({ type: "chat", ...m });
+  room.clients.forEach(c => { if (c.ws.readyState === 1) c.ws.send(msg); });
+}
+const sysChat = (room, text) => pushChat(room, { side: -1, name: "", text });
 function startMatch(room) {
   room.match = E.newMatch({ format: room.format, chars: [clientAt(room, 0).char, clientAt(room, 1).char], autoNext: AUTO_NEXT, evId: room.evId });
   room.sentEv = room.evId;
@@ -75,7 +82,7 @@ wss.on("connection", (ws) => {
       if (!id) id = code();
       room = rooms.get(id);
       if (!room) {
-        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0, sentEv: 0, created: Date.now(), private: !!msg.private,
+        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0, sentEv: 0, created: Date.now(), private: !!msg.private, chat: [],
           format: E.FORMATS[msg.format] ? msg.format : "set1" };     // 경기 방식은 방을 만든 사람 기준
         rooms.set(id, room);
       }
@@ -85,11 +92,23 @@ wss.on("connection", (ws) => {
       client = { ws, name: String(msg.name || "귀뚜라미").slice(0, 12), side, char };
       room.clients.push(client);
       send(ws, { type: "joined", room: id, side });
+      send(ws, { type: "chatlog", list: room.chat });
+      sysChat(room, `${client.name}님이 들어왔어요`);
       broadcast(room);
       return;
     }
     if (!room || !client) return;
     const st = room.match, side = client.side;
+    if (msg.type === "chat") {
+      const text = String(msg.text || "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80);
+      const now = Date.now();
+      client.chatTimes = (client.chatTimes || []).filter(t => now - t < 5000);
+      if (!text) return;
+      if (client.chatTimes.length >= 5) { send(ws, { type: "chat", side: -1, name: "", text: "메시지를 너무 빨리 보내고 있어요. 잠시 후 다시 보내 주세요.", t: now, local: true }); return; }
+      client.chatTimes.push(now);
+      pushChat(room, { side, name: client.name, text });
+      return;
+    }
     if (msg.type === "ping") { client.rtt = Math.min(1000, Math.max(0, Number(msg.rtt) || 0)); send(ws, { type: "pong", t: msg.t }); return; }
     if (msg.type === "input") { room.inputs[side] = cleanKeys(msg.keys); return; }
     // 내 선수 위치: 화면에서 먼저 움직이고 서버는 속도·코트 범위만 검사
@@ -127,6 +146,7 @@ wss.on("connection", (ws) => {
   ws.on("close", () => {
     if (room && client) {
       room.clients = room.clients.filter(c => c !== client);
+      if (room.clients.length) sysChat(room, `${client.name}님이 나갔어요`);
       room.match = null; room.status = "waiting";
       broadcast(room);
       if (room.clients.length === 0) rooms.delete(room.id);
