@@ -222,6 +222,20 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 .room .rsub{font-size:11px;color:#9fb8af;margin-top:2px}
 .room .btn{padding:7px 12px;font-size:13px}
 .room.busy{opacity:.55}
+/* 채팅 */
+.chatbox{margin-top:10px;background:#10242d;border:1px solid #34515a;border-radius:10px;padding:9px}
+.chat-h{font-size:13px}
+.chatlog{margin-top:6px;height:120px;overflow-y:auto;font-size:12.5px;line-height:1.5;display:flex;flex-direction:column;gap:2px;overscroll-behavior:contain}
+.chatlog .cl{word-break:break-all}.chatlog .cl b{color:#9fd8c5;margin-right:4px}.chatlog .cl.me b{color:#ffd18a}
+.chatlog .cl.sys{color:#8fa9a0;font-style:italic;font-size:11.5px}
+.quick{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.quick button{background:#294650;color:#e4f4ee;border:1px solid #52717a;border-radius:14px;padding:4px 9px;font-size:11.5px;cursor:pointer}
+.chatrow{display:flex;gap:6px;margin-top:6px}.chatrow .field{padding:8px;font-size:14px}.chatsend{flex:none;padding:8px 12px;font-size:13px}
+#chatPanel .chatlog{height:150px}
+#mChatBtn{flex:none;width:34px;border:1px solid #52717a;background:#294650;color:#e4f4ee;border-radius:9px;font-size:15px;position:relative}
+#mChatDot{position:absolute;right:3px;top:3px;width:8px;height:8px;border-radius:50%;background:#ff5b4a}
+#mChatSheet{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#172b35;border-top:1px solid #52717a;border-radius:16px 16px 0 0;padding:12px 12px calc(env(safe-area-inset-bottom) + 12px);box-shadow:0 -10px 30px #0008;touch-action:auto}
+#mChatSheet .chatlog{height:130px}
 .roomline{margin-top:9px;font-size:13px;font-weight:700;color:#ffe25a}
 .ov-btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .ov-btns .btn{font-size:14px;padding:10px 14px}
@@ -295,6 +309,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div id="soloSetup"><label class="muted">컴퓨터 난이도</label><div class="seg" id="levelPick"><button data-level="easy" class="active">쉬움</button><button data-level="normal">보통</button><button data-level="hard">어려움</button></div></div>
 <div id="multiSetup" class="hidden" style="margin-top:10px"><label class="muted" style="margin-top:0">내 닉네임</label><input id="name" class="field" maxlength="12" value="귀뚜라미 선수"><div class="row" style="margin-top:8px"><button id="createRoom" class="btn">방 만들기</button><input id="roomCode" class="field" placeholder="방 코드"><button id="joinRoom" class="btn alt">참가</button></div><label class="muted chk"><input type="checkbox" id="privateRoom"> 비공개 방으로 만들기 (방 코드를 아는 사람만 참가)</label>
 <div class="roomline" id="roomLine">아직 방에 들어가지 않았습니다.</div>
+<div id="lobbyChat" class="chatbox hidden"><b class="chat-h">💬 채팅</b><div class="chatlog" id="lobbyChatLog"></div><div class="quick" data-quick></div><div class="chatrow"><input class="field chatin" id="lobbyChatIn" maxlength="80" placeholder="메시지를 입력하세요" autocomplete="off"><button class="btn chatsend" data-send="lobbyChatIn">보내기</button></div></div>
 <div id="roomBrowser"><div class="rl-head"><b>열린 방</b><button id="refreshRooms" class="mini">새로고침</button></div><div class="roomlist" id="roomList"><div class="muted">불러오는 중…</div></div></div><div class="muted" style="margin-top:5px">경기 방식은 방을 만든 사람이 정합니다. 두 명이 모이면 호스트가 경기를 시작합니다. 만든 방은 비공개로 하지 않으면 모든 사람의 '열린 방' 목록에 보입니다.</div></div>
 <div class="summary" id="pickSummary">선수를 먼저 골라 주세요.</div>
 <button id="lobbyStart" class="btn big" disabled>선수를 먼저 선택하세요</button>
@@ -324,6 +339,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <section class="panel" id="itemPanel"><div class="row"><b>🎒 아이템</b><span class="muted" style="text-align:right">숫자 1·2·3으로 사용</span></div>
 <div class="islots"><button class="islot" data-slot="0"></button><button class="islot" data-slot="1"></button><button class="islot" data-slot="2"></button></div>
 <div class="muted" id="itemInfo" style="margin-top:8px;line-height:1.6"></div></section>
+<section class="panel hidden" id="chatPanel"><div class="row"><b>💬 채팅</b><span class="muted" style="text-align:right">Enter로 입력 · Esc로 경기로</span></div><div class="chatlog" id="gameChatLog"></div><div class="quick" data-quick></div><div class="chatrow"><input class="field chatin" id="gameChatIn" maxlength="80" placeholder="메시지를 입력하세요" autocomplete="off"><button class="btn chatsend" data-send="gameChatIn">보내기</button></div></section>
 <section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="tauntBtn" class="btn alt" disabled>😜 도발 (T)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
 </div>
 <div class="arena" id="arena">
@@ -353,11 +369,13 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 </section>
 <section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li><li>포인트가 끝난 뒤 <kbd>T</kbd>(휴대폰은 😜)를 누르면 상대를 약 올리는 동작을 해요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
 </div>
-<div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button><button id="mSnd" aria-label="소리 설정">🔊</button>
+<div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button><button id="mSnd" aria-label="소리 설정">🔊</button><button id="mChatBtn" class="hidden" aria-label="채팅">💬<i id="mChatDot" class="hidden"></i></button>
 <div class="mp"><span class="mn" id="mMeName">나</span><span class="mg" id="mMeGames">0</span><span class="mpt" id="mMePts">0</span><i class="mgauge"><b id="mMeGauge"></b></i></div>
 <div class="mp"><span class="mn" id="mOpName">상대</span><span class="mg" id="mOpGames">0</span><span class="mpt" id="mOpPts">0</span><i class="mgauge"><b id="mOpGauge"></b></i></div></div>
 <div class="mmsg" id="mMsg"></div></div>
+
 </div>
+<div id="mChatSheet" class="hidden"><div class="row"><b>💬 채팅</b><button class="mini" id="mChatClose" style="flex:none">닫기</button></div><div class="chatlog" id="mChatLog"></div><div class="quick" data-quick></div><div class="chatrow"><input class="field chatin" id="mChatIn" maxlength="80" placeholder="메시지를 입력하세요" autocomplete="off"><button class="btn chatsend" data-send="mChatIn">보내기</button></div></div>
 <div id="rotateHint">📱<br>휴대폰을 세로로 돌려 주세요.<br><span style="font-size:13px;font-weight:500">코트가 세로로 길어서 세로 화면에 맞춰져 있습니다.</span></div>
 <footer class="muted" style="text-align:center;padding:14px">귀뚜라미 테니스 클럽 · 사내 친선 게임</footer>
 </main>
@@ -794,6 +812,7 @@ function render(){
   }
   if(!st)lastPhase="";
   renderItems();
+  renderChatUI();
   placeBubbles(pl);
   {const ok=canTaunt();$("tauntBtn").disabled=!ok;$("mTaunt").disabled=!ok;}
   renderLobby();
@@ -942,6 +961,8 @@ function connect(create){
     if(d.type==="error"){msg(d.message);return}
     if(d.type==="joined"){room=d.room;side=d.side;$("roomCode").value=room;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자");msg("방에 입장했습니다. 상대에게 방 코드를 공유하세요.");return}
     if(d.type==="hitResult"){hitFeedback(d.result);return}
+    if(d.type==="chatlog"){clearChat();(d.list||[]).forEach(m=>addChat(m,true));return}
+    if(d.type==="chat"){addChat(d);return}
     if(d.type==="pong"){const r=performance.now()-d.t;rtt=rtt?rtt*.7+r*.3:r;showPing();return}
     if(d.type==="state"){
       const prevStatus=roomStatus;roomStatus=d.status;names=d.names||["",""];roomChars=d.chars||[null,null];roomFormat=d.format||roomFormat;setSeg("format",roomFormat);
@@ -981,6 +1002,38 @@ async function loadRooms(force){
   }catch{roomListKey="";$("roomList").innerHTML='<div class="muted">방 목록을 불러올 수 없어요. 게임 서버 주소로 접속했는지 확인해 주세요.</div>'}
 }
 setInterval(loadRooms,3000);
+/* ───── 채팅 (실시간 대전, 같은 방 두 사람) ───── */
+const QUICK=["좋은 경기 해요!","나이스 샷! 👏","ㅋㅋㅋㅋ","아깝다~","한 판 더?","잠깐만요!","GG"];
+document.querySelectorAll("[data-quick]").forEach(q=>q.innerHTML=QUICK.map(t=>`<button type="button">${esc(t)}</button>`).join(""));
+function chatLine(m){
+  const d=document.createElement("div");d.className="cl"+(m.side<0?" sys":m.side===side?" me":"");
+  if(m.side<0)d.textContent=m.text;else{const b=document.createElement("b");b.textContent=(m.side===side?"나":m.name||"상대")+":";d.append(b,document.createTextNode(m.text))}
+  return d;
+}
+function addChat(m,quiet){
+  ["lobbyChatLog","gameChatLog","mChatLog"].forEach(id=>{const log=$(id);log.appendChild(chatLine(m));while(log.children.length>60)log.firstChild.remove();log.scrollTop=log.scrollHeight});
+  if(quiet||m.side<0)return;
+  if(screen==="game"&&st)say(m.side,m.text,3);             // 경기 중에는 말풍선으로도
+  if(m.side!==side){Snd.play("pop");if($("mChatSheet").classList.contains("hidden"))$("mChatDot").classList.remove("hidden")}
+}
+function clearChat(){["lobbyChatLog","gameChatLog","mChatLog"].forEach(id=>$(id).innerHTML="")}
+function sendChat(text){text=String(text||"").trim();if(!text||!ws||ws.readyState!==1||!room)return false;send({type:"chat",text});return true}
+document.querySelectorAll("[data-quick]").forEach(q=>q.addEventListener("click",e=>{const b=e.target.closest("button");if(b)sendChat(b.textContent)}));
+document.querySelectorAll("[data-send]").forEach(b=>b.addEventListener("click",()=>{const inp=$(b.dataset.send);if(sendChat(inp.value))inp.value=""}));
+document.querySelectorAll(".chatin").forEach(inp=>{
+  inp.addEventListener("focus",()=>{keys={};sendKeys()});   // 입력하는 동안 선수가 멈추도록
+  inp.addEventListener("keydown",e=>{
+    if(e.key==="Enter"&&!e.isComposing){e.preventDefault();if(sendChat(inp.value))inp.value="";if(screen==="game"&&inp.id==="gameChatIn")inp.blur()}
+    if(e.key==="Escape")inp.blur();
+  });
+});
+$("mChatBtn").onclick=()=>{$("mChatSheet").classList.remove("hidden");$("mChatDot").classList.add("hidden");const l=$("mChatLog");l.scrollTop=l.scrollHeight};
+$("mChatClose").onclick=()=>{$("mChatSheet").classList.add("hidden");$("mChatIn").blur()};
+function renderChatUI(){
+  const on=mode==="multi"&&!!room;
+  $("lobbyChat").classList.toggle("hidden",!on);$("chatPanel").classList.toggle("hidden",!on);$("mChatBtn").classList.toggle("hidden",!on);
+  if(!on)$("mChatSheet").classList.add("hidden");
+}
 function leaveRoom(){clearInterval(pingTimer);pingText="";setTimeout(()=>loadRooms(true),50);if(ws){ws.onclose=null;ws.close();ws=null}room="";roomStatus="";names=["",""];roomChars=[null,null];st=null;$("roomInfo").textContent=mode==="solo"?"개인 연습 모드":"온라인 대전"}
 
 /* ───── 이벤트 연결 ───── */
@@ -1063,6 +1116,7 @@ const SKILL_KEY={KeyZ:"volley",KeyE:"drop",KeyF:"speed",KeyC:"lob",KeyQ:"special
 const ITEM_KEY={Digit1:0,Numpad1:0,Digit2:1,Numpad2:1,Digit3:2,Numpad3:2};
 window.addEventListener("keydown",e=>{
   if(e.target.closest("input,textarea"))return;
+  if(e.key==="Enter"&&screen==="game"&&mode==="multi"&&room&&!isMobile()){e.preventDefault();$("gameChatIn").focus();return}
   const k=MOVE[e.code];if(k&&screen==="game"){e.preventDefault();if(!keys[k]){keys[k]=true;sendKeys()}}
   if(e.code==="Space"){e.preventDefault();if(e.repeat)return;primaryAction()}
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
