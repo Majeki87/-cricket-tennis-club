@@ -33,6 +33,12 @@ const SF = {   // 능력치 1칸당 효과
   serveT: v => 1 - .07 * (v - 3), serveSig: v => 1 - .1 * (v - 3)
 };
 const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;   // 경기 중 도발하면 0.9초 멈춤, 2.5초 안에 또 하면 콤보, 상대 도발 2초 안에 하면 반사
+// 환경 디버프: 게임이 끝날 때 가끔 시작해서 2게임 동안 유지, 세트당 1~2번
+const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
+const HAZARD_GAMES = 2, HAZARD_CHANCE = .22;
+const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
+function h01(n) { let x = Math.imul(n | 0, 0x9E3779B1); x ^= x >>> 16; x = Math.imul(x, 0x85EBCA6B); x ^= x >>> 13; x = Math.imul(x, 0xC2B2AE35); x ^= x >>> 16; return (x >>> 0) / 4294967296; }
+function inPatch(st, x, y) { const hz = st.hazard; if (!hz || !hz.patches) return null; for (const p of hz.patches) if ((x - p.x) ** 2 + (y - p.y) ** 2 <= p.r * p.r) return p; return null; }
 const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.7, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
 const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, special: 1.7 };
 const AI = {
@@ -73,7 +79,7 @@ function newMatch(opts = {}) {
     players: [{ x: 0, y: COURT.L + .8 }, { x: 0, y: -COURT.L - .8 }],
     ball: idleBall(0), gauge: [0, 0], stun: [0, 0], winner: null, rally: 0,
     events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
-    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
+    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], hazard: null, hazardsInSet: 0, hazardCool: 0, lastHazard: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
   };
   pushEv(st, { type: "toss", server: st.server });
   startPoint(st);
@@ -105,13 +111,27 @@ function constrain(st, i) {
 }
 function movePlayer(st, i, inp, dt) {
   if (st.stun[i] > 0 || (st.freeze && st.freeze[i] > 0)) return;   // 기절 또는 도발 중
-  const p = st.players[i], sp = (inp.speed || MOVE_SPEED) * SF.speed(statOf(st, i, "speed"));
+  const p = st.players[i], hz = st.hazard;
+  let sp = (inp.speed || MOVE_SPEED) * SF.speed(statOf(st, i, "speed"));
+  if (hz && HZ_SLOW[hz.type] && inPatch(st, p.x, p.y)) sp *= HZ_SLOW[hz.type];
+  // 비상벨: 0.66초마다 바뀌는 방향으로 조작이 틀어지고, 가만히 있어도 우왕좌왕(서버·화면이 같은 값을 계산하도록 시간 기반)
+  let ang = 0, drift = null;
+  if (hz && hz.type === "alarm") {
+    const k = Math.floor((st.clock || 0) * 1.5), r1 = h01(i * 7919 + k * 13), r2 = h01(i * 104729 + k * 31);
+    ang = (r1 - .5) * 3.2;
+    if (r2 < .55) drift = r2 * 40;
+  }
+  const rot = (x, y, a) => [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
   if (inp.target) {
-    const dx = inp.target.x - p.x, dy = inp.target.y - p.y, dist = Math.hypot(dx, dy);
+    let dx = inp.target.x - p.x, dy = inp.target.y - p.y; const dist = Math.hypot(dx, dy);
+    if (ang) [dx, dy] = rot(dx, dy, ang * .6);
     if (dist > .03) { const m = Math.min(dist, sp * dt); p.x += dx / dist * m; p.y += dy / dist * m; }
   } else {
-    const k = inp.keys || {}, dx = (k.right ? 1 : 0) - (k.left ? 1 : 0), dy = (k.down ? 1 : 0) - (k.up ? 1 : 0);
-    if (dx || dy) { const mag = Math.hypot(dx, dy); p.x += dx / mag * sp * dt; p.y += dy / mag * sp * dt; }
+    const k = inp.keys || {};
+    let dx = (k.right ? 1 : 0) - (k.left ? 1 : 0), dy = (k.down ? 1 : 0) - (k.up ? 1 : 0), s2 = sp;
+    if (ang && (dx || dy)) [dx, dy] = rot(dx, dy, ang);
+    else if (drift !== null && !dx && !dy) { dx = Math.cos(drift); dy = Math.sin(drift); s2 = sp * .45; }
+    if (dx || dy) { const mag = Math.hypot(dx, dy); p.x += dx / mag * s2 * dt; p.y += dy / mag * s2 * dt; }
   }
   constrain(st, i);
 }
@@ -310,11 +330,38 @@ function bounce(st) {
     if (!ok) { b.live = false; if (b.serve) fault(st, "out"); else pointTo(st, recv, "out"); return true; }
     if (b.serve && b.let) { b.live = false; letServe(st); return true; }
     if (b.kind === "quake") { st.stun[recv] = STUN_TIME; pushEv(st, { type: "quake", side: recv, x: b.x, y: b.y }); }
+    if (inPatch(st, b.x, b.y)) hazardBounce(st, b);
     return false;
   }
   b.live = false;                                          // 투 바운드: 마지막에 친 선수의 포인트
   pointTo(st, b.owner, b.serve ? "ace" : "winner");
   return true;
+}
+function hazardBounce(st, b) {
+  const type = st.hazard.type, rot = a => { const c = Math.cos(a), s2 = Math.sin(a), vx = b.vx; b.vx = vx * c - b.vy * s2; b.vy = vx * s2 + b.vy * c; };
+  let mode;
+  if (type === "weeds") { rot((Math.random() - .5) * 2.4); b.e *= .6 + Math.random() * .5; b.keep *= .6 + Math.random() * .5; mode = "weeds"; }   // 어디로 튈지 모름
+  else if (Math.random() < .5) { b.e = .12; b.keep = .25; mode = "stop"; }                                            // 첨벙! 거의 멈춤
+  else { rot((Math.random() - .5) * 2.6); b.e = .5; b.keep = .65; mode = "skid"; }                                     // 미끄러지며 엉뚱한 방향
+  b.curve = null; b.spinAmp = 0;
+  pushEv(st, { type: "hzBounce", kind: type, mode, x: b.x, y: b.y });
+}
+function startHazard(st) {
+  const pool = HAZARDS.filter(t => t !== st.lastHazard), type = pool[Math.floor(Math.random() * pool.length)];
+  const patches = [];
+  if (type !== "alarm") for (let side = 0; side < 2; side++) for (let k = 0; k < 3; k++) {   // 양쪽 코트에 3개씩 공평하게
+    const own = side === 0 ? 1 : -1;
+    patches.push({ x: (Math.random() * 2 - 1) * 3.4, y: own * (1.6 + Math.random() * 9.6), r: type === "weeds" ? .9 + Math.random() * .55 : .8 + Math.random() * .5 });
+  }
+  st.hazard = { type, gamesLeft: HAZARD_GAMES, patches }; st.lastHazard = type; st.hazardsInSet++;
+  pushEv(st, { type: "hazard", kind: type });
+}
+function hazardTick(st) {   // 게임이 끝날 때마다
+  if (st.hazard) { if (--st.hazard.gamesLeft <= 0) { pushEv(st, { type: "hazardEnd", kind: st.hazard.type }); st.hazard = null; st.hazardCool = 1; } return; }
+  if (st.phase === "done" || st.hazardsInSet >= 2) return;
+  if (st.hazardCool > 0) { st.hazardCool--; return; }
+  const played = st.games[0] + st.games[1];
+  if ((st.hazardsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) startHazard(st);   // 세트에 한 번은 꼭
 }
 function fault(st, reason) {
   const s = st.server;
@@ -352,11 +399,12 @@ function gameWon(st, w) {
   if (wasTb || (gw >= st.G && gw - gl >= 2)) setWon(st, w);
   else if (gw === st.G && gl === st.G) { st.tb = true; st.tbFirst = st.server; pushEv(st, { type: "tiebreak" }); }
   else if ((st.games[0] + st.games[1]) % 2 === 1) pushEv(st, { type: "ends" });
+  hazardTick(st);
 }
 function setWon(st, w) {
   st.sets[w]++; st.history.push([...st.games]);
   pushEv(st, { type: "set", winner: w, score: [...st.games] });
-  st.games = [0, 0];
+  st.games = [0, 0]; st.hazardsInSet = 0;
   if (st.sets[w] >= st.setsToWin) { st.phase = "done"; st.winner = w; pushEv(st, { type: "match", winner: w }); }
 }
 
@@ -369,7 +417,7 @@ function step(st, dt, inputs = []) {
   const n = Math.max(1, Math.ceil(dt / .017)), h = dt / n;
   for (let s = 0; s < n; s++) {
     for (let i = 0; i < 2; i++) { st.stun[i] = Math.max(0, st.stun[i] - h); if (st.freeze) st.freeze[i] = Math.max(0, st.freeze[i] - h); movePlayer(st, i, inputs[i] || {}, h); }
-    if (st.phase === "serve") { holdBall(st); return; }
+    if (st.phase === "serve") { holdBall(st); continue; }   // 서브 대기 중에도 남은 시간만큼 이동
     if (st.phase !== "rally") return;
     stepBall(st, h);
   }
@@ -442,7 +490,7 @@ function aiThink(st, side, level, dt) {
   return out;
 }
 
-const api = { COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { HAZARDS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
