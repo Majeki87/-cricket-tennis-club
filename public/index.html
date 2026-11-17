@@ -368,8 +368,48 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 .mspecial.ready{border:2px solid #ffe08a;background:linear-gradient(135deg,#e59a35,#bd5d19);box-shadow:0 0 16px #ffd04a;animation:readyPulse 1s ease-in-out infinite}
 #rotateHint{position:fixed;inset:0;z-index:50;background:#0b1722;color:#edf5f1;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;padding:24px;line-height:1.6}
 @media (orientation:landscape) and (max-height:520px){body.mobile.playing #rotateHint{display:flex}}
+/* ───── 첫 로딩 화면 ───── */
+#splash{position:fixed;inset:0;z-index:100;background:#0a1a3c;display:flex;align-items:center;justify-content:center;transition:opacity .45s;color:#fff}
+#splash.out{opacity:0;pointer-events:none}
+.spl-frame{position:relative;width:min(100vw,calc(100vh*1672/941));aspect-ratio:1672/941;background:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAbADADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwC8movcJAl+hdN2N3Qj/HpSzW0ciPLY/vFyQsZOGJ9Oage7hu9LESLHEgYoXY8A9eAepqzG0ltELzT7eMKi4ky2/d6lR37dK7YVakY2Wn5HJKlBvmev5kNjA9xJIhhAeIgOu4EDIz1qW8j23Mnm2qxKqEluUXIOOOMHt06mrFnDd3dxHLd3CRKWywTgjHTtip9dEFzDHF5O4o+eH4I+orGri5TnGm5NPrb/ADCFCMLu115mY0XlFgJbOJ1JALzHKnHHGOec896vW7pcxSbZfOlPV1fIUE9B+X61nrbxorFbCPjuXY/yNRIZ7YStAkESvjewkALeg55qlFJ35nf1ZU43jayXyM258Zx3NusLaXGoB3ZD9T69Kii8YNG5Y2e4kbceaQAvpj09q5LJoyaXs4c3NbU055Wtc6STxKXx/owG0YHznH5dKibX3P8AyyA4xwcCsDJoya0umrNEcpvLrzAg+V0z0I/w9qX+3kP3rUE5znfz1+lYGTRk0JpaJBY//9k=) center/cover}
+.spl-frame>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+.spl-frame>img.on{opacity:1}
+.spl-ui{position:absolute;left:2.6%;right:2.6%;top:76.5%;bottom:3%;display:grid;grid-template-columns:1fr minmax(0,25%);gap:2.4%;font-size:min(1.25vw,2.2vh)}
+.spl-lbl{font-weight:1000;font-style:italic;font-size:1.55em;letter-spacing:.02em;text-shadow:0 2px 0 #08204d}
+.spl-lbl small{font-size:.62em;font-style:normal;font-weight:700;color:#bcd3ff;margin-left:.6em}
+.spl-barrow{display:flex;align-items:center;gap:2%;margin-top:.5em}
+.spl-bar{flex:1;height:2.1em;border-radius:1.1em;background:#071635;border:.18em solid #3d7fe0;box-shadow:inset 0 2px 6px #000a;overflow:hidden}
+.spl-bar i{display:block;height:100%;width:0;border-radius:1em;background:linear-gradient(#ffe35a,#f7b500);box-shadow:inset 0 -3px 0 #d99400}
+.spl-pct{width:4.4em;font-weight:1000;font-style:italic;font-size:2.1em;color:#ffd84a;text-shadow:0 3px 0 #0b2457;text-align:right}
+.spl-tip{margin-top:.7em;padding:.5em 1em;border-radius:.6em;background:#0d2552;border:1px solid #2a4f8f;font-weight:800;min-height:2.4em;transition:opacity .25s}
+.spl-tip b{color:#ffd84a;margin-right:.4em}.spl-tip em{font-style:normal;color:#ffd84a}
+.spl-ctl{border-radius:.9em;background:#0f2a60e6;border:.15em solid #3d7fe0;padding:.6em .9em;font-size:.92em;line-height:1.55}
+.spl-ctl h4{margin:0 0 .3em;text-align:center;font-size:1.2em}
+.spl-g{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:0 .5em}.spl-g .k{color:#ffd84a;font-weight:900}
+#splKeys[hidden],#splTouch[hidden]{display:none!important}
+.spl-touch{margin:0;padding-left:1.1em}.spl-touch li b{color:#ffd84a}
+.spl-start{display:none;margin-top:.7em;text-align:center;font-weight:1000;font-size:1.35em;color:#ffe35a;text-shadow:0 2px 0 #0b2457,0 0 14px #ffd84a88;animation:splBlink 1s ease-in-out infinite}
+#splash.ready .spl-start{display:block}#splash.ready .spl-tip{display:none}#splash.ready{cursor:pointer}
+@keyframes splBlink{50%{opacity:.35}}
+@media (orientation:portrait){
+  #splash{display:block;overflow:auto}
+  .spl-frame{width:100vw;aspect-ratio:auto;background:none}
+  .spl-frame>img{position:static;display:block;width:100%;height:auto;aspect-ratio:1672/700;object-fit:cover;object-position:top;opacity:1;background:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAbADADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwC8movcJAl+hdN2N3Qj/HpSzW0ciPLY/vFyQsZOGJ9Oage7hu9LESLHEgYoXY8A9eAepqzG0ltELzT7eMKi4ky2/d6lR37dK7YVakY2Wn5HJKlBvmev5kNjA9xJIhhAeIgOu4EDIz1qW8j23Mnm2qxKqEluUXIOOOMHt06mrFnDd3dxHLd3CRKWywTgjHTtip9dEFzDHF5O4o+eH4I+orGri5TnGm5NPrb/ADCFCMLu115mY0XlFgJbOJ1JALzHKnHHGOec896vW7pcxSbZfOlPV1fIUE9B+X61nrbxorFbCPjuXY/yNRIZ7YStAkESvjewkALeg55qlFJ35nf1ZU43jayXyM258Zx3NusLaXGoB3ZD9T69Kii8YNG5Y2e4kbceaQAvpj09q5LJoyaXs4c3NbU055Wtc6STxKXx/owG0YHznH5dKibX3P8AyyA4xwcCsDJoya0umrNEcpvLrzAg+V0z0I/w9qX+3kP3rUE5znfz1+lYGTRk0JpaJBY//9k=) top/cover}
+  .spl-ui{position:static;display:block;padding:14px 16px 22px;font-size:14px}.spl-pct{font-size:1.6em;width:3.4em}.spl-ctl{margin-top:12px}
+}
 @media (prefers-reduced-motion:reduce){.arena.shake,.bug,.bug.stunned svg,.gauge.full i,.skill.special.ready{animation:none}.cutin,.banner{animation-duration:.01s;animation-delay:1s}}
-</style></head><body><main class="wrap">
+</style></head><body><div id="splash" role="dialog" aria-label="게임 불러오는 중"><div class="spl-frame"><img id="splImg" src="loading_bg.jpg" alt="귀뚜라미 테니스 — 최강의 귀뚜라미를 가려라!">
+<div class="spl-ui"><div><div class="spl-lbl">GAME LOADING<span id="splDots">...</span><small id="splStage">게임 불러오는 중</small></div>
+<div class="spl-barrow"><div class="spl-bar"><i id="splBar"></i></div><div class="spl-pct" id="splPct">0%</div></div>
+<div class="spl-tip" id="splTipBox">💡 <b>TIP.</b><span id="splTip"></span></div>
+<div class="spl-start" id="splStart">▶ 화면을 눌러 시작!</div></div>
+<div class="spl-ctl"><h4>🎮 조작 방법</h4><div id="splKeys" class="spl-g">
+<span class="k">Space</span><span>타격·서브</span><span class="k">Q</span><span>필살기</span>
+<span class="k">Z</span><span>발리샷</span><span class="k">E</span><span>드롭샷</span>
+<span class="k">F</span><span>스매쉬</span><span class="k">C</span><span>로브샷</span>
+<span class="k">T</span><span>도발</span><span class="k">1·2·3</span><span>아이템</span></div>
+<ul id="splTouch" class="spl-touch" hidden><li><b>왼쪽 아래</b> 누른 채 움직여 이동</li><li><b>오른쪽 원</b> 타격·서브·다음 서브</li><li>원 주위 <b>로브·드롭·발리·스매쉬</b></li><li><b>필살기·😜 도발</b>, 왼쪽 <b>아이템</b> 칸</li></ul></div></div></div></div>
+<main class="wrap">
 <header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음(숲속 자연 소리) 켜기/끄기">🌿 배경음</button></div></header>
 
 
@@ -1340,6 +1380,7 @@ const MOVE={ArrowUp:"up",KeyW:"up",ArrowDown:"down",KeyS:"down",ArrowLeft:"left"
 const SKILL_KEY={KeyZ:"volley",KeyE:"drop",KeyF:"speed",KeyC:"lob",KeyQ:"special"};
 const ITEM_KEY={Digit1:0,Numpad1:0,Digit2:1,Numpad2:1,Digit3:2,Numpad3:2};
 window.addEventListener("keydown",e=>{
+  if(splashOn){if(["Space","Enter"].includes(e.code)||e.key.length===1){e.preventDefault();closeSplash()}return}
   if(e.target.closest("input,textarea"))return;
   if(e.key==="Enter"&&screen==="game"&&mode==="multi"&&room&&!isMobile()){e.preventDefault();$("gameChatIn").focus();return}
   const k=MOVE[e.code];if(k&&screen==="game"){e.preventDefault();if(!keys[k]){keys[k]=true;sendKeys()}}
@@ -1351,6 +1392,41 @@ window.addEventListener("keydown",e=>{
 window.addEventListener("keyup",e=>{const k=MOVE[e.code];if(k){keys[k]=false;sendKeys()}});
 window.addEventListener("blur",()=>{keys={};sendKeys()});
 
+/* ───── 첫 로딩 화면: 그림·글꼴·게임 준비를 기다리며 막대가 차고, 다 되면 "화면을 눌러 시작!" (이 터치로 소리도 켜짐) ───── */
+let splashOn=true,splashReady=false;
+(function(){
+  const TIPS=["상대 도발에 2초 안에 맞도발하면 <em>반사!</em>","공 아래 <em>그림자</em>가 공의 실제 위치예요","웅덩이에 떨어진 공은 <em>멈출 수도</em> 있어요","기가 100%가 되면 <em>필살기</em>를 쓸 수 있어요",
+    "포인트가 끝나면 가끔 <em>아이템</em>을 얻어요","<em>파이어 뚜리</em>의 공은 휘지 않고 곧게 날아가요","<em>스네이크샷</em>은 꿈틀대다 막판에 확 달려들어요","잡초에 떨어진 공은 <em>어디로 튈지</em> 몰라요"];
+  const touch=matchMedia("(pointer:coarse)").matches||innerWidth<600;
+  if(touch){$("splKeys").hidden=true;$("splTouch").hidden=false}
+  let ti=Math.floor(Math.random()*TIPS.length);const showTip=()=>{$("splTip").innerHTML=TIPS[ti%TIPS.length];ti++};showTip();
+  const tipTimer=setInterval(()=>{const b=$("splTipBox");b.style.opacity=0;setTimeout(()=>{showTip();b.style.opacity=1},250)},3200);
+  const steps={dom:true,img:false,font:false,min:false};
+  const img=$("splImg");const imgDone=()=>{steps.img=true;img.classList.add("on")};
+  if(img.complete&&img.naturalWidth)imgDone();else{img.addEventListener("load",imgDone);img.addEventListener("error",()=>{steps.img=true})}
+  (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>steps.font=true);
+  setTimeout(()=>steps.min=true,1800);           // 너무 번쩍 지나가지 않게 최소 1.8초
+  setTimeout(()=>{steps.img=steps.font=true},8000);   // 그림이 늦어도 8초 뒤엔 진행
+  const STAGES=["게임 불러오는 중","코트 준비 중","선수 입장 준비","준비 완료!"];
+  let shown=0,dot=0;const t0=performance.now();
+  (function tick(){
+    if(!splashOn)return;
+    const done=Object.values(steps).filter(Boolean).length,total=Object.keys(steps).length;
+    const target=done===total?100:Math.min(92,(done/total)*80+Math.min(20,(performance.now()-t0)/120));
+    shown+=(target-shown)*.08;if(target===100&&shown>99.4)shown=100;
+    $("splBar").style.width=shown+"%";$("splPct").textContent=Math.floor(shown)+"%";
+    $("splStage").textContent=STAGES[shown>=100?3:shown>66?2:shown>33?1:0];
+    $("splDots").textContent=".".repeat(1+Math.floor(dot++/20)%3);
+    if(shown>=100&&!splashReady){splashReady=true;$("splash").classList.add("ready");clearInterval(tipTimer)}
+    requestAnimationFrame(tick);
+  })();
+})();
+function closeSplash(){
+  if(!splashOn||!splashReady)return;
+  splashOn=false;Snd.init();Snd.play("pop","big");
+  const s=$("splash");s.classList.add("out");setTimeout(()=>s.remove(),500);
+}
+$("splash").addEventListener("pointerup",closeSplash);
 /* ───── 메인 루프 ───── */
 function loop(t){
   const dt=Math.min((t-last)/1000,.05);last=t;
