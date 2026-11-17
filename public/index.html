@@ -142,7 +142,11 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .ball.fast{box-shadow:0 0 14px 5px #fff6,0 0 20px #ffb52e}
 .ball.drop{box-shadow:0 0 12px 4px #6cf5ff99}
 .ball.tornado{width:15px;height:15px;background:#e9fbff;border:3px dashed #2f8fc9;box-shadow:0 0 0 4px #5cd0ff55,0 0 16px 4px #5cd0ff;animation:ballSpin .25s linear infinite}
-.ball.snake{width:14px;height:14px;background:#b8ff6b;border-color:#6f4cc0;box-shadow:0 0 12px 5px #a77bffaa}
+.ball.snake{width:17px;height:15px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 50% 40%,#d8ff9e,#6cc23a 55%,#2f7d1a);border:2px solid #1f5a12;box-shadow:0 0 10px 3px #a77bff99}
+.ball.snake::before{content:"";position:absolute;left:2px;right:2px;top:3px;height:4px;background:radial-gradient(circle at 25% 50%,#111 0 1.6px,transparent 2px),radial-gradient(circle at 75% 50%,#111 0 1.6px,transparent 2px)}
+.ball.snake.strike{box-shadow:0 0 16px 7px #ff4dd2,0 0 30px 10px #a77bff}
+.sseg{position:absolute;z-index:3;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;border:1.5px solid #1f5a12;display:none}
+.sseg:nth-child(odd){background:radial-gradient(circle at 50% 40%,#c4f78a,#58ad2c)}.sseg:nth-child(even){background:radial-gradient(circle at 50% 40%,#f4e27a,#b9a42a)}
 .ball.fire{width:17px;height:17px;background:radial-gradient(circle,#fff6b0 0,#ff9a2a 55%,#e8381a 100%);border-color:#ffd36b;box-shadow:0 0 14px 6px #ff6a1f,0 0 28px 8px #ff3d1f88}
 .ball.quake{width:16px;height:16px;background:radial-gradient(circle,#ecd29e 0,#8a6a3d 100%);border-color:#f3e1b8;box-shadow:0 0 12px 5px #c9a15f}
 @keyframes ballSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
@@ -427,7 +431,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div id="hzLayer"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="freshFx" class="hidden"><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span></div><div id="heatFx" class="hidden"></div><div id="hzChip" class="hidden"></div><div id="buffChip" class="hidden"></div>
 <div class="bug opponent" id="opponent" role="img" aria-label="상대 귀뚜라미 선수"></div>
 <div class="bug" id="player" role="img" aria-label="내 귀뚜라미 선수"></div>
-<div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
+<div id="snakeBody"></div><div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
 <div class="bubble me" id="meBubble"></div><div class="bubble op" id="opBubble"></div>
 <div id="mCtrl"><div class="joyzone" id="joyZone"><div class="joybase" id="joyBase"><div class="joyknob" id="joyKnob"></div></div><span class="zlabel">누른 곳에서 이동</span></div>
 <div class="actpad" id="actPad"><button class="dirb p-up" data-mskill="lob">🌙<small>로브</small></button><button class="dirb p-down" data-mskill="drop">🪶<small>드롭</small></button><button class="dirb p-left" data-mskill="volley">🏐<small>발리</small></button><button class="dirb p-right" data-mskill="speed">💥<small>스매쉬</small></button><b class="padlabel" id="padLabel">타격</b></div>
@@ -649,7 +653,7 @@ const Snd=(()=>{
     item(kind){const base={anchovy:60,milk:72,coupon:67}[kind]||67;notes([base,base+4,base+7,base+12,base+16],{gap:.05,vol:.1,type:"sine",dur:.2});if(kind==="anchovy")FX.pow()},
     special(kind){
       if(kind==="tornado"){tone({f:300,f2:1400,dur:.45,vol:.14});tone({f:1400,f2:300,at:.45,dur:.45,vol:.12});noise({dur:.9,vol:.08,f:600,f2:3000,q:2})}
-      else if(kind==="snake"){for(let i=0;i<6;i++)tone({f:i%2?520:380,type:"square",at:i*.07,dur:.08,vol:.06});noise({dur:.5,vol:.05,f:5000,ft:"highpass"})}
+      else if(kind==="snake"){for(let i=0;i<8;i++)noise({at:i*.09,dur:.11,vol:.06+.02*(i%2),f:5200,ft:"highpass",atk:.03})}   // 쉬이익~ 꿈틀꿈틀
       else if(kind==="fire"){noise({dur:.6,vol:.22,f:300,f2:3000,q:.6});tone({f:200,f2:900,type:"sawtooth",dur:.4,vol:.06})}
       else{FX.quake()}},
     quake(){tone({f:55,f2:35,type:"sine",dur:.8,vol:.4});noise({dur:.8,vol:.2,f:140,ft:"lowpass"})},
@@ -662,6 +666,7 @@ const Snd=(()=>{
     laugh(lv=1){  // 와하하: 짧은 웃음 덩어리가 여러 번
       const voices=2+lv;for(let v=0;v<voices;v++){const f=230+Math.random()*120,off=Math.random()*.12;
         for(let k=0;k<4+lv;k++){const at=off+k*(.12+Math.random()*.03);tone({f:f*(1-k*.03),type:"sawtooth",lp:1300,at,dur:.08,vol:.03+lv*.006});noise({at,dur:.07,vol:.025,f:1100,q:2})}}},
+    strike(){noise({dur:.18,vol:.22,f:2500,f2:7000,q:.7});for(let i=0;i<10;i++)noise({at:.05+i*.035,dur:.02,vol:.08,f:6000,q:3})},   // 쉭! + 방울뱀 따르르
     siren(dur=3){for(let t=0;t<dur;t+=.8){tone({f:960,type:"square",lp:1800,at:t,dur:.4,vol:.07,atk:.02});tone({f:770,type:"square",lp:1800,at:t+.4,dur:.4,vol:.07,atk:.02})}},
     rustle(){for(let i=0;i<6;i++)noise({at:i*.07+Math.random()*.04,dur:.12,vol:.09,f:2600+Math.random()*1500,q:.8})},
     splash(){noise({dur:.35,vol:.2,f:1200,f2:500,q:.6});for(let i=0;i<5;i++)tone({f:900+Math.random()*900,f2:400,at:.04+i*.04,dur:.06,vol:.04})},
@@ -813,6 +818,7 @@ function handleEvent(e){
     case "buffEnd":{const b=BF[e.kind];if(b){popup(b.ic+" 끝!",0,2,"call");setTimeout(()=>msg(b.end),1000)}break}
     case "hazardEnd":{const h=HZ[e.kind];if(h){popup(h.ic+" 끝!",0,0,"call");setTimeout(()=>msg(h.end),900)}break}
     case "hzBounce":{const t={weeds:"🌿 어디로 튈지 몰라!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~ 미끄러졌다!"}[e.mode];popup(t,e.x,e.y,"call");Snd.play(e.kind==="weeds"?"rustle":"splash");break}
+    case "snakeStrike":strikeUntil=performance.now()+500;popup("🐍 쉭! 물었다!",e.x,e.y,"call");Snd.play("strike");break;
     case "netcord":Snd.play("netcord");popup("NET CORD",e.x,e.y,"call");break;
     case "net":Snd.play("net");popup("NET",e.x,e.y,"bad");break;
     case "bounce":Snd.play("bounce");if(e.out)Snd.play("buzz");mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
@@ -867,6 +873,16 @@ function canStartNewMatch(){
   return !!myChar&&(!st||(st.phase==="done"&&settled()));
 }
 function canNextServe(){return !!st&&(st.phase==="point"||st.phase==="fault")&&settled()}
+/* 스네이크샷: 공(머리) 뒤로 몸통 마디가 지나간 길을 따라오며 꿈틀거림 */
+const SEGS=11;let snakePts=[],strikeUntil=0;
+(function(){const w=$("snakeBody");for(let i=0;i<SEGS;i++){const d=document.createElement("div");d.className="sseg";w.appendChild(d)}})();
+function drawSnake(x,y){
+  snakePts.unshift([x,y]);if(snakePts.length>SEGS*3+1)snakePts.length=SEGS*3+1;
+  const segs=$("snakeBody").children;
+  for(let i=0;i<SEGS;i++){const p=snakePts[(i+1)*3],d=segs[i];if(!p){d.style.display="none";continue}
+    const sz=14-i*.75;d.style.display="block";d.style.left=p[0]+"%";d.style.top=p[1]+"%";d.style.width=d.style.height=sz+"px"}
+}
+function hideSnake(){if(!snakePts.length)return;snakePts=[];for(const d of $("snakeBody").children)d.style.display="none"}
 const lerp=(a,b,t)=>a+(b-a)*t;
 function viewState(){
   if(!st)return{players:IDLE_PLAYERS,ball:null};
@@ -899,8 +915,11 @@ function render(){
     $("ballShadow").style.opacity=String(clamp(1-b.z*.18,.35,1));
     const k=b.kind||"normal";
     $("ball").className="ball"+(k==="speed"?" fast":k==="drop"?" drop":SPECIALS.includes(k)?" "+k:"")+(b.pow?" pow":"")+(b.spinVis&&!SPECIALS.includes(k)?" spin":"");
-    if(b.live&&(SPECIALS.includes(k)||b.pow)){const now=performance.now();if(now-lastTrail>28){lastTrail=now;const t=document.createElement("div");t.className="trail "+(SPECIALS.includes(k)?k:"pow");t.style.left=sx(b.x)+"%";t.style.top=(sy(b.y)-lift)+"%";$("arena").appendChild(t);setTimeout(()=>t.remove(),470)}}
+    if(k==="snake"&&b.live)drawSnake(sx(b.x),sy(b.y)-lift);
+    $("ball").classList.toggle("strike",k==="snake"&&performance.now()<strikeUntil);
+    if(b.live&&k!=="snake"&&(SPECIALS.includes(k)||b.pow)){const now=performance.now();if(now-lastTrail>28){lastTrail=now;const t=document.createElement("div");t.className="trail "+(SPECIALS.includes(k)?k:"pow");t.style.left=sx(b.x)+"%";t.style.top=(sy(b.y)-lift)+"%";$("arena").appendChild(t);setTimeout(()=>t.remove(),470)}}
   }
+  if(!(show&&b.live&&(b.kind==="snake")))hideSnake();
   // 서브 목표 박스 표시
   const tgt=$("targetBox");
   if(st&&st.phase==="serve"){const box=-E.stanceSign(st),recv=1-st.server,ys=recv===0?1:-1;
