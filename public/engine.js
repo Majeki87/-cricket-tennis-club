@@ -36,7 +36,7 @@ const SF = {   // 능력치 1칸당 효과
 const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;   // 경기 중 도발하면 0.9초 멈춤, 2.5초 안에 또 하면 콤보, 상대 도발 2초 안에 하면 반사
 // 환경 디버프: 게임이 끝날 때 가끔 시작해서 2게임 동안 유지, 세트당 1~2번
 const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
-const HAZARD_GAMES = 2, HAZARD_CHANCE = .22;
+const HAZARD_POINTS = 2, HAZARD_CHANCE = .22;   // 시작은 게임이 끝날 때, 유지는 포인트 2개(누가 점수를 내든)
 // 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
@@ -359,24 +359,28 @@ function startHazard(st) {
     const own = side === 0 ? 1 : -1;
     patches.push({ x: (Math.random() * 2 - 1) * 3.4, y: own * (1.6 + Math.random() * 9.6), r: type === "weeds" ? .9 + Math.random() * .55 : .8 + Math.random() * .5 });
   }
-  st.hazard = { type, gamesLeft: HAZARD_GAMES, patches }; st.lastHazard = type; st.hazardsInSet++;
+  st.hazard = { type, pointsLeft: HAZARD_POINTS, patches }; st.lastHazard = type; st.hazardsInSet++;
   pushEv(st, { type: "hazard", kind: type });
 }
 function hazardTick(st) {   // 게임이 끝날 때마다
-  if (st.hazard) { if (--st.hazard.gamesLeft <= 0) { pushEv(st, { type: "hazardEnd", kind: st.hazard.type }); st.hazard = null; st.hazardCool = 1; } return; }
+  if (st.hazard) return;
   if (st.phase === "done" || st.hazardsInSet >= 2) return;
   if (st.hazardCool > 0) { st.hazardCool--; return; }
   const played = st.games[0] + st.games[1];
   if ((st.hazardsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) startHazard(st);   // 세트에 한 번은 꼭
 }
+function envPoint(st) {
+  if (st.hazard && --st.hazard.pointsLeft <= 0) { pushEv(st, { type: "hazardEnd", kind: st.hazard.type }); st.hazard = null; st.hazardCool = 1; }
+  if (st.buff && --st.buff.pointsLeft <= 0) { pushEv(st, { type: "buffEnd", kind: st.buff.type }); st.buff = null; st.buffCool = 1; }
+}
 function buffTick(st) {   // 디버프와 같은 규칙으로 따로 진행
-  if (st.buff) { if (--st.buff.gamesLeft <= 0) { pushEv(st, { type: "buffEnd", kind: st.buff.type }); st.buff = null; st.buffCool = 1; } return; }
+  if (st.buff) return;
   if (st.phase === "done" || st.buffsInSet >= 2) return;
   if (st.buffCool > 0) { st.buffCool--; return; }
   const played = st.games[0] + st.games[1];
   if ((st.buffsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) {
     const pool = BUFFS.filter(t => t !== st.lastBuff), type = pool[Math.floor(Math.random() * pool.length)];
-    st.buff = { type, gamesLeft: HAZARD_GAMES }; st.lastBuff = type; st.buffsInSet++;
+    st.buff = { type, pointsLeft: HAZARD_POINTS }; st.lastBuff = type; st.buffsInSet++;
     pushEv(st, { type: "buff", kind: type });
   }
 }
@@ -389,7 +393,8 @@ function letServe(st) { st.phase = "fault"; st.timer = 1.1; pushEv(st, { type: "
 
 function pointTo(st, w, reason) {
   st.ball.live = false; st.serveNo = 1;
-  st.active = [{}, {}]; st.pointNo++; st.lastWinner = w;                   // 점수를 따거나 잃으면 아이템 효과는 사라짐
+  st.active = [{}, {}]; st.pointNo++; st.lastWinner = w;
+  envPoint(st);   // 버프·디버프는 점수가 2번 나면 사라짐                   // 점수를 따거나 잃으면 아이템 효과는 사라짐
   for (let i = 0; i < 2; i++) if (st.items[i].length < ITEM_MAX && Math.random() < ITEM_CHANCE) {
     const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
     st.items[i].push(item); pushEv(st, { type: "itemGet", side: i, item });
