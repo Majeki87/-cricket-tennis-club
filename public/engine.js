@@ -363,18 +363,19 @@ function startHazard(st) {
   pushEv(st, { type: "hazard", kind: type });
 }
 function hazardTick(st) {   // 게임이 끝날 때마다
-  if (st.hazard) return;
+  if (st.hazard || st.buff) return;   // 버프와 디버프는 따로따로(동시에 안 나옴)
   if (st.phase === "done" || st.hazardsInSet >= 2) return;
   if (st.hazardCool > 0) { st.hazardCool--; return; }
   const played = st.games[0] + st.games[1];
   if ((st.hazardsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) startHazard(st);   // 세트에 한 번은 꼭
 }
 function envPoint(st) {
-  if (st.hazard && --st.hazard.pointsLeft <= 0) { pushEv(st, { type: "hazardEnd", kind: st.hazard.type }); st.hazard = null; st.hazardCool = 1; }
-  if (st.buff && --st.buff.pointsLeft <= 0) { pushEv(st, { type: "buffEnd", kind: st.buff.type }); st.buff = null; st.buffCool = 1; }
+  // 하나가 끝나면 버프·디버프 모두 최소 한 게임은 쉬었다가 다음 환경이 나옴
+  if (st.hazard && --st.hazard.pointsLeft <= 0) { pushEv(st, { type: "hazardEnd", kind: st.hazard.type }); st.hazard = null; st.hazardCool = st.buffCool = 1; }
+  if (st.buff && --st.buff.pointsLeft <= 0) { pushEv(st, { type: "buffEnd", kind: st.buff.type }); st.buff = null; st.hazardCool = st.buffCool = 1; }
 }
 function buffTick(st) {   // 디버프와 같은 규칙으로 따로 진행
-  if (st.buff) return;
+  if (st.buff || st.hazard) return;
   if (st.phase === "done" || st.buffsInSet >= 2) return;
   if (st.buffCool > 0) { st.buffCool--; return; }
   const played = st.games[0] + st.games[1];
@@ -421,8 +422,7 @@ function gameWon(st, w) {
   if (wasTb || (gw >= st.G && gw - gl >= 2)) setWon(st, w);
   else if (gw === st.G && gl === st.G) { st.tb = true; st.tbFirst = st.server; pushEv(st, { type: "tiebreak" }); }
   else if ((st.games[0] + st.games[1]) % 2 === 1) pushEv(st, { type: "ends" });
-  hazardTick(st);
-  buffTick(st);
+  if (Math.random() < .5) { hazardTick(st); buffTick(st); } else { buffTick(st); hazardTick(st); }   // 어느 쪽이 먼저 나올지 공평하게
 }
 function setWon(st, w) {
   st.sets[w]++; st.history.push([...st.games]);
