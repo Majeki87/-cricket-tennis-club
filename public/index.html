@@ -141,7 +141,7 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .ball{position:absolute;z-index:4;width:11px;height:11px;border-radius:50%;background:#edff45;border:2px solid white;transform:translate(-50%,-50%);box-shadow:0 0 8px #edff45;pointer-events:none}
 .ball.fast{box-shadow:0 0 14px 5px #fff6,0 0 20px #ffb52e}
 .ball.drop{box-shadow:0 0 12px 4px #6cf5ff99}
-.ball.tornado{width:15px;height:15px;background:#e9fbff;border:3px dashed #2f8fc9;box-shadow:0 0 0 4px #5cd0ff55,0 0 16px 4px #5cd0ff;animation:ballSpin .25s linear infinite}
+.ball.tornado{width:15px;height:15px;background:#e9fbff;border:3px dashed #2f8fc9;box-shadow:0 0 0 4px #5cd0ff55,0 0 16px 4px #5cd0ff;animation:ballSpin .13s linear infinite}
 .ball.snake{width:17px;height:15px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 50% 40%,#d8ff9e,#6cc23a 55%,#2f7d1a);border:2px solid #1f5a12;box-shadow:0 0 10px 3px #a77bff99}
 .ball.snake::before{content:"";position:absolute;left:2px;right:2px;top:3px;height:4px;background:radial-gradient(circle at 25% 50%,#111 0 1.6px,transparent 2px),radial-gradient(circle at 75% 50%,#111 0 1.6px,transparent 2px)}
 .ball.snake.strike{box-shadow:0 0 16px 7px #ff4dd2,0 0 30px 10px #a77bff}
@@ -1400,7 +1400,7 @@ let splashOn=true,splashReady=false;
   const touch=matchMedia("(pointer:coarse)").matches||innerWidth<600;
   if(touch){$("splKeys").hidden=true;$("splTouch").hidden=false}
   let ti=Math.floor(Math.random()*TIPS.length);const showTip=()=>{$("splTip").innerHTML=TIPS[ti%TIPS.length];ti++};showTip();
-  const tipTimer=setInterval(()=>{const b=$("splTipBox");b.style.opacity=0;setTimeout(()=>{showTip();b.style.opacity=1},250)},3200);
+  const tipTimer=setInterval(()=>{const b=$("splTipBox");if(!b||!splashOn){clearInterval(tipTimer);return}b.style.opacity=0;setTimeout(()=>{if($("splTip")){showTip();b.style.opacity=1}},250)},3200);
   const steps={dom:true,img:false,font:false,min:false};
   const img=$("splImg");const imgDone=()=>{steps.img=true;img.classList.add("on")};
   if(img.complete&&img.naturalWidth)imgDone();else{img.addEventListener("load",imgDone);img.addEventListener("error",()=>{steps.img=true})}
