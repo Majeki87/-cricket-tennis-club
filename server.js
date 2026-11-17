@@ -37,7 +37,7 @@ function packMatch(room) {
     history: st.history, tb: st.tb, winner: st.winner, chars: st.chars, items: st.items, active: st.active, rally: st.rally,
     gauge: st.gauge.map(Math.round), stun: st.stun.map(r2), posEpoch: st.posEpoch,
     players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
-    ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spin: b.spin, id: b.id },
+    ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id },
     events };
 }
 function snapshot(room) {
