@@ -396,8 +396,8 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <li>점수는 0(러브)·15·30·40·게임 순서이고, 40-40은 듀스로 2점을 연속으로 따야 게임을 가져갑니다.</li>
 <li>6게임을 먼저, 2게임 차로 따면 세트를 가져갑니다. 6-6이면 타이브레이크(7점 먼저, 2점 차)로 세트를 결정합니다. 서브권은 게임마다 바뀌고, 타이브레이크에서는 첫 1포인트 뒤 2포인트마다 바뀝니다.</li>
 <li>🎒 아이템: 포인트가 끝날 때마다 무작위로 얻을 수 있고 최대 3개까지 모입니다. 🐟 죽방멸치는 공이 빨라지고, 🥛 서울우유는 몸이 커져 공을 받기 쉬워지고, ☕ 로빈 쿠폰은 정확도와 스핀이 좋아집니다. 효과는 쓴 포인트가 끝나면 사라집니다.</li>
-<li>⚠️ 환경 디버프: 세트마다 1~2번, 2게임 동안 🌿 잡초(공이 아무 데로나 튀고 밟으면 느려짐), 🚨 비상벨(모두 우왕좌왕, 조작이 틀어짐), 🌧️ 비(웅덩이에서 공이 멈추거나 엉뚱하게 튀고 밟으면 느려짐)가 생겨요.</li>
-<li>✨ 환경 버프: 디버프와 같은 빈도로 🍃 맑은 공기(두 선수 모든 능력치 +1), ♨️ AI 코트 난방(선수·공이 빨라짐)이 2게임 동안 생겨요. 디버프와 겹칠 수도 있어요.</li>
+<li>⚠️ 환경 디버프: 세트마다 1~2번, 점수가 2번 날 때까지 🌿 잡초(공이 아무 데로나 튀고 밟으면 느려짐), 🚨 비상벨(모두 우왕좌왕, 조작이 틀어짐), 🌧️ 비(웅덩이에서 공이 멈추거나 엉뚱하게 튀고 밟으면 느려짐)가 생겨요.</li>
+<li>✨ 환경 버프: 디버프와 같은 빈도로 🍃 맑은 공기(두 선수 모든 능력치 +1), ♨️ AI 코트 난방(선수·공이 빨라짐)이 점수가 2번 날 때까지 생겨요. 디버프와 겹칠 수도 있어요.</li>
 <li>실제 경기는 홀수 게임마다 코트를 바꾸지만, 이 게임은 내 선수가 항상 화면 아래에 보이도록 화면을 유지합니다.</li>
 </ul></details>
 </div>
@@ -505,11 +505,11 @@ function renderBuff(){
   const bf=st?.buff,game=screen==="game"&&!!st;
   $("freshFx").classList.toggle("hidden",!(game&&bf?.type==="fresh"));$("heatFx").classList.toggle("hidden",!(game&&bf?.type==="heat"));
   const chip=$("buffChip");chip.classList.toggle("hidden",!(game&&bf));chip.classList.toggle("top",!st?.hazard);
-  if(bf)chip.textContent=`${BF[bf.type].ic} ${BF[bf.type].name} · ${BF[bf.type].chip} · ${bf.gamesLeft}게임 남음`;
+  if(bf)chip.textContent=`${BF[bf.type].ic} ${BF[bf.type].name} · ${BF[bf.type].chip} · ${bf.pointsLeft}포인트 남음`;
 }
 function buffAnnounce(kind){
   const b=BF[kind];if(!b)return;const el=document.createElement("div");el.className="hzann buff "+kind;el.innerHTML=`<span class="ic">${b.ic}</span>${b.ann}`;
-  $("arena").appendChild(el);setTimeout(()=>el.remove(),3300);Snd.play(kind);msg(b.ic+" "+b.fx+" (2게임 동안)");
+  $("arena").appendChild(el);setTimeout(()=>el.remove(),3300);Snd.play(kind);msg(b.ic+" "+b.fx+" (점수 2번 날 때까지)");
 }
 let hzKey="",nextSiren=0;
 function renderHazard(){
@@ -517,7 +517,7 @@ function renderHazard(){
   $("rainFx").classList.toggle("hidden",!(game&&hz?.type==="rain"));$("alarmFx").classList.toggle("hidden",!(game&&hz?.type==="alarm"));
   Snd.rain(game&&hz?.type==="rain");
   if(game&&hz?.type==="alarm"&&performance.now()>nextSiren){nextSiren=performance.now()+9000;Snd.play("siren",1.6)}   // 비상벨은 가끔 다시 울림
-  const chip=$("hzChip");chip.classList.toggle("hidden",!(game&&hz));if(hz)chip.textContent=`${HZ[hz.type].ic} ${HZ[hz.type].name} · ${hz.gamesLeft}게임 남음`;
+  const chip=$("hzChip");chip.classList.toggle("hidden",!(game&&hz));if(hz)chip.textContent=`${HZ[hz.type].ic} ${HZ[hz.type].name} · ${hz.pointsLeft}포인트 남음`;
   const key=hz?hz.type+JSON.stringify(hz.patches)+viewAX+viewTop+side+$("arena").clientWidth:"";if(key===hzKey)return;hzKey=key;
   const L=$("hzLayer");L.innerHTML="";if(!hz||!hz.patches)return;
   const aw=$("arena").clientWidth;
@@ -531,7 +531,7 @@ function hazardAnnounce(kind){
   const h=HZ[kind];if(!h)return;const el=document.createElement("div");el.className="hzann "+kind;el.innerHTML=`<span class="ic">${h.ic}</span>${h.ann}`;
   $("arena").appendChild(el);setTimeout(()=>el.remove(),3300);
   Snd.play(kind==="alarm"?"siren":kind==="rain"?"thunder":"rustle",3);if(kind==="alarm")nextSiren=performance.now()+9000;
-  msg(h.ic+" "+h.fx+" (2게임 동안)");
+  msg(h.ic+" "+h.fx+" (점수 2번 날 때까지)");
 }
 const ITEMS={anchovy:{name:"죽방멸치",emoji:"🐟",fx:"순간 튼튼해져 공이 훨씬 빠르고 묵직해져요"},
   milk:{name:"서울우유",emoji:"🥛",fx:"몸이 커져서 공을 받기 쉬워져요"},
@@ -809,7 +809,7 @@ function handleEvent(e){
       msg((e.side===side?"":who(e.side)+"의 ")+it.emoji+" "+it.name+"! "+it.fx+" (이번 포인트 동안)");break}
     case "taunt":onTaunt(e);break;
     case "hazard":setTimeout(()=>hazardAnnounce(e.kind),900);break;   // 게임 결과 배너 뒤에 이어서
-    case "buff":setTimeout(()=>buffAnnounce(e.kind),st.hazard&&st.hazard.gamesLeft===2?2400:900);break;   // 디버프와 동시에 시작하면 뒤이어 안내
+    case "buff":setTimeout(()=>buffAnnounce(e.kind),st.hazard&&st.hazard.pointsLeft===2?2400:900);break;   // 디버프와 동시에 시작하면 뒤이어 안내
     case "buffEnd":{const b=BF[e.kind];if(b){popup(b.ic+" 끝!",0,2,"call");setTimeout(()=>msg(b.end),1000)}break}
     case "hazardEnd":{const h=HZ[e.kind];if(h){popup(h.ic+" 끝!",0,0,"call");setTimeout(()=>msg(h.end),900)}break}
     case "hzBounce":{const t={weeds:"🌿 어디로 튈지 몰라!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~ 미끄러졌다!"}[e.mode];popup(t,e.x,e.y,"call");Snd.play(e.kind==="weeds"?"rustle":"splash");break}
