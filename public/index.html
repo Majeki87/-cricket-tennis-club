@@ -200,6 +200,18 @@ kbd{display:inline-block;min-width:18px;padding:0 4px;border:1px solid #52717a;b
 details.panel summary{cursor:pointer;font-weight:800}
 details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;line-height:1.65}
 
+/* 능력치 육각형 */
+.charwrap{display:grid;gap:12px;margin-top:9px}
+.charwrap .charpick{margin-top:0}
+@media (min-width:900px){.charwrap{grid-template-columns:minmax(0,1.35fr) minmax(280px,1fr);align-items:stretch}.lobby .charwrap .charpick{grid-template-columns:repeat(2,1fr)}}
+.char .ctype{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:10px;background:#ffffff14;font-size:11px;font-weight:800;color:#e7f4ee}
+.statbox{background:#10242d;border:1px solid #34515a;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.statbox .sb-title{font-size:15px;font-weight:900}
+.statbox .sb-type{font-size:12px;font-weight:800;margin-top:2px}
+.statbox svg{width:100%;max-width:300px;height:auto;margin:4px 0}
+.statbox .sb-style{font-size:12px;color:#c7d9d2;line-height:1.55;word-break:keep-all}
+.statbox .sb-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 10px;margin-top:8px;font-size:10.5px;color:#8fa9a0;text-align:left}
+.statbox .sb-cmp{font-size:11px;color:#9fb8af;margin-top:4px;min-height:15px}
 /* 로비(선수 선택 대시보드) */
 .lobby{display:grid;gap:12px;margin:12px auto 0;max-width:1000px}
 @media (min-width:900px){.lobby{grid-template-columns:1.1fr 1fr;align-items:start}.lobby #charPanel{grid-column:1/-1}}
@@ -300,7 +312,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 
 <div id="lobby" class="lobby">
 <section class="panel" id="charPanel"><b class="h2">선수 선택</b><div class="muted" style="margin-top:4px">선수마다 필살기가 다릅니다. 함께 뛸 귀뚜라미를 골라 주세요.</div>
-<div class="charpick" id="charPick"></div></section>
+<div class="charwrap"><div class="charpick" id="charPick"></div><div class="statbox" id="statBox"></div></div></section>
 
 <section class="panel" id="modePanel"><b class="h2">경기 설정</b>
 <div class="row" style="margin-top:9px"><button id="soloTab" class="btn">개인 연습</button><button id="multiTab" class="btn alt">실시간 대전</button></div>
@@ -387,10 +399,10 @@ const $=id=>document.getElementById(id);
 
 /* ───── 캐릭터 · 필살기 데이터 ───── */
 const CHARS={
-  tornado:{name:"토네이도 뚜리",emoji:"🌪️",special:"회전회오리샷",desc:"소용돌이처럼 빙글빙글 돌며 날아가요",body:"#2f8fc9",belly:"#a6defa",head:"#4fb2e6",band:"#f2fbff",glow:"#5cd0ff"},
-  snake:{name:"스네이크 뚜리",emoji:"🐍",special:"스네이크샷",desc:"뱀처럼 좌우로 크게 휘어 들어가요",body:"#6f4cc0",belly:"#c9b2f3",head:"#8d6ad8",band:"#9cff6b",glow:"#a77bff"},
-  fire:{name:"파이어 뚜리",emoji:"🔥",special:"불꽃샷",desc:"불덩이처럼 빨라서 받아치기 어려워요",body:"#d9542a",belly:"#ffc58a",head:"#ef7a3c",band:"#ffe14a",glow:"#ff7a2e"},
-  quake:{name:"어스 뚜리",emoji:"🌋",special:"어스퀘이크샷",desc:"공이 튀는 순간 상대가 잠시 못 움직여요",body:"#86663b",belly:"#dcc296",head:"#a8824d",band:"#4a3520",glow:"#e0b26a"}
+  tornado:{name:"토네이도 뚜리",emoji:"🌪️",special:"회전회오리샷",desc:"소용돌이처럼 빙글빙글 돌며 날아가요",type:"스핀형",style:"평소 샷도 크게 휘어 들어가고 튄 뒤 쭉 뻗어요. 대신 공을 받는 범위가 좁아요.",body:"#2f8fc9",belly:"#a6defa",head:"#4fb2e6",band:"#f2fbff",glow:"#5cd0ff"},
+  snake:{name:"스네이크 뚜리",emoji:"🐍",special:"스네이크샷",desc:"뱀처럼 좌우로 크게 휘어 들어가요",type:"스피드·테크닉형",style:"발이 가장 빠르고 공을 정확하게 보내요. 대신 공의 힘과 서브가 약한 편이에요.",body:"#6f4cc0",belly:"#c9b2f3",head:"#8d6ad8",band:"#9cff6b",glow:"#a77bff"},
+  fire:{name:"파이어 뚜리",emoji:"🔥",special:"불꽃샷",desc:"불덩이처럼 빨라서 받아치기 어려워요",type:"파워·직진형",style:"공이 휘지 않고 빠르게 곧장 날아가고 서브가 강해요. 대신 정확도가 낮아 아웃이 잦아요.",body:"#d9542a",belly:"#ffc58a",head:"#ef7a3c",band:"#ffe14a",glow:"#ff7a2e"},
+  quake:{name:"어스 뚜리",emoji:"🌋",special:"어스퀘이크샷",desc:"공이 튀는 순간 상대가 잠시 못 움직여요",type:"정석·올라운드형",style:"모든 능력이 고르고 실수가 적어요. 처음 하는 분께 추천해요.",body:"#86663b",belly:"#dcc296",head:"#a8824d",band:"#4a3520",glow:"#e0b26a"}
 };
 const SPECIALS=Object.keys(CHARS);
 /* 선수 멘트: 같은 상황에 여러 개면 그중 하나 (이벤트 번호로 골라서 실시간 대전 두 화면에 같은 멘트가 뜸) */
@@ -759,7 +771,7 @@ function render(){
     $("ballShadow").style.top=sy(b.y)+"%";$("ball").style.top=(sy(b.y)-lift)+"%";
     $("ballShadow").style.opacity=String(clamp(1-b.z*.18,.35,1));
     const k=b.kind||"normal";
-    $("ball").className="ball"+(k==="speed"?" fast":k==="drop"?" drop":SPECIALS.includes(k)?" "+k:"")+(b.pow?" pow":"")+(b.spin&&!SPECIALS.includes(k)?" spin":"");
+    $("ball").className="ball"+(k==="speed"?" fast":k==="drop"?" drop":SPECIALS.includes(k)?" "+k:"")+(b.pow?" pow":"")+(b.spinVis&&!SPECIALS.includes(k)?" spin":"");
     if(b.live&&(SPECIALS.includes(k)||b.pow)){const now=performance.now();if(now-lastTrail>28){lastTrail=now;const t=document.createElement("div");t.className="trail "+(SPECIALS.includes(k)?k:"pow");t.style.left=sx(b.x)+"%";t.style.top=(sy(b.y)-lift)+"%";$("arena").appendChild(t);setTimeout(()=>t.remove(),470)}}
   }
   // 서브 목표 박스 표시
@@ -876,8 +888,44 @@ function renderLobby(){
 
 /* ───── 캐릭터 · 모드 선택 ───── */
 function buildCharPick(){
-  $("charPick").innerHTML=SPECIALS.map(k=>{const c=CHARS[k];return `<button class="char" data-char="${k}" aria-pressed="false">${BUG_SVG}<b>${c.emoji} ${c.name}</b><span class="sp">${c.special}</span><small>${c.desc}</small></button>`}).join("");
-  document.querySelectorAll(".char").forEach(b=>{setLook(b,b.dataset.char);b.onclick=()=>pickChar(b.dataset.char)});
+  $("charPick").innerHTML=SPECIALS.map(k=>{const c=CHARS[k];return `<button class="char" data-char="${k}" aria-pressed="false">${BUG_SVG}<b>${c.emoji} ${c.name}</b><span class="ctype">${c.type}</span><span class="sp">필살기 · ${c.special}</span><small>${c.desc}</small></button>`}).join("");
+  document.querySelectorAll(".char").forEach(b=>{setLook(b,b.dataset.char);b.onclick=()=>pickChar(b.dataset.char);
+    const on=()=>{if(hoverChar!==b.dataset.char){hoverChar=b.dataset.char;renderStatBox()}},off=()=>{if(hoverChar===b.dataset.char){hoverChar=null;renderStatBox()}};
+    b.addEventListener("mouseenter",on);b.addEventListener("focus",on);b.addEventListener("mouseleave",off);b.addEventListener("blur",off)});
+  renderStatBox();
+}
+/* ───── 능력치 육각형: 선택한 선수(채움) + 마우스를 올린 선수(점선)를 겹쳐 비교 ───── */
+const STAT_LABEL={power:"파워",speed:"스피드",control:"컨트롤",spin:"스핀",reach:"리치",serve:"서브"};
+const STAT_HELP={power:"공 속도",speed:"이동 속도",control:"정확도",spin:"휘는 정도",reach:"받는 범위",serve:"서브 위력"};
+let hoverChar=null,statShown=null,statTween=0;
+const HX=150,HY=128,HR=88;
+const hexPt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3;return[HX+Math.cos(a)*r,HY+Math.sin(a)*r]};
+const polyPts=vals=>vals.map((v,i)=>hexPt(i,HR*v/5).map(n=>n.toFixed(1)).join(",")).join(" ");
+function statVals(k){const s=E.CHAR_STATS[k];return s?E.STAT_KEYS.map(x=>s[x]):[0,0,0,0,0,0]}
+function renderStatBox(){
+  const main=myChar||hoverChar,cmp=hoverChar&&myChar&&hoverChar!==myChar?hoverChar:null;
+  const box=$("statBox");
+  if(!main){box.innerHTML=`<div class="sb-title">선수 능력치</div><div class="sb-style" style="margin-top:6px">선수 카드에 마우스를 올리거나 골라 보세요.</div>${hexSvg(null,null)}`;return}
+  const c=CHARS[main];
+  box.innerHTML=`<div class="sb-title">${c.emoji} ${c.name}</div><div class="sb-type" style="color:${c.glow}">${c.type}</div>${hexSvg(main,cmp)}
+    <div class="sb-cmp">${cmp?`점선: ${CHARS[cmp].emoji} ${CHARS[cmp].name}(${CHARS[cmp].type})와 비교`:""}</div>
+    <div class="sb-style">${c.style}</div>
+    <div class="sb-legend">${E.STAT_KEYS.map(x=>`<span><b style="color:#d9ebe4">${STAT_LABEL[x]}</b> ${STAT_HELP[x]}</span>`).join("")}</div>`;
+  // 바뀔 때 도형이 부드럽게 커지는 애니메이션
+  const poly=box.querySelector(".hx-main");if(!poly)return;
+  const to=statVals(main),from=statShown||to.map(()=>0);statShown=to;cancelAnimationFrame(statTween);const t0=performance.now();
+  const anim=t=>{const a=Math.min(1,(t-t0)/260),e=1-Math.pow(1-a,3);poly.setAttribute("points",polyPts(to.map((v,i)=>from[i]+(v-from[i])*e)));if(a<1)statTween=requestAnimationFrame(anim)};
+  statTween=requestAnimationFrame(anim);
+}
+function hexSvg(main,cmp){
+  const grid=[1,2,3,4,5].map(l=>`<polygon points="${polyPts([l,l,l,l,l,l])}" fill="${l===5?"#ffffff08":"none"}" stroke="#ffffff${l===5?"40":"1c"}" stroke-width="1"/>`).join("");
+  const axes=[0,1,2,3,4,5].map(i=>{const [x,y]=hexPt(i,HR);return`<line x1="${HX}" y1="${HY}" x2="${x}" y2="${y}" stroke="#ffffff1c"/>`}).join("");
+  const vals=main?statVals(main):null,c=main?CHARS[main]:null;
+  const labels=E.STAT_KEYS.map((k,i)=>{const [x,y]=hexPt(i,HR+22);const v=vals?vals[i]:"";
+    return`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="800" fill="#d9ebe4">${STAT_LABEL[k]}<tspan fill="${c?c.glow:"#8fa9a0"}" dx="4">${v}</tspan></text>`}).join("");
+  const cmpPoly=cmp?`<polygon points="${polyPts(statVals(cmp))}" fill="none" stroke="${CHARS[cmp].glow}" stroke-width="2" stroke-dasharray="5 4"/>`:"";
+  const mainPoly=main?`<polygon class="hx-main" points="${polyPts(statShown&&statShown.join()===statVals(main).join()?statVals(main):(statShown||[0,0,0,0,0,0]))}" fill="${c.glow}55" stroke="${c.glow}" stroke-width="2.5" stroke-linejoin="round"/>`:"";
+  return`<svg viewBox="0 0 300 250" role="img" aria-label="${main?CHARS[main].name+" 능력치":"능력치"}">${grid}${axes}${mainPoly}${cmpPoly}${labels}</svg>`;
 }
 function pickChar(k){
   if(isLocked()||!CHARS[k])return;
@@ -885,7 +933,8 @@ function pickChar(k){
   document.querySelectorAll(".char").forEach(b=>{const on=b.dataset.char===k;b.classList.toggle("active",on);b.setAttribute("aria-pressed",on)});
   $("specialBtn").innerHTML=c.emoji+" "+c.special+"<small>기 100% 필요 · Q</small>";$("specialBtn").style.setProperty("--glow",c.glow);
   if(mode==="multi"&&room)send({type:"char",char:k});
-  msg(c.emoji+" "+c.name+" 선택! 필살기 "+c.special+": "+c.desc+".");
+  msg(c.emoji+" "+c.name+"("+c.type+") 선택! 필살기 "+c.special+": "+c.desc+".");
+  renderStatBox();
 }
 function setMode(m){mode=m;if(m==="solo")side=0;
   $("soloTab").className="btn "+(m==="solo"?"":"alt");$("multiTab").className="btn "+(m==="multi"?"":"alt");
@@ -1131,7 +1180,7 @@ function loop(t){
   const dt=Math.min((t-last)/1000,.05);last=t;
   if(mode==="solo"&&st){E.step(st,dt,[{keys:worldKeys()},E.aiThink(st,1,difficulty,dt)]);processEvents()}
   if(mode==="multi"&&st&&myPos&&(st.phase==="serve"||st.phase==="rally")){
-    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,players:[...st.players]};view.players[side]=myPos;
+    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,chars:st.chars,players:[...st.players]};view.players[side]=myPos;
     E.moveLocal(view,side,worldKeys(),dt);
     const now=performance.now(),key=myPos.x.toFixed(2)+","+myPos.y.toFixed(2);
     if(now-lastPosSend>=33&&key!==lastSent){lastPosSend=now;lastSent=key;send({type:"pos",x:+myPos.x.toFixed(3),y:+myPos.y.toFixed(3),e:myEpoch})}
