@@ -186,6 +186,31 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .badges{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-size:15px;white-space:nowrap;pointer-events:none;filter:drop-shadow(0 1px 2px #000)}
 .bug.opponent .badges{top:auto;bottom:-18px;transform:translateX(-50%) rotate(180deg)}
 .bug{transition:scale .3s}
+/* 환경 디버프 */
+#hzLayer{position:absolute;inset:0;z-index:1;pointer-events:none}
+.hzp{position:absolute;transform:translate(-50%,-50%);border-radius:50%}
+.hzp.weeds{background:radial-gradient(circle,#2f7d2acc 0,#2a6b25aa 55%,#2a6b2500 72%)}
+.hzp.weeds span{position:absolute;transform:translate(-50%,-60%);line-height:1;filter:drop-shadow(0 1px 1px #0006)}
+.hzp.rain{background:radial-gradient(ellipse,#7ec8f2cc 0,#4a9fd6aa 50%,#4a9fd600 72%);overflow:hidden}
+.hzp.rain::after{content:"";position:absolute;inset:22%;border-radius:50%;border:2px solid #e6f6ffaa;animation:ripple 1.6s ease-out infinite}
+@keyframes ripple{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.25);opacity:0}}
+#rainFx{position:absolute;inset:0;z-index:5;pointer-events:none;background:repeating-linear-gradient(105deg,#ffffff00 0 14px,#d8eeff55 14px 15px,#ffffff00 15px 30px),linear-gradient(#0a203055,#0a203033);background-size:60px 120px,100% 100%;animation:rainFall .5s linear infinite}
+@keyframes rainFall{to{background-position:-30px 120px,0 0}}
+#alarmFx{position:absolute;inset:0;z-index:5;pointer-events:none;box-shadow:inset 0 0 0 0 #ff2a2a;animation:alarmFlash 1s ease-in-out infinite}
+@keyframes alarmFlash{0%,100%{box-shadow:inset 0 0 30px 6px #ff2a2a00;background:#ff000000}50%{box-shadow:inset 0 0 40px 14px #ff2a2acc;background:#ff00001a}}
+.exit-sign{position:absolute;right:6%;top:24%;display:flex;align-items:center;gap:4px;background:#11a052;color:#fff;border:2px solid #e9fff1;border-radius:6px;padding:3px 7px;font-weight:1000;box-shadow:0 0 14px #2dff8a;animation:exitBlink 1s steps(2) infinite}
+.exit-sign b{font-size:14px;letter-spacing:1px}.exit-sign small{font-size:10px;font-weight:800}
+.exit-run{font-size:16px;transform:scaleX(-1)}
+@keyframes exitBlink{50%{filter:brightness(1.35)}}
+#hzChip{position:absolute;left:6px;top:6px;z-index:6;background:#000000aa;color:#fff;border-radius:12px;padding:3px 9px;font-size:11px;font-weight:800;pointer-events:none}
+.hzann{position:absolute;z-index:8;left:4%;right:4%;top:18%;padding:12px 10px;border-radius:14px;text-align:center;pointer-events:none;color:#fff;font-weight:1000;font-size:clamp(15px,4.2vw,21px);line-height:1.45;word-break:keep-all;box-shadow:0 8px 24px #000a;animation:hzIn 3.2s ease-out forwards}
+.hzann .ic{display:block;font-size:34px;margin-bottom:4px}
+.hzann.weeds{background:linear-gradient(135deg,#2f7d2a,#1d5a1a);border:2px solid #9be38f}
+.hzann.rain{background:linear-gradient(135deg,#2a6fa3,#1a4a72);border:2px solid #a8dcff}
+.hzann.alarm{background:linear-gradient(135deg,#c81e1e,#8a0f0f);border:2px solid #ffd0d0}
+.hzann.alarm .en{display:block;font-size:.8em;opacity:.95;margin-top:2px}
+@keyframes hzIn{0%{opacity:0;transform:translateY(-14px) scale(.9)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
+body.mobile .hzann{top:14%}
 /* 선수 말풍선 */
 .bubble{position:absolute;z-index:7;max-width:min(62%,190px);padding:6px 10px;border-radius:12px;background:#fffdf3;color:#1b2a24;font-size:12px;font-weight:800;line-height:1.35;text-align:center;word-break:keep-all;box-shadow:0 3px 10px #0006;pointer-events:none;opacity:0;visibility:hidden}
 .bubble::after{content:"";position:absolute;left:50%;margin-left:-6px;border:6px solid transparent}
@@ -356,6 +381,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <li>점수는 0(러브)·15·30·40·게임 순서이고, 40-40은 듀스로 2점을 연속으로 따야 게임을 가져갑니다.</li>
 <li>6게임을 먼저, 2게임 차로 따면 세트를 가져갑니다. 6-6이면 타이브레이크(7점 먼저, 2점 차)로 세트를 결정합니다. 서브권은 게임마다 바뀌고, 타이브레이크에서는 첫 1포인트 뒤 2포인트마다 바뀝니다.</li>
 <li>🎒 아이템: 포인트가 끝날 때마다 무작위로 얻을 수 있고 최대 3개까지 모입니다. 🐟 죽방멸치는 공이 빨라지고, 🥛 서울우유는 몸이 커져 공을 받기 쉬워지고, ☕ 로빈 쿠폰은 정확도와 스핀이 좋아집니다. 효과는 쓴 포인트가 끝나면 사라집니다.</li>
+<li>⚠️ 환경 디버프: 세트마다 1~2번, 2게임 동안 🌿 잡초(공이 아무 데로나 튀고 밟으면 느려짐), 🚨 비상벨(모두 우왕좌왕, 조작이 틀어짐), 🌧️ 비(웅덩이에서 공이 멈추거나 엉뚱하게 튀고 밟으면 느려짐)가 생겨요.</li>
 <li>실제 경기는 홀수 게임마다 코트를 바꾸지만, 이 게임은 내 선수가 항상 화면 아래에 보이도록 화면을 유지합니다.</li>
 </ul></details>
 </div>
@@ -382,6 +408,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <line class="netshadow" x1="-6.4" y1=".28" x2="6.4" y2=".28"/><line class="net" x1="-6.4" y1="0" x2="6.4" y2="0"/><line class="netmesh" x1="-6.3" y1="0" x2="6.3" y2="0"/>
 <rect class="post" x="-6.55" y="-.16" width=".3" height=".32"/><rect class="post" x="6.25" y="-.16" width=".3" height=".32"/>
 </svg>
+<div id="hzLayer"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="hzChip" class="hidden"></div>
 <div class="bug opponent" id="opponent" role="img" aria-label="상대 귀뚜라미 선수"></div>
 <div class="bug" id="player" role="img" aria-label="내 귀뚜라미 선수"></div>
 <div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
@@ -452,6 +479,31 @@ function say(i,text,prio,big){   // 더 중요한 멘트(prio 높음)가 떠 있
   b.until=now+1700;b.prio=prio;
   const el=$(i===side?"meBubble":"opBubble");el.textContent=text;el.classList.toggle("big",!!big);
   el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
+}
+const HZ={weeds:{ic:"🌿",name:"잡초",ann:"아앗! 잡초가 자라났다!!<br>모두 뽑을 준비해!!",fx:"잡초에 공이 떨어지면 어디로 튈지 몰라요. 잡초를 밟으면 느려져요.",end:"잡초를 다 뽑았다! 코트가 깨끗해졌어요."},
+  alarm:{ic:"🚨",name:"비상벨",ann:"비상구는 이쪽입니다.<span class='en'>Here is emergency exit!</span>",fx:"비상벨에 모두 우왕좌왕! 조작이 마음대로 안 돼요.",end:"비상 상황 해제! 다시 침착하게~"},
+  rain:{ic:"🌧️",name:"비",ann:"아앗 하늘에서 비가 온다.",fx:"웅덩이에 공이 떨어지면 멈추거나 엉뚱하게 튀어요. 웅덩이를 밟으면 느려져요.",end:"비가 그쳤다! 웅덩이도 말랐어요."}};
+let hzKey="",nextSiren=0;
+function renderHazard(){
+  const hz=st?.hazard,game=screen==="game"&&!!st;
+  $("rainFx").classList.toggle("hidden",!(game&&hz?.type==="rain"));$("alarmFx").classList.toggle("hidden",!(game&&hz?.type==="alarm"));
+  Snd.rain(game&&hz?.type==="rain");
+  if(game&&hz?.type==="alarm"&&performance.now()>nextSiren){nextSiren=performance.now()+9000;Snd.play("siren",1.6)}   // 비상벨은 가끔 다시 울림
+  const chip=$("hzChip");chip.classList.toggle("hidden",!(game&&hz));if(hz)chip.textContent=`${HZ[hz.type].ic} ${HZ[hz.type].name} · ${hz.gamesLeft}게임 남음`;
+  const key=hz?hz.type+JSON.stringify(hz.patches)+viewAX+viewTop+side+$("arena").clientWidth:"";if(key===hzKey)return;hzKey=key;
+  const L=$("hzLayer");L.innerHTML="";if(!hz||!hz.patches)return;
+  const aw=$("arena").clientWidth;
+  hz.patches.forEach((p,i)=>{const d=document.createElement("div");d.className="hzp "+hz.type;
+    d.style.left=sx(p.x)+"%";d.style.top=sy(p.y)+"%";d.style.width=(2*p.r/(2*viewAX)*100)+"%";d.style.height=(2*p.r/(viewBot-viewTop)*100)+"%";
+    if(hz.type==="weeds"){const px=2*p.r/(2*viewAX)*aw;for(let k=0;k<6;k++){const t=document.createElement("span");t.textContent=k%2?"🌱":"🌿";t.style.left=(18+h01p(i*31+k)*64)+"%";t.style.top=(22+h01p(i*57+k*3)*60)+"%";t.style.fontSize=(px*.28)+"px";d.appendChild(t)}}
+    L.appendChild(d)});
+}
+const h01p=n=>hash(n)/4294967296;
+function hazardAnnounce(kind){
+  const h=HZ[kind];if(!h)return;const el=document.createElement("div");el.className="hzann "+kind;el.innerHTML=`<span class="ic">${h.ic}</span>${h.ann}`;
+  $("arena").appendChild(el);setTimeout(()=>el.remove(),3300);
+  Snd.play(kind==="alarm"?"siren":kind==="rain"?"thunder":"rustle",3);if(kind==="alarm")nextSiren=performance.now()+9000;
+  msg(h.ic+" "+h.fx+" (2게임 동안)");
 }
 const ITEMS={anchovy:{name:"죽방멸치",emoji:"🐟",fx:"순간 튼튼해져 공이 훨씬 빠르고 묵직해져요"},
   milk:{name:"서울우유",emoji:"🥛",fx:"몸이 커져서 공을 받기 쉬워져요"},
@@ -582,6 +634,10 @@ const Snd=(()=>{
     laugh(lv=1){  // 와하하: 짧은 웃음 덩어리가 여러 번
       const voices=2+lv;for(let v=0;v<voices;v++){const f=230+Math.random()*120,off=Math.random()*.12;
         for(let k=0;k<4+lv;k++){const at=off+k*(.12+Math.random()*.03);tone({f:f*(1-k*.03),type:"sawtooth",lp:1300,at,dur:.08,vol:.03+lv*.006});noise({at,dur:.07,vol:.025,f:1100,q:2})}}},
+    siren(dur=3){for(let t=0;t<dur;t+=.8){tone({f:960,type:"square",lp:1800,at:t,dur:.4,vol:.07,atk:.02});tone({f:770,type:"square",lp:1800,at:t+.4,dur:.4,vol:.07,atk:.02})}},
+    rustle(){for(let i=0;i<6;i++)noise({at:i*.07+Math.random()*.04,dur:.12,vol:.09,f:2600+Math.random()*1500,q:.8})},
+    splash(){noise({dur:.35,vol:.2,f:1200,f2:500,q:.6});for(let i=0;i<5;i++)tone({f:900+Math.random()*900,f2:400,at:.04+i*.04,dur:.06,vol:.04})},
+    thunder(){noise({dur:2.2,vol:.3,f:120,ft:"lowpass",atk:.05});noise({at:.08,dur:1.6,vol:.12,f:420,q:.5})},
     oooh(){tone({f:300,f2:520,type:"sawtooth",lp:900,dur:.9,vol:.05,atk:.2});tone({f:360,f2:600,type:"sawtooth",lp:900,dur:.9,vol:.04,atk:.25});FX.cheer(true)},
     click(){tone({f:1100,dur:.03,vol:.05})},
     pop(kind){   // 뿅: 위로 톡 튀어 오르는 귀여운 소리 (누를 때마다 높이가 살짝 달라짐)
@@ -663,6 +719,14 @@ const Snd=(()=>{
     if(nextRustle<t+.15){noise({bus:natBus,at:nextRustle-t,dur:.9+Math.random()*.8,vol:.03,f:3200,q:.4,atk:.35,pan:Math.random()*1.4-.7});nextRustle+=4+Math.random()*6}   // 나뭇잎 바스락
     if(scene!=="game"&&t>=musicAt-.15)while(nextT<t+.15){musicStep(nextT-t);nextT+=SPB;stepN++}
   }
+  let rainNode=null;
+  function rain(on){   // 비 오는 동안 빗소리(효과음 설정을 따름)
+    if(!ctx)return;
+    if(on&&!rainNode){const src=ctx.createBufferSource(),hp=ctx.createBiquadFilter(),lp=ctx.createBiquadFilter(),g=ctx.createGain();
+      src.buffer=noiseBuf;src.loop=true;hp.type="highpass";hp.frequency.value=1800;lp.type="lowpass";lp.frequency.value=7000;g.gain.value=0;
+      src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(sfxBus);src.start();g.gain.setTargetAtTime(.07,ctx.currentTime,.6);rainNode={src,g}}
+    else if(!on&&rainNode){const r=rainNode;rainNode=null;r.g.gain.setTargetAtTime(0,ctx.currentTime,.4);setTimeout(()=>{try{r.src.stop()}catch{}},2000)}
+  }
   function setScene(v){
     scene=v;if(!ctx)return;const t=ctx.currentTime;
     if(v==="game"){
@@ -674,7 +738,7 @@ const Snd=(()=>{
   }
   function toggle(k){pref[k]=!pref[k];save();init();apply();return pref[k]}
   document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else ctx.resume()});
-  return{init,play,setScene,toggle,pref};
+  return{init,play,setScene,toggle,pref,rain};
 })();
 
 /* ───── 점수 표기 ───── */
@@ -714,6 +778,9 @@ function handleEvent(e){
     case "item":{const it=ITEMS[e.item];if(!it)break;Snd.play("item",e.item);say(e.side,pick(LINES.item[e.item],e.id),3,true);popup(it.emoji+" "+it.name+"!",st.players[e.side].x,st.players[e.side].y,"call");
       msg((e.side===side?"":who(e.side)+"의 ")+it.emoji+" "+it.name+"! "+it.fx+" (이번 포인트 동안)");break}
     case "taunt":onTaunt(e);break;
+    case "hazard":setTimeout(()=>hazardAnnounce(e.kind),900);break;   // 게임 결과 배너 뒤에 이어서
+    case "hazardEnd":{const h=HZ[e.kind];if(h){popup(h.ic+" 끝!",0,0,"call");setTimeout(()=>msg(h.end),900)}break}
+    case "hzBounce":{const t={weeds:"🌿 어디로 튈지 몰라!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~ 미끄러졌다!"}[e.mode];popup(t,e.x,e.y,"call");Snd.play(e.kind==="weeds"?"rustle":"splash");break}
     case "netcord":Snd.play("netcord");popup("NET CORD",e.x,e.y,"call");break;
     case "net":Snd.play("net");popup("NET",e.x,e.y,"bad");break;
     case "bounce":Snd.play("bounce");if(e.out)Snd.play("buzz");mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
@@ -841,6 +908,7 @@ function render(){
   let status="대기 중";
   if(!st)status=mode==="multi"?({waiting:"상대를 기다리는 중",ready:"선수 준비 완료"}[roomStatus]||"대기 중"):"대기 중";
   else status=({serve:(st.serveNo===1?"퍼스트":"세컨드")+" 서브 · "+(E.serveCourt(st)==="deuce"?"듀스 코트":"애드 코트"),rally:"랠리 중",point:"포인트 종료",fault:st.serveNo===2?"폴트":"레트",done:"경기 종료"})[st.phase]+(st.tb&&st.phase!=="done"?" · 타이브레이크":"");
+  if(st?.hazard&&HZ[st.hazard.type])status+=" · "+HZ[st.hazard.type].ic+" "+HZ[st.hazard.type].name;
   $("gameStatus").textContent=status;
   // 오버레이
   if(st&&st.phase!==lastPhase){phaseAt=performance.now();
@@ -852,6 +920,7 @@ function render(){
   }
   if(!st)lastPhase="";
   renderItems();
+  renderHazard();
   renderChatUI();
   placeBubbles(pl);
   {const ok=canTaunt();$("tauntBtn").disabled=!ok;$("mTaunt").disabled=!ok;}
@@ -1234,7 +1303,7 @@ function loop(t){
   const dt=Math.min((t-last)/1000,.05);last=t;
   if(mode==="solo"&&st){E.step(st,dt,[{keys:worldKeys()},E.aiThink(st,1,difficulty,dt)]);processEvents()}
   if(mode==="multi"&&st&&myPos&&(st.phase==="serve"||st.phase==="rally")){
-    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,players:[...st.players]};view.players[side]=myPos;
+    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,hazard:st.hazard,clock:st.clock,players:[...st.players]};view.players[side]=myPos;
     E.moveLocal(view,side,worldKeys(),dt);
     const now=performance.now(),key=myPos.x.toFixed(2)+","+myPos.y.toFixed(2);
     if(now-lastPosSend>=33&&key!==lastSent){lastPosSend=now;lastSent=key;send({type:"pos",x:+myPos.x.toFixed(3),y:+myPos.y.toFixed(3),e:myEpoch})}
