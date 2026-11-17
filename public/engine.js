@@ -38,12 +38,14 @@ const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;  
 const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
 const HAZARD_POINTS = 2, HAZARD_CHANCE = .22;   // 시작은 게임이 끝날 때, 유지는 포인트 2개(누가 점수를 내든)
 // 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
+const TORNADO = { r: 2.3, loops: 5, squash: .7 };   // 회전회오리샷: 반지름 2.3m 고리를 5바퀴
+const FIREBALL = { T: .45, margin: .06, z: 1.1 };   // 불꽃샷: 0.45초 목표(멸치보다 빠르게), 낮은 공도 허리 높이에서 강타
 const SNAKE = { coil: .62, slow: .52, fast: 1.783, amp: 1.7, waves: 4.5 };   // 4번 반 꿈틀 · .62×.52 + .38×1.783 ≈ 1 (총 이동 거리 유지)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
 function h01(n) { let x = Math.imul(n | 0, 0x9E3779B1); x ^= x >>> 16; x = Math.imul(x, 0x85EBCA6B); x ^= x >>> 13; x = Math.imul(x, 0xC2B2AE35); x ^= x >>> 16; return (x >>> 0) / 4294967296; }
 function inPatch(st, x, y) { const hz = st.hazard; if (!hz || !hz.patches) return null; for (const p of hz.patches) if ((x - p.x) ** 2 + (y - p.y) ** 2 <= p.r * p.r) return p; return null; }
-const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.7, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
+const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.85, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
 const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, special: 1.7 };
 const AI = {
   easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3, reflect: .3 },
@@ -224,7 +226,7 @@ function shoot(st, side, skill, aim) {
       kind = char; tx = away * 3.1; sig = .2; zSig = 0; margin = .3;
       if (char === "tornado") { depth = 9; T = 1.35; curve = "tornado"; }
       else if (char === "snake") { depth = 8.8; T = 1.3; curve = "snake"; }
-      else if (char === "fire") { depth = 10.2; T = .62; }
+      else if (char === "fire") { depth = 10.2; tx = away * 2.3; T = FIREBALL.T; margin = FIREBALL.margin; }   // 너무 빨라서 구석까지 찌르면 아무도 못 받으니 조준 폭은 약간 안쪽
       else { depth = 8.4; T = 1.15; }
       break;
     default: tx = h ? h * 3 : clamp(-opp.x * .45 + (Math.random() - .5) * 3.2, -3.1, 3.1); depth = 8.6 + v * 1.4; T = 1.25 - v * .08; sig = .5;
@@ -236,7 +238,8 @@ function shoot(st, side, skill, aim) {
   if (st.buff && st.buff.type === "heat" && skill !== "special") T *= HEAT.ballT;   // 코트 난방: 공도 빨라짐
   tx += gauss() * sig * err;
   const ty = d * (depth + gauss() * sig * .8 * err);
-  launch(b, { x: b.x, y: b.y, z: b.z }, { x: tx, y: ty }, T, margin);
+  const fromZ = skill === "special" && char === "fire" ? Math.max(b.z, FIREBALL.z) : b.z;
+  launch(b, { x: b.x, y: b.y, z: fromZ }, { x: tx, y: ty }, T, margin);
   if (zSig) b.vz += gauss() * zSig * err;
   b.owner = side; b.serve = false; b.kind = kind; b.curve = curve;
   if (skill === "drop") { b.e = .42; b.keep = .6; }
@@ -307,7 +310,7 @@ function stepBall(st, dt) {
   let ox = 0, oy = 0;
   if (b.curve && b.bounces === 0 && b.t < b.T) {        // 필살기 궤적: 착지 순간에는 휘어짐이 0이 되도록
     const u = b.t / b.T;
-    if (b.curve === "tornado") { const r = 1.5 * Math.sin(Math.PI * u), ph = u * Math.PI * 6; ox = r * Math.sin(ph); oy = r * .55 * (Math.cos(ph) - 1); }
+    if (b.curve === "tornado") { const r = TORNADO.r * Math.sin(Math.PI * u), ph = u * Math.PI * 2 * TORNADO.loops; ox = r * Math.sin(ph); oy = r * TORNADO.squash * (Math.cos(ph) - 1); }
     else if (b.curve === "snake" && u < SNAKE.coil) ox = SNAKE.amp * Math.sin(2 * Math.PI * SNAKE.waves * u / SNAKE.coil) * Math.min(1, u / .06);   // 촘촘하게 좌우로 꿈틀꿈틀(물기 직전에 정확히 가운데로 돌아옴)
   }
   if (b.spinAmp && b.bounces === 0 && b.t < b.T) ox += b.spinAmp * Math.sin(Math.PI * b.t / b.T) * b.spin;   // 스핀으로 바나나처럼 휘었다가 목표 지점에 떨어짐
