@@ -23,7 +23,8 @@ const CHAR_STATS = {
   snake:   { power: 2, speed: 5, control: 4, spin: 3, reach: 3, serve: 2 },   // 스피드·테크닉형: 발이 빠르고 정교함
   quake:   { power: 3, speed: 3, control: 4, spin: 3, reach: 3, serve: 3 }    // 정석·올라운드형: 고르게, 실수가 적음
 };
-const statOf = (st, side, key) => (CHAR_STATS[st.chars && st.chars[side]] || {})[key] || 3;
+// 환경 버프 '맑은 공기'가 있으면 두 선수 모든 능력치 +1
+const statOf = (st, side, key) => ((CHAR_STATS[st.chars && st.chars[side]] || {})[key] || 3) + (st.buff && st.buff.type === "fresh" ? 1 : 0);
 const SF = {   // 능력치 1칸당 효과
   powerT: v => 1 - .07 * (v - 3),        // 공 비행 시간(작을수록 빠름)
   speed: v => 1 + .07 * (v - 3),         // 이동 속도
@@ -36,6 +37,8 @@ const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;  
 // 환경 디버프: 게임이 끝날 때 가끔 시작해서 2게임 동안 유지, 세트당 1~2번
 const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
 const HAZARD_GAMES = 2, HAZARD_CHANCE = .22;
+// 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
+const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
 function h01(n) { let x = Math.imul(n | 0, 0x9E3779B1); x ^= x >>> 16; x = Math.imul(x, 0x85EBCA6B); x ^= x >>> 13; x = Math.imul(x, 0xC2B2AE35); x ^= x >>> 16; return (x >>> 0) / 4294967296; }
 function inPatch(st, x, y) { const hz = st.hazard; if (!hz || !hz.patches) return null; for (const p of hz.patches) if ((x - p.x) ** 2 + (y - p.y) ** 2 <= p.r * p.r) return p; return null; }
@@ -79,7 +82,8 @@ function newMatch(opts = {}) {
     players: [{ x: 0, y: COURT.L + .8 }, { x: 0, y: -COURT.L - .8 }],
     ball: idleBall(0), gauge: [0, 0], stun: [0, 0], winner: null, rally: 0,
     events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
-    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], hazard: null, hazardsInSet: 0, hazardCool: 0, lastHazard: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
+    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], hazard: null, hazardsInSet: 0, hazardCool: 0, lastHazard: null,
+    buff: null, buffsInSet: 0, buffCool: 0, lastBuff: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
   };
   pushEv(st, { type: "toss", server: st.server });
   startPoint(st);
@@ -114,6 +118,7 @@ function movePlayer(st, i, inp, dt) {
   const p = st.players[i], hz = st.hazard;
   let sp = (inp.speed || MOVE_SPEED) * SF.speed(statOf(st, i, "speed"));
   if (hz && HZ_SLOW[hz.type] && inPatch(st, p.x, p.y)) sp *= HZ_SLOW[hz.type];
+  if (st.buff && st.buff.type === "heat") sp *= HEAT.move;   // 코트 난방: 몸이 풀려 빨라짐
   // 비상벨: 0.66초마다 바뀌는 방향으로 조작이 틀어지고, 가만히 있어도 우왕좌왕(서버·화면이 같은 값을 계산하도록 시간 기반)
   let ang = 0, drift = null;
   if (hz && hz.type === "alarm") {
@@ -166,7 +171,7 @@ function serve(st, side, aim = {}) {
   const tx = clamp(box * COURT.S / 2 + h * 1.3, -COURT.S, COURT.S) + gauss() * sig;
   const ty = d * ((first ? 5.5 : 4.7) + gauss() * sig * .7);
   const p = st.players[side];
-  launch(b, { x: p.x + .2, y: p.y, z: 2.65 }, { x: tx, y: ty }, (first ? .85 : 1.15) * SF.serveT(sv) * (act.anchovy ? ITEM_FX.anchovyT : 1), act.anchovy ? .1 : null);
+  launch(b, { x: p.x + .2, y: p.y, z: 2.65 }, { x: tx, y: ty }, (first ? .85 : 1.15) * SF.serveT(sv) * (act.anchovy ? ITEM_FX.anchovyT : 1) * (st.buff && st.buff.type === "heat" ? HEAT.ballT : 1), act.anchovy ? .1 : null);
   if (first) b.vz += gauss() * .3 * (aim.err || 1) * (act.coupon ? ITEM_FX.couponSig : 1);
   b.owner = side; b.serve = true; b.kind = first ? "speed" : "normal";
   itemBall(st, side, b);
@@ -227,6 +232,7 @@ function shoot(st, side, skill, aim) {
   if (skill !== "special") { T *= SF.powerT(statOf(st, side, "power")); sig *= SF.control(statOf(st, side, "control")); }   // 캐릭터 파워·컨트롤
   if (act.coupon) sig *= ITEM_FX.couponSig;             // 로빈 쿠폰: 집중력 → 정확도
   if (act.anchovy) T *= ITEM_FX.anchovyT;               // 죽방멸치: 힘 → 공 속도
+  if (st.buff && st.buff.type === "heat" && skill !== "special") T *= HEAT.ballT;   // 코트 난방: 공도 빨라짐
   tx += gauss() * sig * err;
   const ty = d * (depth + gauss() * sig * .8 * err);
   launch(b, { x: b.x, y: b.y, z: b.z }, { x: tx, y: ty }, T, margin);
@@ -363,6 +369,17 @@ function hazardTick(st) {   // 게임이 끝날 때마다
   const played = st.games[0] + st.games[1];
   if ((st.hazardsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) startHazard(st);   // 세트에 한 번은 꼭
 }
+function buffTick(st) {   // 디버프와 같은 규칙으로 따로 진행
+  if (st.buff) { if (--st.buff.gamesLeft <= 0) { pushEv(st, { type: "buffEnd", kind: st.buff.type }); st.buff = null; st.buffCool = 1; } return; }
+  if (st.phase === "done" || st.buffsInSet >= 2) return;
+  if (st.buffCool > 0) { st.buffCool--; return; }
+  const played = st.games[0] + st.games[1];
+  if ((st.buffsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) {
+    const pool = BUFFS.filter(t => t !== st.lastBuff), type = pool[Math.floor(Math.random() * pool.length)];
+    st.buff = { type, gamesLeft: HAZARD_GAMES }; st.lastBuff = type; st.buffsInSet++;
+    pushEv(st, { type: "buff", kind: type });
+  }
+}
 function fault(st, reason) {
   const s = st.server;
   if (st.serveNo === 1) { st.serveNo = 2; st.phase = "fault"; st.timer = 1.1; pushEv(st, { type: "fault", side: s, reason }); }
@@ -400,11 +417,12 @@ function gameWon(st, w) {
   else if (gw === st.G && gl === st.G) { st.tb = true; st.tbFirst = st.server; pushEv(st, { type: "tiebreak" }); }
   else if ((st.games[0] + st.games[1]) % 2 === 1) pushEv(st, { type: "ends" });
   hazardTick(st);
+  buffTick(st);
 }
 function setWon(st, w) {
   st.sets[w]++; st.history.push([...st.games]);
   pushEv(st, { type: "set", winner: w, score: [...st.games] });
-  st.games = [0, 0]; st.hazardsInSet = 0;
+  st.games = [0, 0]; st.hazardsInSet = 0; st.buffsInSet = 0;
   if (st.sets[w] >= st.setsToWin) { st.phase = "done"; st.winner = w; pushEv(st, { type: "match", winner: w }); }
 }
 
@@ -490,7 +508,7 @@ function aiThink(st, side, level, dt) {
   return out;
 }
 
-const api = { HAZARDS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
