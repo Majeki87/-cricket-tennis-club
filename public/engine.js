@@ -29,7 +29,7 @@ const SF = {   // 능력치 1칸당 효과
   powerT: v => 1 - .07 * (v - 3),        // 공 비행 시간(작을수록 빠름)
   speed: v => 1 + .07 * (v - 3),         // 이동 속도
   control: v => 1 - .15 * (v - 3),       // 빗나감 정도
-  spinAmp: v => (v - 1) * .32,           // 공이 옆으로 휘는 폭(m): 1이면 직진
+  spinAmp: v => (v - 1) * .18,           // 공이 옆으로 휘는 폭(m): 1이면 직진, 5면 약 0.7m
   reach: v => 1 + .08 * (v - 3),         // 받을 수 있는 범위
   serveT: v => 1 - .07 * (v - 3), serveSig: v => 1 - .1 * (v - 3)
 };
@@ -38,7 +38,7 @@ const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;  
 const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
 const HAZARD_POINTS = 2, HAZARD_CHANCE = .22;   // 시작은 게임이 끝날 때, 유지는 포인트 2개(누가 점수를 내든)
 // 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
-const SNAKE = { coil: .6, slow: .58, fast: 1.63, amp: 1.5, waves: 2.5 };   // .6×.58 + .4×1.63 = 1 (총 이동 거리 유지)
+const SNAKE = { coil: .62, slow: .52, fast: 1.783, amp: 1.7, waves: 4.5 };   // 4번 반 꿈틀 · .62×.52 + .38×1.783 ≈ 1 (총 이동 거리 유지)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
 function h01(n) { let x = Math.imul(n | 0, 0x9E3779B1); x ^= x >>> 16; x = Math.imul(x, 0x85EBCA6B); x ^= x >>> 13; x = Math.imul(x, 0xC2B2AE35); x ^= x >>> 16; return (x >>> 0) / 4294967296; }
@@ -283,7 +283,7 @@ function constrainPos(st, i) { constrain(st, i); }
 function charSpin(st, side, b) {
   const v = statOf(st, side, "spin");
   b.spinAmp = (b.spinAmp || 0) + SF.spinAmp(v);
-  b.e = Math.min(.9, b.e * (1 + .05 * (v - 3))); b.keep = Math.min(.95, b.keep * (1 + .03 * (v - 3)));
+  b.e = Math.min(.9, b.e * (1 + .03 * (v - 3))); b.keep = Math.min(.95, b.keep * (1 + .02 * (v - 3)));   // 튄 뒤 뻗는 정도
 }
 function useItem(st, side, slot) {
   if (st.phase === "done") return "idle";
@@ -308,7 +308,7 @@ function stepBall(st, dt) {
   if (b.curve && b.bounces === 0 && b.t < b.T) {        // 필살기 궤적: 착지 순간에는 휘어짐이 0이 되도록
     const u = b.t / b.T;
     if (b.curve === "tornado") { const r = 1.5 * Math.sin(Math.PI * u), ph = u * Math.PI * 6; ox = r * Math.sin(ph); oy = r * .55 * (Math.cos(ph) - 1); }
-    else if (b.curve === "snake" && u < SNAKE.coil) ox = SNAKE.amp * Math.sin(2 * Math.PI * SNAKE.waves * u / SNAKE.coil) * Math.min(1, u / .08);   // 촘촘하게 좌우로 꿈틀꿈틀(물기 직전에 정확히 가운데로 돌아옴)
+    else if (b.curve === "snake" && u < SNAKE.coil) ox = SNAKE.amp * Math.sin(2 * Math.PI * SNAKE.waves * u / SNAKE.coil) * Math.min(1, u / .06);   // 촘촘하게 좌우로 꿈틀꿈틀(물기 직전에 정확히 가운데로 돌아옴)
   }
   if (b.spinAmp && b.bounces === 0 && b.t < b.T) ox += b.spinAmp * Math.sin(Math.PI * b.t / b.T) * b.spin;   // 스핀으로 바나나처럼 휘었다가 목표 지점에 떨어짐
   b.x = b.bx + ox; b.y = b.by + oy;
