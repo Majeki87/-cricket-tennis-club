@@ -32,12 +32,13 @@ const SF = {   // 능력치 1칸당 효과
   reach: v => 1 + .08 * (v - 3),         // 받을 수 있는 범위
   serveT: v => 1 - .07 * (v - 3), serveSig: v => 1 - .1 * (v - 3)
 };
+const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;   // 경기 중 도발하면 0.9초 멈춤, 2.5초 안에 또 하면 콤보, 상대 도발 2초 안에 하면 반사
 const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.7, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
 const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, special: 1.7 };
 const AI = {
-  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3 },
-  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35, item: .5 },
-  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55, item: .7 }
+  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3, reflect: .3 },
+  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35, item: .5, reflect: .45 },
+  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55, item: .7, reflect: .6 }
 };
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -72,7 +73,7 @@ function newMatch(opts = {}) {
     players: [{ x: 0, y: COURT.L + .8 }, { x: 0, y: -COURT.L - .8 }],
     ball: idleBall(0), gauge: [0, 0], stun: [0, 0], winner: null, rally: 0,
     events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
-    posEpoch: Math.floor(Math.random() * 1e6), hist: []
+    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
   };
   pushEv(st, { type: "toss", server: st.server });
   startPoint(st);
@@ -86,7 +87,7 @@ function startPoint(st) {
   st.players[r] = { x: -sign * 2.3, y: ownSign(r) * (COURT.L + .7) };
   st.ball = idleBall(st.ball.id); st.ball.held = true;
   holdBall(st);
-  st.phase = "serve"; st.stun = [0, 0]; st.rally = 0;
+  st.phase = "serve"; st.stun = [0, 0]; st.freeze = [0, 0]; st.rally = 0;
   st.posEpoch = (st.posEpoch || 0) + 1; st.hist = [];     // 실시간 대전: 선수 위치를 새로 맞추는 기준
   st.serveWait = 1 + Math.random() * .6;
 }
@@ -103,7 +104,7 @@ function constrain(st, i) {
   p.y = clamp(p.y * own, .7, COURT.AY - .8) * own;
 }
 function movePlayer(st, i, inp, dt) {
-  if (st.stun[i] > 0) return;
+  if (st.stun[i] > 0 || (st.freeze && st.freeze[i] > 0)) return;   // 기절 또는 도발 중
   const p = st.players[i], sp = (inp.speed || MOVE_SPEED) * SF.speed(statOf(st, i, "speed"));
   if (inp.target) {
     const dx = inp.target.x - p.x, dy = inp.target.y - p.y, dist = Math.hypot(dx, dy);
@@ -136,6 +137,7 @@ function launch(b, from, to, T, margin) {
 
 function serve(st, side, aim = {}) {
   if (st.phase !== "serve" || side !== st.server) return false;
+  if (st.freeze && st.freeze[side] > 0) return false;
   const b = st.ball, d = dirOf(side), box = -stanceSign(st), first = st.serveNo === 1, k = aim.keys || {};
   const h = (k.right ? 1 : 0) - (k.left ? 1 : 0);          // 서브 코스: 센터(T) 쪽 / 와이드 쪽
   const act = st.active[side];
@@ -163,6 +165,7 @@ function tryHit(st, side, skill, aim = {}, lookback = 0) {
   const b = st.ball;
   if (!SKILLS.includes(skill)) skill = "normal";
   if (st.phase !== "rally" || !b.live) return "idle";
+  if (st.freeze && st.freeze[side] > 0) return "taunting";
   if (b.owner === side || !b.crossed) return "own";
   if (b.serve && b.bounces === 0) return "serveBounce";    // 서브는 반드시 한 번 튄 뒤에 리턴
   if (b.bounces >= 2) return "late";
@@ -229,11 +232,21 @@ function itemBall(st, side, b) {
   b.spin = Math.random() < .5 ? -1 : 1;
   if (act.coupon) { b.e = Math.min(.9, b.e * 1.18); b.keep = Math.min(.95, b.keep * 1.15); }   // 로빈 쿠폰: 스핀 → 휘어 들어가고 튄 뒤 더 뻗음
 }
-// 도발: 포인트가 끝난 뒤(또는 경기 종료 후)에만, 경기에는 영향 없음
+// 도발: 경기 중에도 가능(대신 서브·랠리 중에는 0.9초 동안 움직이거나 칠 수 없음)
+//  · 2.5초 안에 다시 도발하면 콤보 단계 상승(최대 3단계)
+//  · 상대가 도발한 뒤 2초 안에 맞도발하면 "반사"(서로 계속 반사하면 연쇄 횟수 증가)
 function taunt(st, side, n) {
-  if (st.phase !== "point" && st.phase !== "done") return false;
-  n = Math.max(1, Math.min(8, n | 0));
-  pushEv(st, { type: "taunt", side, n });
+  if (!["serve", "rally", "point", "fault", "done"].includes(st.phase)) return false;
+  const now = st.clock || 0;
+  if (now - st.tauntAt[side] < TAUNT_GAP) return false;
+  const lt = st.lastTaunt, reflect = !!lt && lt.side === 1 - side && now - lt.at <= TAUNT_REFLECT;
+  const lv = lt && lt.side === side && now - lt.at <= TAUNT_COMBO ? Math.min(3, st.tauntLv[side] + 1) : 1;
+  st.tauntLv[side] = lv; st.tauntAt[side] = now;
+  const inPlay = st.phase === "serve" || st.phase === "rally";
+  if (inPlay) st.freeze[side] = TAUNT_FREEZE;
+  const chain = reflect ? (lt.chain || 0) + 1 : 0;
+  st.lastTaunt = { side, at: now, chain };
+  pushEv(st, { type: "taunt", side, n: Math.max(1, Math.min(8, n | 0)), lv, reflect, chain, inPlay });
   return true;
 }
 // 실시간 대전: 내 화면에서 먼저 움직이는 선수 위치 계산(서버와 같은 규칙)
@@ -348,13 +361,14 @@ function setWon(st, w) {
 }
 
 function step(st, dt, inputs = []) {
+  st.clock = (st.clock || 0) + dt;
   if (st.phase === "fault") { st.timer -= dt; if (st.timer <= 0) startPoint(st); return; }
   if (st.phase === "point") { if (st.autoNext > 0) { st.timer -= dt; if (st.timer <= 0) startPoint(st); } return; }
   if (st.phase !== "serve" && st.phase !== "rally") return;
   st.ball.px = st.ball.x; st.ball.py = st.ball.y;
   const n = Math.max(1, Math.ceil(dt / .017)), h = dt / n;
   for (let s = 0; s < n; s++) {
-    for (let i = 0; i < 2; i++) { st.stun[i] = Math.max(0, st.stun[i] - h); movePlayer(st, i, inputs[i] || {}, h); }
+    for (let i = 0; i < 2; i++) { st.stun[i] = Math.max(0, st.stun[i] - h); if (st.freeze) st.freeze[i] = Math.max(0, st.freeze[i] - h); movePlayer(st, i, inputs[i] || {}, h); }
     if (st.phase === "serve") { holdBall(st); return; }
     if (st.phase !== "rally") return;
     stepBall(st, h);
@@ -381,6 +395,9 @@ function aiThink(st, side, level, dt) {
     ai.itemPoint = st.pointNo;
     if (Math.random() < cfg.item) useItem(st, side, Math.floor(Math.random() * st.items[side].length));
   }
+  const lt = st.lastTaunt;   // 상대가 도발하면 가끔 맞도발(랠리 중에는 안 함)
+  if (lt && lt.side === 1 - side && ai.reflectAt !== lt.at) { ai.reflectAt = lt.at; ai.reflectWait = st.phase !== "rally" && Math.random() < cfg.reflect ? .5 + Math.random() * .6 : -1; }
+  if (ai.reflectWait > 0 && st.phase !== "rally" && (ai.reflectWait -= dt) <= 0) taunt(st, side, 1 + Math.floor(Math.random() * 8));
   if (st.phase === "point" || st.phase === "done") {   // 컴퓨터: 포인트를 따면 가끔 도발
     if (ai.tauntPoint !== st.pointNo) { ai.tauntPoint = st.pointNo; ai.tauntWait = st.lastWinner === side && Math.random() < .3 ? .9 : -1; }
     if (ai.tauntWait > 0 && (ai.tauntWait -= dt) <= 0) taunt(st, side, 1 + Math.floor(Math.random() * 8));
