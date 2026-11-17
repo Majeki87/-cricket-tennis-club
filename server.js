@@ -35,7 +35,7 @@ function packMatch(room) {
   const b = st.ball, events = st.events.filter(e => e.id > room.sentEv);
   return { format: st.format, phase: st.phase, server: st.server, serveNo: st.serveNo, pts: st.pts, games: st.games, sets: st.sets,
     history: st.history, tb: st.tb, winner: st.winner, chars: st.chars, items: st.items, active: st.active, rally: st.rally,
-    gauge: st.gauge.map(Math.round), stun: st.stun.map(r2), posEpoch: st.posEpoch,
+    gauge: st.gauge.map(Math.round), stun: st.stun.map(r2), freeze: (st.freeze || [0, 0]).map(r2), posEpoch: st.posEpoch,
     players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
     ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id },
     events };
@@ -114,7 +114,7 @@ wss.on("connection", (ws) => {
     // 내 선수 위치: 화면에서 먼저 움직이고 서버는 속도·코트 범위만 검사
     if (msg.type === "pos") {
       client.posMode = true;
-      if (!st || (st.phase !== "serve" && st.phase !== "rally") || msg.e !== st.posEpoch || st.stun[side] > 0) return;
+      if (!st || (st.phase !== "serve" && st.phase !== "rally") || msg.e !== st.posEpoch || st.stun[side] > 0 || (st.freeze && st.freeze[side] > 0)) return;
       let x = Number(msg.x), y = Number(msg.y); if (!isFinite(x) || !isFinite(y)) return;
       const now = Date.now(), p = st.players[side], dts = Math.min(.25, (now - (client.lastPos || now - 33)) / 1000);
       client.lastPos = now;
