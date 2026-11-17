@@ -99,6 +99,25 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .bug.tz8 svg{animation:tzBuzz .07s linear infinite alternate}
 .bug.tz8::before{content:"♪ ♫";position:absolute;left:55%;top:-6px;font-size:16px;color:#fff;text-shadow:0 1px 3px #000;animation:tzNote .8s ease-out infinite}
 .bug.opponent.tz8::before{top:auto;bottom:-6px;transform:rotate(180deg)}
+.bug.tzlv2 svg{scale:1.2}.bug.tzlv3 svg{scale:1.38;filter:drop-shadow(0 0 6px #ffd04a) drop-shadow(0 0 14px #ff9d2e)}
+.bug .sweat{position:absolute;right:4%;top:-4%;font-size:15px;opacity:0;pointer-events:none}
+.bug.opponent .sweat{transform:rotate(180deg)}
+.bug.meh svg{scale:.84;filter:saturate(.5) brightness(.9)}.bug.meh .sweat{opacity:1;animation:sweatDrop .7s ease-in infinite}
+@keyframes sweatDrop{0%{translate:0 0}100%{translate:0 10px;opacity:.2}}
+/* 상대 도발 직격: 내 화면에 크게 튀어나오는 컷인 + 코트에 찍히는 도장 */
+.dh{position:absolute;z-index:9;left:50%;top:34%;width:76%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;animation:dhPop 1.5s cubic-bezier(.2,1.4,.4,1) forwards}
+.dh .dh-face{--body:#42a86b;--belly:#8bdc85;--head:#62c878;--band:transparent;width:46%;margin:0 auto;filter:drop-shadow(0 6px 10px #000a)}
+.dh .dh-face svg{width:100%;height:auto;animation:dhWig .18s ease-in-out infinite alternate}
+.dh b{display:inline-block;margin-top:-4px;padding:6px 14px;border-radius:16px;background:#fffdf3;color:#1b2a24;font-size:clamp(15px,4.2vw,22px);font-weight:1000;box-shadow:0 4px 14px #0008;word-break:keep-all}
+.dh .dh-tag{display:block;margin-top:6px;font-size:13px;font-weight:900;color:#ffe25a;text-shadow:0 2px 4px #000}
+.dh.lv2 .dh-face{width:54%}.dh.lv3 .dh-face{width:62%}.dh.lv3 b{background:#fff3c4;font-size:clamp(17px,4.8vw,26px)}
+.dh.reflect b{background:#ffe1e1;color:#7a1010}
+.dh.dhmini{top:12%;width:60%;animation-duration:.9s;opacity:.92}.dh.dhmini .dh-face{width:30%}.dh.dhmini b{font-size:14px;padding:4px 10px}
+@keyframes dhPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-12deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(4deg)}30%{transform:translate(-50%,-50%) scale(1) rotate(0)}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-56%) scale(.96)}}
+@keyframes dhWig{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+.stamp{--o:1;position:absolute;z-index:3;font-size:44px;pointer-events:none;transform:translate(-50%,-50%);animation:stampIn 1.8s ease-out forwards;filter:drop-shadow(0 3px 4px #0007)}
+.stamp.faint{--o:.4;font-size:30px}
+@keyframes stampIn{0%{opacity:0;scale:2.4}12%{opacity:var(--o);scale:.9}20%{scale:1}75%{opacity:var(--o)}100%{opacity:0}}
 @keyframes tzWig{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
 @keyframes tzSway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
 @keyframes tzAnt{from{transform:rotate(-16deg)}to{transform:rotate(10deg)}}
@@ -374,12 +393,12 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div class="overlay" id="overlay"></div></div>
 <div class="col colR">
 <section class="panel" id="ctrlPanel"><b>🎮 조작</b>
-<div class="keys"><span><kbd>←↑↓→</kbd> <kbd>WASD</kbd></span><span>이동</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Z</kbd><kbd>E</kbd><kbd>F</kbd><kbd>C</kbd><kbd>Q</kbd></span><span>기술 (아래 버튼에 키 표시)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span><span><kbd>T</kbd></span><span>도발 (포인트가 끝난 뒤)</span></div>
+<div class="keys"><span><kbd>←↑↓→</kbd> <kbd>WASD</kbd></span><span>이동</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Z</kbd><kbd>E</kbd><kbd>F</kbd><kbd>C</kbd><kbd>Q</kbd></span><span>기술 (아래 버튼에 키 표시)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span><span><kbd>T</kbd></span><span>도발 (경기 중엔 0.9초 멈춤 · 연타 콤보 · 2초 안 맞도발은 반사)</span></div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
 <div class="skillrow"><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="speed">💥 스매쉬<small>빠르지만 아웃 위험 · F</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · C</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · Q</small></button></div>
 </section>
-<section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li><li>포인트가 끝난 뒤 <kbd>T</kbd>(휴대폰은 😜)를 누르면 상대를 약 올리는 동작을 해요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
+<section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>Q</kbd>로 필살기!</li><li><kbd>T</kbd>(휴대폰은 😜)로 언제든 도발! 연달아 누르면 최대 3단계 콤보, 상대 도발에 2초 안에 맞도발하면 반사돼요. 단, 경기 중엔 0.9초 동안 멈춰요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
 </div>
 <div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button><button id="mSnd" aria-label="소리 설정">🔊</button><button id="mChatBtn" class="hidden" aria-label="채팅">💬<i id="mChatDot" class="hidden"></i></button>
 <div class="mp"><span class="mn" id="mMeName">나</span><span class="mg" id="mMeGames">0</span><span class="mpt" id="mMePts">0</span><i class="mgauge"><b id="mMeGauge"></b></i></div>
@@ -419,6 +438,8 @@ const LINES={
   taunt:{1:["씰룩~씰룩~ 씰룩~씰룩~","메롱~ 여기 봐라~"],2:["승리가 뭐야","찌르르~ 별거 아니네?"],3:["귀뚤귀뚤 댄스 타임!","이 리듬 따라올 수 있어?"],
          4:["이 정도는 껌이지~","라켓이 심심하대~"],5:["그건 모르겠고~","하암~ 졸려서 못 보겠네"],6:["신이 난다고","신난다 신난다!"],
          7:["약이 오른다고","메~롱! 약 오르지?"],8:["새벽을 열고 있다고","찌르르르~ 승리의 노래~"]},
+  reflect:["반사~!","그대로 돌려줄게!","도발은 내가 한 수 위거든?","반사! 메롱 두 배~"],
+  taunt3:["이게 바로 최강 도발이다!","끝까지 약 올려 주지!","아직 멀었어~ 메롱메롱!"],
   game:["이 게임 가져간다~ 찌르르르!"],match:["우승이다! 귀뚤귀뚤귀뚤!"],deuce:["아직 안 끝났어!"]
 };
 const hash=id=>{let x=Math.imul(id|0,0x9E3779B1);x^=x>>>16;x=Math.imul(x,0x85EBCA6B);x^=x>>>13;x=Math.imul(x,0xC2B2AE35);x^=x>>>16;return x>>>0};   // 이벤트 번호를 섞어서 고르기(두 화면 결과는 같음)
@@ -555,6 +576,13 @@ const Snd=(()=>{
     taunt(n){if(n===8){chirp(0,.07);chirp(.5,.07);return}
       tone({f:220,f2:660,dur:.15,vol:.14});tone({f:660,f2:200,at:.15,dur:.25,vol:.12})},
     whiff(){noise({dur:.2,vol:.06,f:400,f2:1500,q:.6})},
+    boo(lv=1){   // 우~~: 여러 사람이 낮게 내려가는 소리
+      const n=3+lv*2;for(let i=0;i<n;i++){const f=150+Math.random()*90,at=Math.random()*.15;tone({f,f2:f*.78,type:"sawtooth",lp:520,at,dur:1.1+lv*.25,vol:.022+lv*.006,atk:.15})}
+      noise({dur:1.2+lv*.2,vol:.05+lv*.02,f:420,q:.7,atk:.2})},
+    laugh(lv=1){  // 와하하: 짧은 웃음 덩어리가 여러 번
+      const voices=2+lv;for(let v=0;v<voices;v++){const f=230+Math.random()*120,off=Math.random()*.12;
+        for(let k=0;k<4+lv;k++){const at=off+k*(.12+Math.random()*.03);tone({f:f*(1-k*.03),type:"sawtooth",lp:1300,at,dur:.08,vol:.03+lv*.006});noise({at,dur:.07,vol:.025,f:1100,q:2})}}},
+    oooh(){tone({f:300,f2:520,type:"sawtooth",lp:900,dur:.9,vol:.05,atk:.2});tone({f:360,f2:600,type:"sawtooth",lp:900,dur:.9,vol:.04,atk:.25});FX.cheer(true)},
     click(){tone({f:1100,dur:.03,vol:.05})},
     pop(kind){   // 뿅: 위로 톡 튀어 오르는 귀여운 소리 (누를 때마다 높이가 살짝 달라짐)
       const r=1+(Math.random()-.5)*.12,base=(kind==="char"?720:600)*r;
@@ -685,7 +713,7 @@ function handleEvent(e){
       msg(curMsg+" · "+(e.side===side?"아이템 "+it.emoji+" "+it.name+" 획득!":who(e.side)+"이(가) "+it.emoji+" 획득"));break}
     case "item":{const it=ITEMS[e.item];if(!it)break;Snd.play("item",e.item);say(e.side,pick(LINES.item[e.item],e.id),3,true);popup(it.emoji+" "+it.name+"!",st.players[e.side].x,st.players[e.side].y,"call");
       msg((e.side===side?"":who(e.side)+"의 ")+it.emoji+" "+it.name+"! "+it.fx+" (이번 포인트 동안)");break}
-    case "taunt":Snd.play("taunt",e.n);playTaunt(e.side,e.n);say(e.side,pick(LINES.taunt[e.n]||LINES.win,e.id),3,true);break;
+    case "taunt":onTaunt(e);break;
     case "netcord":Snd.play("netcord");popup("NET CORD",e.x,e.y,"call");break;
     case "net":Snd.play("net");popup("NET",e.x,e.y,"bad");break;
     case "bounce":Snd.play("bounce");if(e.out)Snd.play("buzz");mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
@@ -962,16 +990,42 @@ function nextPoint(){
   if(st&&(st.phase==="point"||st.phase==="fault"))E.startPoint(st);
 }
 const TAUNT_TIME=1700,tauntTimer=[0,0];
-function playTaunt(i,n){
+function playTaunt(i,n,lv=1){
   const el=$(i===side?"player":"opponent");clearTimeout(tauntTimer[i]);
-  el.classList.remove("tz1","tz2","tz3","tz4","tz5","tz6","tz7","tz8");void el.offsetWidth;el.classList.add("tz"+n);
-  tauntTimer[i]=setTimeout(()=>el.classList.remove("tz"+n),TAUNT_TIME);
+  el.classList.remove("tz1","tz2","tz3","tz4","tz5","tz6","tz7","tz8","tzlv2","tzlv3","meh");void el.offsetWidth;el.classList.add("tz"+n);if(lv>1)el.classList.add("tzlv"+lv);
+  tauntTimer[i]=setTimeout(()=>el.classList.remove("tz"+n,"tzlv2","tzlv3"),TAUNT_TIME);
 }
-const canTaunt=()=>!!st&&(st.phase==="point"||st.phase==="done");
-let lastTauntAt=-1e9;
+const mehTimer=[0,0];
+function embarrass(i){const el=$(i===side?"player":"opponent");clearTimeout(mehTimer[i]);el.classList.add("meh");mehTimer[i]=setTimeout(()=>el.classList.remove("meh"),1500)}
+const TAUNT_CROWD={1:"boo",2:"laugh",3:"laugh",4:"boo",5:"boo",6:"laugh",7:"boo",8:"laugh"},STAMPS=["😜","🤪","😝","🙃","😛"];
+function directHit(e,line){   // 상대가 나를 도발: 내 화면에 크게
+  const c=CHARS[st.chars?.[e.side]],el=document.createElement("div"),lv=e.lv||1;
+  el.className="dh lv"+lv+(e.reflect?" reflect":"")+(e.inPlay?" dhmini":"");
+  el.innerHTML=`<div class="dh-face">${BUG_SVG}</div><b></b>${e.reflect?`<span class="dh-tag">반사${e.chain>1?" x"+e.chain:""}!</span>`:lv>1?`<span class="dh-tag">도발 ${lv}단계${lv===3?"!! 🔥":"!"}</span>`:""}`;
+  el.querySelector("b").textContent=line;if(c)setLook(el.querySelector(".dh-face"),st.chars[e.side]);
+  $("arena").appendChild(el);setTimeout(()=>el.remove(),e.inPlay?950:1550);
+  if(!e.inPlay||lv>=3)shake();
+  const sp=document.createElement("div");sp.className="stamp"+(e.inPlay?" faint":"");sp.textContent=STAMPS[hash(e.id)%STAMPS.length];   // 내 코트에 도장 쾅
+  sp.style.left=(22+hash(e.id*3)%56)+"%";sp.style.top=(58+hash(e.id*5)%28)+"%";sp.style.rotate=(hash(e.id*7)%50-25)+"deg";sp.style.fontSize=(e.inPlay?30:36+lv*10)+"px";
+  $("arena").appendChild(sp);setTimeout(()=>sp.remove(),1850);
+}
+let lastTauntAt=-1e9,freezeTold=false;
+const canTaunt=()=>!!st;
+function onTaunt(e){
+  const lv=e.lv||1,mine=e.side===side;
+  playTaunt(e.side,e.n,lv);
+  Snd.play("taunt",e.n);Snd.play(e.reflect?"oooh":TAUNT_CROWD[e.n],lv);   // 관중 반응: 야유·웃음, 반사 때는 "오오~!"
+  const line=e.reflect?pick(LINES.reflect,e.id):lv===3?pick(LINES.taunt3,e.id):pick(LINES.taunt[e.n]||LINES.win,e.id);
+  say(e.side,line,3,true);
+  const p=st.players[e.side];
+  if(e.reflect){popup(`🪞 반사${e.chain>1?" x"+e.chain:""}!`,p.x,p.y,"call");embarrass(1-e.side)}
+  else if(lv>1)popup(lv===3?"도발 3단계!! 🔥":"도발 2단계!",p.x,p.y,"call");
+  if(!mine)directHit(e,line);
+  else if(e.inPlay&&!freezeTold){freezeTold=true;msg(mt("경기 중에 도발하면 0.9초 동안 움직이거나 칠 수 없어요. 상대 도발에 2초 안에 맞도발하면 반사!"))}
+}
 function tauntUI(){
-  if(!canTaunt()){msg("도발은 포인트가 끝난 뒤에 할 수 있어요.");return}
-  const now=performance.now();if(now-lastTauntAt<TAUNT_TIME)return;lastTauntAt=now;
+  if(!canTaunt())return;
+  const now=performance.now();if(now-lastTauntAt<600)return;lastTauntAt=now;
   const n=1+Math.floor(Math.random()*8);
   if(mode==="multi")send({type:"taunt",n});else E.taunt(st,side,n);
 }
@@ -989,7 +1043,7 @@ function serveNow(){
   if(mode==="multi")send({type:"serve",keys:worldKeys()});
   else E.serve(st,0,{keys:worldKeys(),err:1});
 }
-const HIT_TEXT={far:"공(그림자)이 아직 멀어요! 그림자가 가까이 올 때 치세요.",fireFar:"🔥 불꽃샷은 그림자에 바짝 붙어야 받아칠 수 있어요!",high:"공이 너무 높아요. 조금 떨어질 때 치세요.",serveBounce:"서브는 한 번 튄 다음에 받아쳐야 해요.",late:"이미 두 번 튀었어요."};
+const HIT_TEXT={taunting:"도발하는 중이라 잠깐 칠 수 없어요!",far:"공(그림자)이 아직 멀어요! 그림자가 가까이 올 때 치세요.",fireFar:"🔥 불꽃샷은 그림자에 바짝 붙어야 받아칠 수 있어요!",high:"공이 너무 높아요. 조금 떨어질 때 치세요.",serveBounce:"서브는 한 번 튄 다음에 받아쳐야 해요.",late:"이미 두 번 튀었어요."};
 function hitFeedback(r){if(HIT_TEXT[r])msg(HIT_TEXT[r]);else if(r==="ok"&&st.gauge[side]>=100)msg("기가 가득 찼어요! Q 키로 필살기를 쓸 수 있어요.")}
 function hitBall(skill="normal"){
   if(!st||st.phase!=="rally")return;
@@ -1020,7 +1074,7 @@ function connect(create){
         snaps.push({t:performance.now(),players:st.players,ball:st.ball});if(snaps.length>12)snaps.shift();
         const sp=st.players[side],active=st.phase==="serve"||st.phase==="rally";
         // 새 포인트·폴트로 서버가 자리를 다시 잡았거나, 기절했거나, 너무 어긋나면 서버 위치로 맞춤
-        if(!myPos||st.posEpoch!==myEpoch||!active||st.stun[side]>0||Math.hypot(myPos.x-sp.x,myPos.y-sp.y)>2.5){myPos={x:sp.x,y:sp.y};myEpoch=st.posEpoch}
+        if(!myPos||st.posEpoch!==myEpoch||!active||st.stun[side]>0||(st.freeze&&st.freeze[side]>0)||Math.hypot(myPos.x-sp.x,myPos.y-sp.y)>2.5){myPos={x:sp.x,y:sp.y};myEpoch=st.posEpoch}
       }else{snaps=[];myPos=null}
       if(st&&st.phase!=="done"&&screen!=="game")showScreen("game");          // 호스트가 시작하면 두 사람 모두 경기 화면으로
       if(st)processEvents();
@@ -1180,7 +1234,7 @@ function loop(t){
   const dt=Math.min((t-last)/1000,.05);last=t;
   if(mode==="solo"&&st){E.step(st,dt,[{keys:worldKeys()},E.aiThink(st,1,difficulty,dt)]);processEvents()}
   if(mode==="multi"&&st&&myPos&&(st.phase==="serve"||st.phase==="rally")){
-    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,chars:st.chars,players:[...st.players]};view.players[side]=myPos;
+    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,players:[...st.players]};view.players[side]=myPos;
     E.moveLocal(view,side,worldKeys(),dt);
     const now=performance.now(),key=myPos.x.toFixed(2)+","+myPos.y.toFixed(2);
     if(now-lastPosSend>=33&&key!==lastSent){lastPosSend=now;lastSent=key;send({type:"pos",x:+myPos.x.toFixed(3),y:+myPos.y.toFixed(3),e:myEpoch})}
@@ -1188,7 +1242,7 @@ function loop(t){
   render();
   requestAnimationFrame(loop);
 }
-$("player").innerHTML=BUG_SVG+'<span class="badges" id="meBadge"></span>';$("opponent").innerHTML=BUG_SVG+'<span class="badges" id="opBadge"></span>';
+$("player").innerHTML=BUG_SVG+'<span class="badges" id="meBadge"></span><span class="sweat">💦</span>';$("opponent").innerHTML=BUG_SVG+'<span class="badges" id="opBadge"></span><span class="sweat">💦</span>';
 updateMobile();buildCharPick();setMode("solo");
 requestAnimationFrame(loop);
 })();
