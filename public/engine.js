@@ -38,6 +38,7 @@ const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;  
 const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
 const HAZARD_POINTS = 2, HAZARD_CHANCE = .22;   // 시작은 게임이 끝날 때, 유지는 포인트 2개(누가 점수를 내든)
 // 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
+const SNAKE = { coil: .6, slow: .58, fast: 1.63, amp: 1.5, waves: 2.5 };   // .6×.58 + .4×1.63 = 1 (총 이동 거리 유지)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
 function h01(n) { let x = Math.imul(n | 0, 0x9E3779B1); x ^= x >>> 16; x = Math.imul(x, 0x85EBCA6B); x ^= x >>> 13; x = Math.imul(x, 0xC2B2AE35); x ^= x >>> 16; return (x >>> 0) / 4294967296; }
@@ -295,12 +296,19 @@ function useItem(st, side, slot) {
 }
 function stepBall(st, dt) {
   const b = st.ball; if (!b.live) return;
-  b.t += dt; b.bx += b.vx * dt; b.by += b.vy * dt; b.z += b.vz * dt - .5 * G * dt * dt; b.vz -= G * dt;
+  b.t += dt;
+  // 스네이크샷: 앞 60% 시간은 천천히 꿈틀대며 다가오다가(똬리), 남은 40%에 한 번에 확 달려듦(물기). 전체 이동 거리는 같아서 목표 지점에 떨어짐
+  let mul = 1;
+  if (b.curve === "snake" && b.bounces === 0) {
+    const u = b.t / b.T; mul = u < SNAKE.coil ? SNAKE.slow : SNAKE.fast;
+    if (u >= SNAKE.coil && !b.struck) { b.struck = true; pushEv(st, { type: "snakeStrike", x: b.x, y: b.y }); }
+  }
+  b.bx += b.vx * dt * mul; b.by += b.vy * dt * mul; b.z += b.vz * dt - .5 * G * dt * dt; b.vz -= G * dt;
   let ox = 0, oy = 0;
   if (b.curve && b.bounces === 0 && b.t < b.T) {        // 필살기 궤적: 착지 순간에는 휘어짐이 0이 되도록
     const u = b.t / b.T;
     if (b.curve === "tornado") { const r = 1.5 * Math.sin(Math.PI * u), ph = u * Math.PI * 6; ox = r * Math.sin(ph); oy = r * .55 * (Math.cos(ph) - 1); }
-    else if (b.curve === "snake") ox = 2.5 * Math.sin(3 * Math.PI * u);
+    else if (b.curve === "snake" && u < SNAKE.coil) ox = SNAKE.amp * Math.sin(2 * Math.PI * SNAKE.waves * u / SNAKE.coil) * Math.min(1, u / .08);   // 촘촘하게 좌우로 꿈틀꿈틀(물기 직전에 정확히 가운데로 돌아옴)
   }
   if (b.spinAmp && b.bounces === 0 && b.t < b.T) ox += b.spinAmp * Math.sin(Math.PI * b.t / b.T) * b.spin;   // 스핀으로 바나나처럼 휘었다가 목표 지점에 떨어짐
   b.x = b.bx + ox; b.y = b.by + oy;
