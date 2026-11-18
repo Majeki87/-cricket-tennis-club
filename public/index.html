@@ -104,6 +104,14 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .bug.opponent .sweat{transform:rotate(180deg)}
 .bug.meh svg{scale:.84;filter:saturate(.5) brightness(.9)}.bug.meh .sweat{opacity:1;animation:sweatDrop .7s ease-in infinite}
 @keyframes sweatDrop{0%{translate:0 0}100%{translate:0 10px;opacity:.2}}
+.minicric{position:absolute;z-index:4;width:9%;aspect-ratio:6/5;transform:translate(-50%,-50%);pointer-events:none;--body:#42a86b;--belly:#8bdc85;--head:#62c878;--band:transparent}
+.minicric svg{width:100%;height:100%}
+.minicric .mc-fx{position:absolute;right:-6px;top:-12px;font-size:14px}
+.minicric.flick{animation:mcFlick 1.8s ease-in forwards}
+.minicric.scared svg{animation:mcShake .07s linear infinite}.minicric.scared{animation:mcIn 1.8s ease-out forwards}
+@keyframes mcIn{0%{opacity:0;scale:.3}12%{opacity:1;scale:1}80%{opacity:1}100%{opacity:0}}
+@keyframes mcShake{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+@keyframes mcFlick{0%{opacity:0;scale:.3}12%{opacity:1;scale:1;rotate:0deg}35%{translate:0 0;rotate:-12deg}42%{translate:0 0;rotate:10deg}100%{opacity:0;translate:60px -120px;rotate:720deg;scale:.6}}
 /* 상대 도발 직격: 내 화면에 크게 튀어나오는 컷인 + 코트에 찍히는 도장 */
 .dh{position:absolute;z-index:9;left:50%;top:34%;width:76%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;animation:dhPop 1.5s cubic-bezier(.2,1.4,.4,1) forwards}
 .dh .dh-face{--body:#42a86b;--belly:#8bdc85;--head:#62c878;--band:transparent;width:46%;margin:0 auto;filter:drop-shadow(0 6px 10px #000a)}
@@ -544,14 +552,30 @@ const LINES={
   taunt:{1:["씰룩~씰룩~ 씰룩~씰룩~","메롱~ 여기 봐라~"],2:["승리가 뭐야","찌르르~ 별거 아니네?"],3:["귀뚤귀뚤 댄스 타임!","이 리듬 따라올 수 있어?"],
          4:["이 정도는 껌이지~","라켓이 심심하대~"],5:["그건 모르겠고~","하암~ 졸려서 못 보겠네"],6:["신이 난다고","신난다 신난다!"],
          7:["약이 오른다고","메~롱! 약 오르지?"],8:["새벽을 열고 있다고","찌르르르~ 승리의 노래~"]},
-  byChar:{husky:{win:["정의는 반드시 승리한다!","아우우우~!","이게 바로 정의의 힘이다!"],lose:["포기하지 마, 아직 안 끝났어!","다음엔 꼭 지켜 내겠어!"],taunt:["아우우우우~!","정의의 이름으로 널 이기겠다!"],vsBoss:["바나킹, 여기서 끝내 주마!"]},
-    monkey:{win:["끼끼끼… 걸려들었군!","이 코트는 이제 내 거다!","끼히히, 너무 쉽잖아?"],lose:["끼익! 이럴 리가 없어!","두고 보자… 끼익!"],taunt:["끼히히히히~","바나나 하나 줄까? 끼끼"],steal:["이 아이템은 내가 접수한다! 끼히히","남의 것도 내 것! 끼끼"]}},
+  // 개시키·바나킹은 아래 전용 멘트만 씀(귀뚜라미 멘트 "귀뚤귀뚤·찌르르·더듬이" 등은 안 나옴)
+  byChar:{
+    husky:{hit:["받아라!","정의의 한 방!","멍멍!","아우!","간다~!"],smash:["정의의 스매쉬다!"],
+      win:["정의는 반드시 승리한다!","아우우우~!","이게 바로 정의의 힘이다!","멍! 봤지?"],
+      lose:["포기하지 마, 아직 안 끝났어!","다음엔 꼭 지켜 내겠어!","끄응… 아직이야!"],
+      ace:["에이스! 아우우우~!"],deuce:["정의는 쉽게 지지 않아!"],game:["이 게임은 정의의 것이다!"],match:["정의는 반드시 승리한다! 아우우우우~!"],
+      serve:["정의의 서브, 간다!","멍! 준비됐지?"],vsBoss:["바나킹, 여기서 끝내 주마!"],
+      taunt:["아우우우우~!","정의의 이름으로 널 이기겠다!","꼬리 흔드는 거 부럽지? 멍멍!"],
+      mock:["귀뚤귀뚤 울지 마~ 아우우!","귀뚜라미야, 정의 앞에선 얌전히~","멍! 깜짝 놀랐지?","찌르르? 내 하울링이 더 멋지지!"]},
+    monkey:{hit:["끼끼!","받아 보시지~","끼히히, 여기다!","이 공 어때?"],smash:["끼야아! 이 한 방이면 끝이다!"],
+      win:["끼끼끼… 걸려들었군!","이 코트는 이제 내 거다!","끼히히, 너무 쉽잖아?","바나나보다 달콤한 점수~"],
+      lose:["끼익! 이럴 리가 없어!","두고 보자… 끼익!","끼끼… 운이 좋았군"],
+      ace:["끼끼끼, 손도 못 댔지?"],deuce:["끼익, 끈질기군…"],game:["이 게임은 내가 접수한다! 끼끼"],match:["끼하하하! 이 코트의 왕은 바로 나다!"],
+      serve:["끼끼, 이 서브 받아 보시지","바나킹 님의 서브다!"],
+      taunt:["끼히히히히~","바나나 하나 줄까? 끼끼","약 오르지? 약 오르지?"],
+      mock:["찌르르? 그게 다야? 끼히히","귀뚜라미 주제에 감히~","더듬이 간지럽지? 끼끼","울어 봐, 귀뚤귀뚤~ 끼하하!"],
+      steal:["이 아이템은 내가 접수한다! 끼히히","남의 것도 내 것! 끼끼"]}},
   reflect:["반사~!","그대로 돌려줄게!","도발은 내가 한 수 위거든?","반사! 메롱 두 배~"],
   taunt3:["이게 바로 최강 도발이다!","끝까지 약 올려 주지!","아직 멀었어~ 메롱메롱!"],
   game:["이 게임 가져간다~ 찌르르르!"],match:["우승이다! 귀뚤귀뚤귀뚤!"],deuce:["아직 안 끝났어!"]
 };
 const hash=id=>{let x=Math.imul(id|0,0x9E3779B1);x^=x>>>16;x=Math.imul(x,0x85EBCA6B);x^=x>>>13;x=Math.imul(x,0xC2B2AE35);x^=x>>>16;return x>>>0};   // 이벤트 번호를 섞어서 고르기(두 화면 결과는 같음)
 const pick=(arr,id)=>arr[hash(id)%arr.length];
+function lineFor(i,key,id){const own=LINES.byChar[st?.chars?.[i]];return pick(own&&own[key]?own[key]:LINES[key],id)}   // 개시키·바나킹은 자기 멘트만
 const chance3=id=>hash(id*7+3)%3===0;
 const bubbleState=[{until:0,prio:0},{until:0,prio:0}];
 function say(i,text,prio,big){   // 더 중요한 멘트(prio 높음)가 떠 있으면 덜 중요한 멘트는 건너뜀
@@ -870,12 +894,12 @@ function handleEvent(e){
   const nextHint=mode==="solo"?" · Space로 다음 서브":" · 잠시 후 다음 서브(Space로 바로)";
   switch(e.type){
     case "toss":tossText+="동전 던지기 결과 "+who(e.server)+"의 서브로 시작합니다. ";break;
-    case "serve":Snd.play("swing");Snd.play("hit",e.no===1?"speed":"normal");if(e.side!==side)animateSwing("opponent");if(e.no===1&&chance3(e.id))say(e.side,pick(LINES.serve,e.id),1);break;
+    case "serve":Snd.play("swing");Snd.play("hit",e.no===1?"speed":"normal");if(e.side!==side)animateSwing("opponent");if(e.no===1&&chance3(e.id))say(e.side,lineFor(e.side,"serve",e.id),1);break;
     case "hit":
       if(e.skill!=="special")Snd.play("hit",e.skill);if(st.ball&&st.ball.pow)Snd.play("pow");
       if(e.side!==side)animateSwing("opponent");
       if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SMASH!",lob:"🌙 LOB!",slice:"🔪 SLICE!"}[e.skill],e.x,e.y);
-      if(e.skill!=="special"&&chance3(e.id))say(e.side,pick(e.skill==="speed"?LINES.smash.concat(LINES.hit):LINES.hit,e.id),1);   // 칠 때는 3번에 1번꼴
+      if(e.skill!=="special"&&chance3(e.id))say(e.side,e.skill==="speed"&&hash(e.id)%2===0?lineFor(e.side,"smash",e.id):lineFor(e.side,"hit",e.id),1);   // 칠 때는 3번에 1번꼴
       break;
     case "whiff":Snd.play("whiff");animateSwing("opponent");popup("헛스윙!",st.players[e.side].x,st.players[e.side].y);break;
     case "special":Snd.play("special",e.kind);cutin(e.side,e.kind);if(e.kind==="quake")shake();if(LINES.special[e.kind])say(e.side,LINES.special[e.kind],3,true);break;
@@ -913,20 +937,19 @@ function handleEvent(e){
       Snd.play(e.winner===side?"win":"lose");Snd.play("cheer",e.reason==="ace");
       if(e.reason==="ace")popup("ACE!",0,(e.winner===0?-1:1)*8,"call");
       {const w=e.winner,deuce=!e.tb&&e.pts[0]>=3&&e.pts[0]===e.pts[1];
-       const bw=LINES.byChar[st.chars?.[w]],bl=LINES.byChar[st.chars?.[1-w]],mine2=hash(e.id)%2===0;   // 캐릭터 전용 멘트를 절반쯤 섞음
-       const winPool=bw&&mine2?(st.chars[w]==="husky"&&st.chars[1-w]==="monkey"&&hash(e.id*3)%2===0?bw.vsBoss:bw.win):LINES.win;
-       say(w,e.reason==="ace"?pick(LINES.ace,e.id):deuce?pick(LINES.deuce,e.id):pick(winPool,e.id),2);
-       say(1-w,pick(bl&&hash(e.id+5)%2===0?bl.lose:LINES.lose,e.id+2),2);}
+       const vsBoss=st.chars?.[w]==="husky"&&st.chars?.[1-w]==="monkey"&&hash(e.id*3)%3===0;
+       say(w,e.reason==="ace"?lineFor(w,"ace",e.id):deuce?lineFor(w,"deuce",e.id):vsBoss?pick(LINES.byChar.husky.vsBoss,e.id):lineFor(w,"win",e.id),2);
+       say(1-w,lineFor(1-w,"lose",e.id+2),2);}
       msg(r+"! "+who(e.winner)+" 포인트 · "+callScore(e.pts,e.server,e.tb)+nextHint);break}
     case "game":
       if(!e.tb)Snd.play("game");
-      say(e.winner,pick(LINES.game,e.id),4,true);
+      say(e.winner,lineFor(e.winner,"game",e.id),4,true);
       banner(e.tb?"타이브레이크 승리":"게임 "+who(e.winner),"게임 스코어 "+e.games[side]+" - "+e.games[1-side]);
       msg("게임, "+who(e.winner)+"! 게임 스코어 "+e.games[side]+"-"+e.games[1-side]+" (나-"+who(1-side)+")"+nextHint);break;
     case "tiebreak":Snd.play("tiebreak");banner("타이브레이크","7점 먼저 · 2점 차");msg("게임 스코어 동점! 타이브레이크로 세트를 결정합니다. 7점을 먼저, 2점 차로 따야 합니다."+nextHint);break;
     case "ends":msg(curMsg+" · 코트 체인지(화면은 그대로)");break;
     case "set":Snd.play("set");Snd.play("cheer",true);banner("세트 "+who(e.winner),e.score[side]+" - "+e.score[1-side]);msg("세트, "+who(e.winner)+"! "+e.score[side]+"-"+e.score[1-side]+nextHint);break;
-    case "match":Snd.play(e.winner===side?"victory":"defeat");say(e.winner,pick(LINES.match,e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
+    case "match":Snd.play(e.winner===side?"victory":"defeat");say(e.winner,lineFor(e.winner,"match",e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
   }
 }
 function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;lastEv=e.id;handleEvent(e)}}
@@ -1210,6 +1233,18 @@ function playTaunt(i,n,lv=1){
 const mehTimer=[0,0];
 function embarrass(i){const el=$(i===side?"player":"opponent");clearTimeout(mehTimer[i]);el.classList.add("meh");mehTimer[i]=setTimeout(()=>el.classList.remove("meh"),1500)}
 const TAUNT_CROWD={1:"boo",2:"laugh",3:"laugh",4:"boo",5:"boo",6:"laugh",7:"boo",8:"laugh"},STAMPS=["😜","🤪","😝","🙃","😛"];
+/* 개시키·바나킹이 도발하면 옆에 작은 귀뚜라미가 나타나 놀림을 당함
+   (상대가 귀뚜라미 선수면 그 색으로) — 바나킹은 손가락으로 튕겨 날려 보내고, 개시키가 짖으면 귀뚜라미가 덜덜 떪 */
+function mockCricket(e){
+  const p=st.players[e.side],opp=st.chars?.[1-e.side],kind=st.chars[e.side];
+  const el=document.createElement("div");el.className="minicric "+(kind==="monkey"?"flick":"scared");
+  el.innerHTML=BUG_SVG+`<span class="mc-fx">${kind==="monkey"?"😵":"💦"}</span>`;
+  if(opp&&opp!=="husky"&&opp!=="monkey")setLook(el,opp);
+  const dx=(e.side===side?1.7:-1.7)*(p.x>0?-1:1);   // 코트 안쪽으로
+  el.style.left=sx(p.x+dx)+"%";el.style.top=sy(p.y)+"%";
+  $("arena").appendChild(el);setTimeout(()=>el.remove(),1800);
+  if(kind==="monkey")setTimeout(()=>Snd.play("boing"),650);
+}
 function directHit(e,line){   // 상대가 나를 도발: 내 화면에 크게
   const c=CHARS[st.chars?.[e.side]],el=document.createElement("div"),lv=e.lv||1;
   el.className="dh lv"+lv+(e.reflect?" reflect":"")+(e.inPlay?" dhmini":"");
@@ -1227,8 +1262,10 @@ function onTaunt(e){
   const lv=e.lv||1,mine=e.side===side;
   playTaunt(e.side,e.n,lv);
   Snd.play("taunt",e.n);Snd.play(e.reflect?"oooh":TAUNT_CROWD[e.n],lv);   // 관중 반응: 야유·웃음, 반사 때는 "오오~!"
-  const bt=LINES.byChar[st.chars?.[e.side]]?.taunt;
-  const line=e.reflect?pick(LINES.reflect,e.id):lv===3?pick(LINES.taunt3,e.id):bt&&hash(e.id)%2===0?pick(bt,e.id):pick(LINES.taunt[e.n]||LINES.win,e.id);
+  const own=LINES.byChar[st.chars?.[e.side]];
+  const line=own?(e.reflect?pick(LINES.reflect,e.id):pick(hash(e.id)%3===0?own.taunt:own.mock,e.id))   // 개시키·바나킹: 자기 멘트로 귀뚜라미를 놀림
+    :e.reflect?pick(LINES.reflect,e.id):lv===3?pick(LINES.taunt3,e.id):pick(LINES.taunt[e.n]||LINES.win,e.id);
+  if(own)mockCricket(e);
   say(e.side,line,3,true);
   const p=st.players[e.side];
   if(e.reflect){popup(`🪞 반사${e.chain>1?" x"+e.chain:""}!`,p.x,p.y,"call");embarrass(1-e.side)}
