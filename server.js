@@ -39,7 +39,8 @@ function packMatch(room) {
     buff: st.buff ? { type: st.buff.type, pointsLeft: st.buff.pointsLeft } : null,
     clock: r2(st.clock || 0), hazard: st.hazard ? { type: st.hazard.type, pointsLeft: st.hazard.pointsLeft, patches: st.hazard.patches.map(p => ({ x: r2(p.x), y: r2(p.y), r: r2(p.r) })) } : null,
     players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
-    ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id },
+    ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id, split: b.split ? 1 : 0, slot: b.slot || 0, sg: r2(b.sg || 0) },
+    peels: (st.peels || []).map(q => ({ x: r2(q.x), y: r2(q.y) })), slip: (st.slip || [null, null]).map(x => x ? r2(x.t) : 0),
     events };
 }
 function snapshot(room) {
@@ -116,7 +117,7 @@ wss.on("connection", (ws) => {
     // 내 선수 위치: 화면에서 먼저 움직이고 서버는 속도·코트 범위만 검사
     if (msg.type === "pos") {
       client.posMode = true;
-      if (!st || (st.phase !== "serve" && st.phase !== "rally") || msg.e !== st.posEpoch || st.stun[side] > 0 || (st.freeze && st.freeze[side] > 0)) return;
+      if (!st || (st.phase !== "serve" && st.phase !== "rally") || msg.e !== st.posEpoch || st.stun[side] > 0 || (st.freeze && st.freeze[side] > 0) || (st.slip && st.slip[side])) return;
       let x = Number(msg.x), y = Number(msg.y); if (!isFinite(x) || !isFinite(y)) return;
       const now = Date.now(), p = st.players[side], dts = Math.min(.25, (now - (client.lastPos || now - 33)) / 1000);
       client.lastPos = now;
