@@ -49,7 +49,7 @@ function packMatch(room) {
     events };
 }
 function snapshot(room) {
-  return { type: "state", room: room.id, status: room.status, format: room.format, court: room.court,
+  return { type: "state", room: room.id, status: room.status, format: room.format, court: room.court, ready: room.ready || [false, false],
     names: [0, 1].map(s => clientAt(room, s)?.name || ""),
     chars: [0, 1].map(s => clientAt(room, s)?.char || null),
     match: packMatch(room) };
@@ -79,9 +79,9 @@ function tick(room) {
   const inp = [0, 1].map(s => clientAt(room, s)?.posMode ? { posMode: true } : { keys: room.inputs[s] });
   E.step(room.match, TICK, inp);
   room.evId = room.match.evId;
-  if (room.match.phase === "done" && !room.recorded) {   // 경기가 끝나면 두 선수 전적 기록
-    room.recorded = true;
-    for (const c of room.clients) if (c.acct) accounts.recordMatch(c.acct, room.match.winner === c.side);
+  if (room.match.phase === "done" && !room.recorded) {   // 경기가 끝나면 전적 기록(사람끼리 한 실시간 대전만 전적에 들어감)
+    room.recorded = true; const a = clientAt(room, 0), b = clientAt(room, 1), st = room.match;
+    accounts.recordMatch({ k: [a?.acct || null, b?.acct || null], n: [a?.name || "선수", b?.name || "선수"], c: [st.chars[0], st.chars[1]], court: st.court, format: st.format, winner: st.winner, history: st.history });
   }
 }
 
@@ -94,7 +94,7 @@ wss.on("connection", (ws) => {
       if (!id) id = code();
       room = rooms.get(id);
       if (!room) {
-        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0, sentEv: 0, created: Date.now(), private: !!msg.private, chat: [],
+        room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", ready: [false, false], evId: 0, sentEv: 0, created: Date.now(), private: !!msg.private, chat: [],
           format: E.FORMATS[msg.format] ? msg.format : "set1",     // 경기 방식·코트는 방을 만든 사람 기준
           court: E.COURTS.includes(msg.court) || msg.court === "random" ? msg.court : "hard" };
         rooms.set(id, room);
@@ -139,9 +139,9 @@ wss.on("connection", (ws) => {
     }
     // 경기 시작 전(또는 경기가 끝난 뒤) 로비에서 선수·경기 방식 변경
     const idle = !st || st.phase === "done";
-    if (msg.type === "char" && idle && E.CHARS.includes(msg.char)) client.char = msg.char;
-    if (msg.type === "format" && idle && side === 0 && E.FORMATS[msg.format]) room.format = msg.format;
-    if (msg.type === "court" && idle && side === 0 && (E.COURTS.includes(msg.court) || msg.court === "random")) room.court = msg.court;
+    if (msg.type === "char" && idle && E.CHARS.includes(msg.char)) { client.char = msg.char; room.ready[side] = false; }
+    if (msg.type === "format" && idle && side === 0 && E.FORMATS[msg.format]) { room.format = msg.format; room.ready = [false, false]; }
+    if (msg.type === "court" && idle && side === 0 && (E.COURTS.includes(msg.court) || msg.court === "random")) { room.court = msg.court; room.ready = [false, false]; }
     if (msg.type === "serve" && st) E.serve(st, side, { keys: cleanKeys(msg.keys), err: 1 });
     if (msg.type === "item" && st) E.useItem(st, side, Number(msg.slot) | 0);
     if (msg.type === "dash" && st) E.dash(st, side, cleanKeys(msg.keys));
@@ -152,10 +152,12 @@ wss.on("connection", (ws) => {
       const lookback = Math.max(3, Math.min(12, Math.round(((client.rtt || 80) / 2 + 100) / (1000 * TICK)) + 2));
       send(ws, { type: "hitResult", result: E.tryHit(st, side, skill, { keys: cleanKeys(msg.keys), err: 1 }, lookback) });
     }
-    // Space / 시작 버튼: 포인트·폴트 후에는 누구나 바로 다음 서브, 경기 시작·새 경기는 호스트만
-    if (msg.type === "next" || msg.type === "start") {
-      if (st && (st.phase === "point" || st.phase === "fault")) E.startPoint(st);
-      else if (side === 0 && room.clients.length === 2 && (!st || st.phase === "done")) startMatch(room);
+    // Space: 포인트·폴트 후에는 누구나 바로 다음 서브
+    if ((msg.type === "next" || msg.type === "start") && st && (st.phase === "point" || st.phase === "fault")) E.startPoint(st);
+    // Ready: 두 사람이 모두 누르면 경기 시작(경기가 끝난 뒤 다시 하기도 같음). 다시 누르면 취소
+    if (msg.type === "ready" && room.clients.length === 2 && (!st || st.phase === "done")) {
+      room.ready[side] = msg.on === undefined ? !room.ready[side] : !!msg.on;
+      if (room.ready[0] && room.ready[1]) { room.ready = [false, false]; startMatch(room); }
     }
     broadcast(room);
   });
@@ -163,7 +165,7 @@ wss.on("connection", (ws) => {
     if (room && client) {
       room.clients = room.clients.filter(c => c !== client);
       if (room.clients.length) sysChat(room, `${client.name}님이 나갔어요`);
-      room.match = null; room.status = "waiting";
+      room.match = null; room.status = "waiting"; room.ready = [false, false];
       broadcast(room);
       if (room.clients.length === 0) rooms.delete(room.id);
     }
