@@ -574,12 +574,12 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div id="entry" class="entry hidden"><div class="entry-card">
 <div class="entry-logo">🦗 귀뚜라미 테니스</div><div class="entry-sub">최강의 귀뚜라미를 가려라!</div>
 <label class="muted" for="loginNick">닉네임</label><input id="loginNick" class="field" maxlength="12" placeholder="예: 최재원" autocomplete="username">
-<label class="muted" for="loginPin">비밀번호 (숫자 4자리)</label><input id="loginPin" class="field" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" placeholder="••••" autocomplete="current-password">
+<label class="muted" for="loginPin">비밀번호 (숫자 4~8자리)</label><input id="loginPin" class="field" inputmode="numeric" pattern="[0-9]*" maxlength="8" type="password" placeholder="••••" autocomplete="current-password">
 <label class="muted chk"><input type="checkbox" id="loginKeep" checked> 이 기기에서 자동 로그인</label>
 <button id="loginBtn" class="btn big">로그인</button>
 <div class="entry-or"><span>또는</span></div>
 <button id="guestBtn" class="btn alt big">게스트로 시작</button>
-<div class="hint" id="loginHint">처음 쓰는 닉네임이면 새 계정이 만들어져요. 계정은 이 기기(브라우저)에만 저장돼요.</div>
+<div class="hint" id="loginHint">처음 쓰는 닉네임이면 새 계정이 만들어져요.</div>
 </div></div>
 
 <div id="modes" class="modes hidden">
@@ -1180,7 +1180,7 @@ function handleEvent(e){
     case "tiebreak":Snd.play("tiebreak");banner("타이브레이크","7점 먼저 · 2점 차");msg("게임 스코어 동점! 타이브레이크로 세트를 결정합니다. 7점을 먼저, 2점 차로 따야 합니다."+nextHint);break;
     case "ends":msg(curMsg+" · 코트 체인지(화면은 그대로)");break;
     case "set":Snd.play("set");Snd.play("cheer",true);banner("세트 "+who(e.winner),e.score[side]+" - "+e.score[1-side]);msg("세트, "+who(e.winner)+"! "+e.score[side]+"-"+e.score[1-side]+nextHint);break;
-    case "match":accSet(me=>e.winner===side?{w:(me.w||0)+1}:{l:(me.l||0)+1});Snd.play(e.winner===side?"victory":"defeat",Snd.isAnimal(st.chars?.[side]));Snd.voice(st.chars?.[e.winner],"match");say(e.winner,lineFor(e.winner,"match",e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
+    case "match":recordResult(e.winner===side);Snd.play(e.winner===side?"victory":"defeat",Snd.isAnimal(st.chars?.[side]));Snd.voice(st.chars?.[e.winner],"match");say(e.winner,lineFor(e.winner,"match",e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
   }
 }
 function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;lastEv=e.id;handleEvent(e)}}
@@ -1562,7 +1562,7 @@ function connect(create){
   if(ws)ws.close();
   const proto=location.protocol==="https:"?"wss":"ws";
   ws=new WebSocket(proto+"://"+location.host);lastEv=0;lastPhase="";st=null;snaps=[];myPos=null;rtt=0;
-  ws.onopen=()=>{clearInterval(pingTimer);pingTimer=setInterval(()=>send({type:"ping",t:performance.now(),rtt:Math.round(rtt)}),2000);send({type:"ping",t:performance.now(),rtt:0});send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format,court,private:create&&$("privateRoom").checked})};
+  ws.onopen=()=>{clearInterval(pingTimer);pingTimer=setInterval(()=>send({type:"ping",t:performance.now(),rtt:Math.round(rtt)}),2000);send({type:"ping",t:performance.now(),rtt:0});send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format,court,token:account&&account.server?getTok():undefined,private:create&&$("privateRoom").checked})};
   ws.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch{return}
     if(d.type==="error"){msg(d.message);return}
     if(d.type==="joined"){room=d.room;side=d.side;$("roomCode").value=room;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자");msg("방에 입장했습니다. 상대에게 방 코드를 공유하세요.");return}
@@ -1776,39 +1776,76 @@ function updateStage(react){
     Snd.play({ice:"slip",sea:"whoosh",forest:"rustle",clay:"rustle",grass:"jingle",hard:"pop",random:"split"}[ck]||"pop")}
   if(line)stageBubble(line);
 }
-/* ───── 계정: 이 기기(브라우저)에 저장하는 로그인(나중에 서버 계정으로 넓힐 수 있게 한곳에 모아 둠) ───── */
-const ACC_KEY="ct_accounts",SES_KEY="ct_session";
-let account=null;   // {nick, guest}
+/* ───── 계정: 게임 서버에 저장(DATABASE_URL이 있을 때), 서버가 없거나 파일로 열면 이 기기에 저장 ───── */
+const ACC_KEY="ct_accounts",SES_KEY="ct_session",TOK_KEY="ct_token";
+let account=null,acctCache=null,serverAcc=false;   // account: {nick, guest, server}
+const serverReady=(async()=>{try{if(location.protocol==="file:")return;const r=await fetch("/api/status",{cache:"no-store"});serverAcc=!!(r.ok&&(await r.json()).accounts)}catch{}})()
+  .then(()=>{$("loginHint").textContent=serverAcc?"처음 쓰는 닉네임이면 새 계정이 만들어져요. 계정은 게임 서버에 저장돼서 어느 기기에서든 같은 닉네임·비밀번호로 들어올 수 있어요.":"처음 쓰는 닉네임이면 새 계정이 만들어져요. 지금은 계정이 이 기기(브라우저)에만 저장돼요."});
 const loadAccs=()=>{try{return JSON.parse(localStorage.getItem(ACC_KEY)||"{}")||{}}catch{return{}}};
 const saveAccs=a=>{try{localStorage.setItem(ACC_KEY,JSON.stringify(a))}catch{}};
+const getTok=()=>{try{return localStorage.getItem(TOK_KEY)||sessionStorage.getItem(TOK_KEY)}catch{return null}};
+const setTok=(t,keep)=>{try{localStorage.removeItem(TOK_KEY);sessionStorage.removeItem(TOK_KEY);if(t)(keep?localStorage:sessionStorage).setItem(TOK_KEY,t)}catch{}};
+async function api(path,body){
+  const r=await fetch("/api"+path,{method:body?"POST":"GET",headers:{"content-type":"application/json",...(getTok()?{authorization:"Bearer "+getTok()}:{})},body:body?JSON.stringify(body):undefined,cache:"no-store"});
+  let d={};try{d=await r.json()}catch{}if(!r.ok)throw Object.assign(new Error(d.error||"서버에 연결할 수 없어요."),{status:r.status});return d;
+}
 function pinHash(nick,pin){let h=2166136261;for(const ch of nick+"|"+pin+"|cricket"){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
-function accGet(){return account&&!account.guest?loadAccs()[account.nick]||null:null}
-function accSet(patch){if(!account||account.guest)return;const a=loadAccs(),me=a[account.nick];if(!me)return;Object.assign(me,typeof patch==="function"?patch(me):patch);saveAccs(a)}
-function doLogin(){
-  const nick=$("loginNick").value.trim(),pin=$("loginPin").value.trim(),hint=$("loginHint");
-  if(nick.length<2){hint.textContent="닉네임은 2글자 이상으로 적어 주세요.";hint.classList.add("err");return}
-  if(!/^\d{4}$/.test(pin)){hint.textContent="비밀번호는 숫자 4자리예요.";hint.classList.add("err");return}
+function accGet(){if(!account||account.guest)return null;return account.server?acctCache:loadAccs()[account.nick]||null}
+function accSet(patch){   // 고른 선수·코트 저장
+  if(!account||account.guest)return;
+  if(account.server){if(acctCache)Object.assign(acctCache,patch);api("/prefs",patch).catch(()=>{});return}
+  const a=loadAccs(),me=a[account.nick];if(!me)return;Object.assign(me,typeof patch==="function"?patch(me):patch);saveAccs(a);
+}
+function recordResult(win){   // 전적: 실시간 대전은 서버가 직접 기록, 개인 연습은 화면이 알려 줌
+  if(!account||account.guest)return;
+  if(account.server){if(acctCache)win?acctCache.w++:acctCache.l++;if(mode==="solo")api("/record",{result:win?"w":"l"}).then(d=>{if(d.user)acctCache=d.user}).catch(()=>{});return}
+  accSet(me=>win?{w:(me.w||0)+1}:{l:(me.l||0)+1});
+}
+const loginErr=t=>{const h=$("loginHint");h.textContent=t;h.classList.add("err")};
+async function doLogin(){
+  const nick=$("loginNick").value.trim(),pin=$("loginPin").value.trim(),keep=$("loginKeep").checked;
+  if(nick.length<2)return loginErr("닉네임은 2글자 이상으로 적어 주세요.");
+  if(!/^\d{4,8}$/.test(pin))return loginErr("비밀번호는 숫자 4~8자리예요.");
+  await serverReady;
+  if(serverAcc){
+    $("loginBtn").disabled=true;
+    try{
+      const d=await api("/login",{nick,pin});setTok(d.token,keep);account={nick:d.user.nick,guest:false,server:true};acctCache=d.user;
+      const local=loadAccs()[nick];   // 이 기기에 같은 닉네임 전적이 있으면 처음 한 번 서버로 옮김
+      let moved=false;if(d.created&&local&&((local.w|0)+(local.l|0))>0){try{const im=await api("/import",{w:local.w|0,l:local.l|0});if(im.user)acctCache=im.user;moved=!!im.imported}catch{}}
+      if(d.created&&!acctCache.char&&local&&local.char)acctCache.char=local.char;
+      $("loginPin").value="";$("loginHint").classList.remove("err");afterLogin(d.created,moved);
+    }catch(e){loginErr(e.message||"서버에 연결할 수 없어요.");Snd.play("lose")}
+    finally{$("loginBtn").disabled=false}
+    return;
+  }
   const a=loadAccs(),h=pinHash(nick,pin);let created=false;
-  if(a[nick]&&a[nick].pin!==h){hint.textContent="비밀번호가 맞지 않아요. 다시 확인해 주세요.";hint.classList.add("err");Snd.play("lose");return}
+  if(a[nick]&&a[nick].pin!==h){loginErr("비밀번호가 맞지 않아요. 다시 확인해 주세요.");Snd.play("lose");return}
   if(!a[nick]){a[nick]={pin:h,created:Date.now(),char:null,court:"hard",w:0,l:0};created=true;saveAccs(a)}
-  account={nick,guest:false};try{if($("loginKeep").checked)localStorage.setItem(SES_KEY,nick);else localStorage.removeItem(SES_KEY)}catch{}
-  $("loginPin").value="";hint.classList.remove("err");afterLogin(created);
+  account={nick,guest:false,server:false};try{if(keep)localStorage.setItem(SES_KEY,nick);else localStorage.removeItem(SES_KEY)}catch{}
+  $("loginPin").value="";$("loginHint").classList.remove("err");afterLogin(created);
 }
 function doGuest(){account={nick:"게스트"+(1000+Math.floor(Math.random()*9000)),guest:true};afterLogin(false)}
-function afterLogin(created){
+function afterLogin(created,moved){
   const me=accGet();
   if(me&&me.char&&CHARS[me.char])pickChar(me.char,true);
   if(me&&me.court&&COURT_INFO[me.court]){court=me.court;setCourtPick(court)}
   $("name").value=account.nick;renderAcct();Snd.play("pop","big");showScreen("modes");
-  if(created)msg("새 계정을 만들었어요. 고른 선수와 코트, 전적이 이 기기에 저장돼요.");
+  if(created)msg(account.server?"새 계정을 만들었어요. 어느 기기에서든 같은 닉네임·비밀번호로 들어올 수 있어요."+(moved?" 이 기기에 있던 전적도 옮겨 왔어요.":""):"새 계정을 만들었어요. 고른 선수와 코트, 전적이 이 기기에 저장돼요.");
 }
-function doLogout(){leaveRoom();st=null;account=null;try{localStorage.removeItem(SES_KEY)}catch{}myChar=null;
+function doLogout(){leaveRoom();st=null;account=null;acctCache=null;setTok(null);try{localStorage.removeItem(SES_KEY)}catch{}myChar=null;
   document.querySelectorAll(".char").forEach(b=>{b.classList.remove("active");b.setAttribute("aria-pressed","false")});renderStatBox();showScreen("entry")}
+async function autoLogin(){   // 로딩 화면이 끝날 때: 저장된 로그인으로 바로 들어감
+  await serverReady;
+  if(serverAcc&&getTok()){try{const d=await api("/me");account={nick:d.user.nick,guest:false,server:true};acctCache=d.user;return true}catch{setTok(null)}}
+  if(!serverAcc){try{const ses=localStorage.getItem(SES_KEY);if(ses&&loadAccs()[ses]){account={nick:ses,guest:false,server:false};return true}}catch{}}
+  return false;
+}
 function renderAcct(){
   if(!account)return;const me=accGet(),label=(account.guest?"👤 ":"🦗 ")+account.nick+(account.guest?" (게스트)":"");
   $("acctName").textContent=label;$("acctChip").textContent=label;
   $("modeHello").textContent=account.nick+" 님, 어서 오세요!";
-  $("modeRecord").textContent=me?`전적 ${me.w||0}승 ${me.l||0}패`:"게스트는 전적이 저장되지 않아요.";
+  $("modeRecord").textContent=me?`전적 ${me.w||0}승 ${me.l||0}패`+(account.server?" · ☁️ 서버 계정":" · 📱 이 기기 계정"):"게스트는 전적이 저장되지 않아요.";
 }
 function chooseMode(m){
   if(m==="solo"){leaveRoom();setMode("solo")}else{st=null;setMode("multi");loadRooms(true)}
@@ -1818,7 +1855,6 @@ $("loginBtn").onclick=doLogin;$("guestBtn").onclick=doGuest;$("logoutBtn").oncli
 $("loginPin").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin()});$("loginNick").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginPin").focus()});
 $("modeSolo").onclick=()=>chooseMode("solo");$("modeMulti").onclick=()=>chooseMode("multi");
 $("backModes").onclick=()=>{if(room&&!confirm("방에서 나가고 모드 선택으로 돌아갈까요?"))return;leaveRoom();st=null;renderAcct();showScreen("modes")};
-(function(){try{const ses=localStorage.getItem(SES_KEY);if(ses&&loadAccs()[ses])account={nick:ses,guest:false}}catch{}})();   // 자동 로그인
 /* ───── 첫 로딩 화면: 그림·글꼴·게임 준비를 기다리며 막대가 차고, 다 되면 "화면을 눌러 시작!" (이 터치로 소리도 켜짐) ───── */
 let splashOn=true,splashReady=false;
 (function(){
@@ -1852,7 +1888,7 @@ function closeSplash(){
   if(!splashOn||!splashReady)return;
   splashOn=false;Snd.init();Snd.play("pop","big");
   const s=$("splash");s.classList.add("out");setTimeout(()=>s.remove(),500);
-  if(account)afterLogin(false);else{showScreen("entry");setTimeout(()=>$("loginNick").focus(),300)}
+  autoLogin().then(ok=>{if(ok)afterLogin(false);else{showScreen("entry");setTimeout(()=>$("loginNick").focus(),300)}});
 }
 $("splash").addEventListener("pointerup",closeSplash);
 /* ───── 메인 루프 ───── */
