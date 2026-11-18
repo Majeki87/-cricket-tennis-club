@@ -357,6 +357,13 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 .dirb.down,.dirb:active{background:#ffffff38;border-color:#fff}
 .dirb.p-up{left:50%;top:calc(56% - min(70px, 56% - 27px))}.dirb.p-down{left:50%;top:calc(56% + min(68px, 44% - 27px))}
 .dirb.p-left{left:calc(50% - min(68px, 50% - 27px));top:56%}.dirb.p-right{left:calc(50% + min(68px, 50% - 27px));top:56%}   /* 좁은 폰에서도 화면 밖으로 잘리지 않게 */
+.dirb.p-ul{left:calc(50% - min(50px, (50% - 27px) * .78));top:calc(56% - min(52px, (56% - 27px) * .78))}
+@media (max-width:360px){.dirb{width:44px;height:44px;font-size:15px}.dirb small{font-size:9px}.dirb.p-ul{left:25px;top:26px}}   /* 아주 좁은 폰: 버튼을 조금 작게, 슬라이스는 왼쪽 위 모서리로 */
+.mdash{position:absolute;left:calc(50% - 58px);bottom:calc(40% - 52px);width:50px;height:50px;border-radius:50%;pointer-events:auto;touch-action:none;border:1.5px solid #9fe7ff;background:#0b4a6acc;color:#fff;font-size:18px;line-height:1;padding:0;z-index:2}
+.mdash small{display:block;font-size:10px;font-weight:800}
+.mdash.cool,.dashbtn.cool{opacity:.4}
+.ball.slice{box-shadow:0 0 10px 4px #7fd4ff,0 0 2px 1px #fff}
+.bug.dashing svg{scale:1.15;filter:drop-shadow(0 0 6px #9fe7ff)}
 /* 휴대폰 아이템 칸: 왼쪽, 조이스틱 위 */
 .mitems{position:absolute;left:8px;bottom:calc(40% + 6px);display:flex;flex-direction:column;gap:6px;pointer-events:auto}
 .mitem{width:50px;height:50px;border-radius:12px;border:1.5px dashed #ffffff50;background:#00000030;color:#fff;font-size:22px;line-height:1;padding:0;touch-action:none;position:relative}
@@ -407,8 +414,9 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <span class="k">Space</span><span>타격·서브</span><span class="k">R</span><span>필살기</span>
 <span class="k">Q</span><span>스매쉬</span><span class="k">W</span><span>로브샷</span>
 <span class="k">E</span><span>드롭샷</span><span class="k">A</span><span>발리샷</span>
+<span class="k">S</span><span>슬라이스</span><span class="k">D</span><span>대시</span>
 <span class="k">T</span><span>도발</span><span class="k">1·2·3</span><span>아이템</span></div>
-<ul id="splTouch" class="spl-touch" hidden><li><b>왼쪽 아래</b> 누른 채 움직여 이동</li><li><b>오른쪽 원</b> 타격·서브·다음 서브</li><li>원 주위 <b>로브·드롭·발리·스매쉬</b></li><li><b>필살기·😜 도발</b>, 왼쪽 <b>아이템</b> 칸</li></ul></div></div></div></div>
+<ul id="splTouch" class="spl-touch" hidden><li><b>왼쪽 아래</b> 누른 채 움직여 이동</li><li><b>오른쪽 원</b> 타격·서브·다음 서브</li><li>원 주위 <b>로브·드롭·발리·스매쉬·슬라이스</b></li><li>조이스틱 옆 <b>💨 대시</b>로 몸 날리기</li><li><b>필살기·😜 도발</b>, 왼쪽 <b>아이템</b> 칸</li></ul></div></div></div></div>
 <main class="wrap">
 <header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음(숲속 자연 소리) 켜기/끄기">🌿 배경음</button></div></header>
 
@@ -474,18 +482,18 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div id="snakeBody"></div><div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
 <div class="bubble me" id="meBubble"></div><div class="bubble op" id="opBubble"></div>
 <div id="mCtrl"><div class="joyzone" id="joyZone"><div class="joybase" id="joyBase"><div class="joyknob" id="joyKnob"></div></div><span class="zlabel">누른 곳에서 이동</span></div>
-<div class="actpad" id="actPad"><button class="dirb p-up" data-mskill="lob">🌙<small>로브</small></button><button class="dirb p-down" data-mskill="drop">🪶<small>드롭</small></button><button class="dirb p-left" data-mskill="volley">🏐<small>발리</small></button><button class="dirb p-right" data-mskill="speed">💥<small>스매쉬</small></button><b class="padlabel" id="padLabel">타격</b></div>
+<div class="actpad" id="actPad"><button class="dirb p-up" data-mskill="lob">🌙<small>로브</small></button><button class="dirb p-down" data-mskill="drop">🪶<small>드롭</small></button><button class="dirb p-left" data-mskill="volley">🏐<small>발리</small></button><button class="dirb p-right" data-mskill="speed">💥<small>스매쉬</small></button><button class="dirb p-ul" data-mskill="slice">🔪<small>슬라이스</small></button><b class="padlabel" id="padLabel">타격</b></div>
 <div class="mitems" id="mItems"><button class="mitem" data-slot="2"></button><button class="mitem" data-slot="1"></button><button class="mitem" data-slot="0"></button></div>
-<button class="mtaunt" id="mTaunt" disabled aria-label="도발">😜</button><button class="mspecial" id="mSpecial" disabled>✨<small>0%</small></button></div>
+<button class="mdash" id="mDash" aria-label="대시">💨<small>대시</small></button><button class="mtaunt" id="mTaunt" disabled aria-label="도발">😜</button><button class="mspecial" id="mSpecial" disabled>✨<small>0%</small></button></div>
 <div class="overlay" id="overlay"></div></div>
 <div class="col colR">
 <section class="panel" id="ctrlPanel"><b>🎮 조작</b>
-<div class="keys"><span><kbd>←↑↓→</kbd></span><span>이동 (방향키)</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd></span><span>스매쉬 · 로브 · 드롭 · 필살기 (발리는 <kbd>A</kbd>)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span><span><kbd>T</kbd></span><span>도발 (경기 중엔 0.9초 멈춤 · 연타 콤보 · 2초 안 맞도발은 반사)</span></div>
+<div class="keys"><span><kbd>←↑↓→</kbd></span><span>이동 (방향키)</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd></span><span>스매쉬 · 로브 · 드롭 · 필살기</span><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>발리 · 슬라이스 · 대시(방향키와 함께)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span><span><kbd>T</kbd></span><span>도발 (경기 중엔 0.9초 멈춤 · 연타 콤보 · 2초 안 맞도발은 반사)</span></div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
-<div class="skillrow"><button class="skill" data-skill="speed">💥 스매쉬<small>빠르지만 아웃 위험 · Q</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · W</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · A</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · R</small></button></div>
+<div class="skillrow"><button class="skill" data-skill="speed">💥 스매쉬<small>빠르지만 아웃 위험 · Q</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · W</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · A</small></button><button class="skill" data-skill="slice">🔪 슬라이스<small>낮게 깔려 미끄러짐 · S</small></button><button class="skill dashbtn" id="dashBtn">💨 대시<small>몸을 날려 순간 이동 · D</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · R</small></button></div>
 </section>
-<section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>R</kbd>로 필살기!</li><li><kbd>T</kbd>(휴대폰은 😜)로 언제든 도발! 연달아 누르면 최대 3단계 콤보, 상대 도발에 2초 안에 맞도발하면 반사돼요. 단, 경기 중엔 0.9초 동안 멈춰요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
+<section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>R</kbd>로 필살기!</li><li>멀리 빠지는 공은 방향키를 누른 채 <kbd>D</kbd>(휴대폰은 💨)로 대시! 3초마다 쓸 수 있어요.</li><li><kbd>T</kbd>(휴대폰은 😜)로 언제든 도발! 연달아 누르면 최대 3단계 콤보, 상대 도발에 2초 안에 맞도발하면 반사돼요. 단, 경기 중엔 0.9초 동안 멈춰요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
 </div>
 <div id="mTop"><div class="mrow"><button id="mExit" aria-label="로비로 나가기">✕</button><button id="mSnd" aria-label="소리 설정">🔊</button><button id="mChatBtn" class="hidden" aria-label="채팅">💬<i id="mChatDot" class="hidden"></i></button>
 <div class="mp"><span class="mn" id="mMeName">나</span><span class="mg" id="mMeGames">0</span><span class="mpt" id="mMePts">0</span><i class="mgauge"><b id="mMeGauge"></b></i></div>
@@ -843,7 +851,7 @@ function handleEvent(e){
     case "hit":
       if(e.skill!=="special")Snd.play("hit",e.skill);if(st.ball&&st.ball.pow)Snd.play("pow");
       if(e.side!==side)animateSwing("opponent");
-      if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SMASH!",lob:"🌙 LOB!"}[e.skill],e.x,e.y);
+      if(e.skill!=="normal"&&e.skill!=="special")popup({volley:"🏐 VOLLEY!",drop:"🪶 DROP SHOT!",speed:"💥 SMASH!",lob:"🌙 LOB!",slice:"🔪 SLICE!"}[e.skill],e.x,e.y);
       if(e.skill!=="special"&&chance3(e.id))say(e.side,pick(e.skill==="speed"?LINES.smash.concat(LINES.hit):LINES.hit,e.id),1);   // 칠 때는 3번에 1번꼴
       break;
     case "whiff":Snd.play("whiff");animateSwing("opponent");popup("헛스윙!",st.players[e.side].x,st.players[e.side].y);break;
@@ -859,6 +867,8 @@ function handleEvent(e){
     case "hazardEnd":{const h=HZ[e.kind];if(h){popup(h.ic+" 끝!",0,0,"call");setTimeout(()=>msg(h.end),900)}break}
     case "hzBounce":{const t={weeds:"🌿 어디로 튈지 몰라!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~ 미끄러졌다!"}[e.mode];popup(t,e.x,e.y,"call");Snd.play(e.kind==="weeds"?"rustle":"splash");break}
     case "snakeStrike":strikeUntil=performance.now()+500;popup("🐍 쉭! 물었다!",e.x,e.y,"call");Snd.play("strike");break;
+    case "dash":{const el=$(e.side===side?"player":"opponent");el.classList.add("dashing");setTimeout(()=>el.classList.remove("dashing"),350);
+      popup("💨",e.x,e.y);Snd.play("whiff");if(e.side===side&&mode==="solo")dashReadyAt=performance.now()+E.DASH.cd*1000;break}
     case "netcord":Snd.play("netcord");popup("NET CORD",e.x,e.y,"call");break;
     case "net":Snd.play("net");popup("NET",e.x,e.y,"bad");break;
     case "bounce":Snd.play("bounce");if(e.out)Snd.play("buzz");mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
@@ -1012,6 +1022,7 @@ function render(){
   }
   if(!st)lastPhase="";
   renderItems();
+  {const cool=performance.now()<dashReadyAt;$("dashBtn").classList.toggle("cool",cool);$("mDash").classList.toggle("cool",cool)}
   renderHazard();
   renderBuff();
   renderChatUI();
@@ -1191,6 +1202,21 @@ function tauntUI(){
   const n=1+Math.floor(Math.random()*8);
   if(mode==="multi")send({type:"taunt",n});else E.taunt(st,side,n);
 }
+/* 대시: 방향키(조이스틱)를 누른 쪽으로 몸을 날림. 대전에서는 내 화면에서 먼저 날아가고 서버가 확인 */
+let localDash=null,dashReadyAt=0;
+function dashUI(){
+  if(!st||(st.phase!=="rally"&&st.phase!=="serve"))return;
+  if(performance.now()<dashReadyAt){msg("대시는 3초마다 쓸 수 있어요.");return}
+  const k=worldKeys();
+  if(mode==="multi"){
+    if(st.phase==="serve"&&st.server===side)return;
+    if((st.stun&&st.stun[side]>0)||(st.freeze&&st.freeze[side]>0))return;
+    let dx=(k.right?1:0)-(k.left?1:0),dy=(k.down?1:0)-(k.up?1:0);if(!dx&&!dy)dx=st.ball?.live?(Math.sign(st.ball.x-myPos.x)||1):1;
+    const m=Math.hypot(dx,dy);localDash={t:E.DASH.time,rec:E.DASH.recover,vx:dx/m*E.DASH.speed,vy:dy/m*E.DASH.speed};
+    send({type:"dash",keys:k});dashReadyAt=performance.now()+E.DASH.cd*1000;return;
+  }
+  const r=E.dash(st,0,k);if(r==="ok")dashReadyAt=performance.now()+E.DASH.cd*1000;
+}
 function useItemUI(slot){
   if(!st)return;
   if(!st.items[side][slot]){msg("이 칸은 비어 있어요. 포인트가 끝날 때 가끔 아이템을 얻을 수 있어요.");return}
@@ -1310,6 +1336,7 @@ $("roomList").addEventListener("click",e=>{const b=e.target.closest("[data-join]
   $("roomCode").value=b.dataset.join;connect(false)});
 $("lobbyStart").onclick=()=>{if(mode==="solo")startSolo();else send({type:"next"})};
 $("toLobby").onclick=toLobby;
+$("dashBtn").onclick=dashUI;
 $("tauntBtn").onclick=tauntUI;
 $("overlay").addEventListener("click",e=>{const a=e.target.closest("[data-act]");if(!a)return;
   if(a.dataset.act==="lobby")toLobby();else if(mode==="solo")startSolo();else send({type:"next"})});
@@ -1347,6 +1374,7 @@ document.querySelectorAll(".dirb").forEach(b=>tapBtn(b,()=>hitBall(b.dataset.msk
 document.querySelectorAll(".mitem").forEach(b=>tapBtn(b,()=>useItemUI(+b.dataset.slot)));
 tapBtn($("mSpecial"),()=>hitBall("special"));
 tapBtn($("mTaunt"),tauntUI);
+tapBtn($("mDash"),dashUI);
 $("mExit").onclick=toLobby;
 // 두 번 탭 확대 막기: 아이폰 사파리는 확대 금지 설정을 무시해서 스크립트로도 막음
 let lastTouchEnd=0;
@@ -1377,7 +1405,7 @@ function sendKeys(){if(mode==="multi")send({type:"input",keys:worldKeys()})}
 document.querySelectorAll("[data-key]").forEach(b=>{let k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true;sendKeys()});["pointerup","pointercancel","pointerleave"].forEach(ev=>b.addEventListener(ev,()=>{keys[k]=false;sendKeys()}))});
 // 한/영 상태와 상관없이 동작하도록 e.code(물리 키) 기준
 const MOVE={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};   // 이동은 방향키(W가 기술 키가 되어 WASD 이동은 뺌)
-const SKILL_KEY={KeyQ:"speed",KeyW:"lob",KeyE:"drop",KeyR:"special",KeyA:"volley"};   // 왼손 QWER: 스매쉬·로브·드롭·필살기, 발리는 A
+const SKILL_KEY={KeyQ:"speed",KeyW:"lob",KeyE:"drop",KeyR:"special",KeyA:"volley",KeyS:"slice"};   // 왼손 QWER: 스매쉬·로브·드롭·필살기, 발리는 A
 const ITEM_KEY={Digit1:0,Numpad1:0,Digit2:1,Numpad2:1,Digit3:2,Numpad3:2};
 window.addEventListener("keydown",e=>{
   if(splashOn){if(["Space","Enter"].includes(e.code)||e.key.length===1){e.preventDefault();closeSplash()}return}
@@ -1388,6 +1416,7 @@ window.addEventListener("keydown",e=>{
   const s=SKILL_KEY[e.code];if(s&&!e.repeat){e.preventDefault();hitBall(s)}
   if(e.code in ITEM_KEY&&!e.repeat&&screen==="game"){e.preventDefault();useItemUI(ITEM_KEY[e.code])}
   if(e.code==="KeyT"&&!e.repeat&&screen==="game"){e.preventDefault();tauntUI()}
+  if(e.code==="KeyD"&&!e.repeat&&screen==="game"){e.preventDefault();dashUI()}
 });
 window.addEventListener("keyup",e=>{const k=MOVE[e.code];if(k){keys[k]=false;sendKeys()}});
 window.addEventListener("blur",()=>{keys={};sendKeys()});
@@ -1433,7 +1462,9 @@ function loop(t){
   if(mode==="solo"&&st){E.step(st,dt,[{keys:worldKeys()},E.aiThink(st,1,difficulty,dt)]);processEvents()}
   if(mode==="multi"&&st&&myPos&&(st.phase==="serve"||st.phase==="rally")){
     const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,hazard:st.hazard,buff:st.buff,clock:st.clock,players:[...st.players]};view.players[side]=myPos;
-    E.moveLocal(view,side,worldKeys(),dt);
+    if(localDash&&localDash.t>0){myPos.x+=localDash.vx*dt;myPos.y+=localDash.vy*dt;E.constrainPos(view,side);localDash.t-=dt}
+    else if(localDash&&localDash.rec>0)localDash.rec-=dt;
+    else{localDash=null;E.moveLocal(view,side,worldKeys(),dt)}
     const now=performance.now(),key=myPos.x.toFixed(2)+","+myPos.y.toFixed(2);
     if(now-lastPosSend>=33&&key!==lastSent){lastPosSend=now;lastSent=key;send({type:"pos",x:+myPos.x.toFixed(3),y:+myPos.y.toFixed(3),e:myEpoch})}
   }
