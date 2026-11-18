@@ -128,7 +128,7 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 @keyframes tzNod{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
 @keyframes tzBuzz{from{transform:translateX(-2%)}to{transform:translateX(2%)}}
 @keyframes tzNote{0%{opacity:0;translate:0 8px}25%{opacity:1}100%{opacity:0;translate:6px -22px}}
-.mtaunt{position:absolute;right:4px;bottom:calc(40% - 52px);width:44px;height:44px;z-index:2;border-radius:50%;pointer-events:auto;touch-action:none;border:1.5px solid #ffffff60;background:#00000040;font-size:22px;line-height:1;padding:0}
+.mtaunt{position:absolute;right:4px;bottom:calc(40% - 44px);width:42px;height:42px;z-index:2;border-radius:50%;pointer-events:auto;touch-action:none;border:1.5px solid #ffffff60;background:#00000040;font-size:22px;line-height:1;padding:0}
 .mtaunt:disabled{opacity:.3}
 .bug.stunned::after{content:"💫";position:absolute;left:50%;top:-16px;transform:translateX(-50%);font-size:18px}
 .bug.opponent.stunned::after{top:auto;bottom:-16px;transform:translateX(-50%) rotate(180deg)}
@@ -358,9 +358,9 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 .dirb.p-up{left:50%;top:calc(56% - min(70px, 56% - 27px))}.dirb.p-down{left:50%;top:calc(56% + min(68px, 44% - 27px))}
 .dirb.p-left{left:calc(50% - min(68px, 50% - 27px));top:56%}.dirb.p-right{left:calc(50% + min(68px, 50% - 27px));top:56%}   /* 좁은 폰에서도 화면 밖으로 잘리지 않게 */
 .dirb.p-ul{left:calc(50% - min(50px, (50% - 27px) * .78));top:calc(56% - min(52px, (56% - 27px) * .78))}
-@media (max-width:360px){.dirb{width:44px;height:44px;font-size:15px}.dirb small{font-size:9px}.dirb.p-ul{left:25px;top:26px}}   /* 아주 좁은 폰: 버튼을 조금 작게, 슬라이스는 왼쪽 위 모서리로 */
-.mdash{position:absolute;left:calc(50% - 58px);bottom:calc(40% - 52px);width:50px;height:50px;border-radius:50%;pointer-events:auto;touch-action:none;border:1.5px solid #9fe7ff;background:#0b4a6acc;color:#fff;font-size:18px;line-height:1;padding:0;z-index:2}
-.mdash small{display:block;font-size:10px;font-weight:800}
+.dirb.p-ur{left:calc(50% + min(50px, (50% - 27px) * .78));top:calc(56% - min(52px, (56% - 27px) * .78))}
+@media (max-width:360px){.dirb{width:44px;height:44px;font-size:15px}.dirb small{font-size:9px}.dirb.p-ul{left:25px;top:26px}.dirb.p-ur{left:calc(100% - 25px);top:26px}.mtaunt{right:76px;bottom:calc(40% + 16px)}}   /* 아주 좁은 폰은 공간이 없어 도발을 필살기 왼쪽으로   /* 아주 좁은 폰: 버튼을 조금 작게, 슬라이스는 왼쪽 위 모서리로 */
+.dirb.mdash{border-color:#9fe7ff;background:#0b4a6acc}
 .mdash.cool,.dashbtn.cool{opacity:.4}
 .ball.slice{box-shadow:0 0 10px 4px #7fd4ff,0 0 2px 1px #fff}
 .bug.dashing svg{scale:1.15;filter:drop-shadow(0 0 6px #9fe7ff)}
@@ -416,7 +416,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <span class="k">E</span><span>드롭샷</span><span class="k">A</span><span>발리샷</span>
 <span class="k">S</span><span>슬라이스</span><span class="k">D</span><span>대시</span>
 <span class="k">T</span><span>도발</span><span class="k">1·2·3</span><span>아이템</span></div>
-<ul id="splTouch" class="spl-touch" hidden><li><b>왼쪽 아래</b> 누른 채 움직여 이동</li><li><b>오른쪽 원</b> 타격·서브·다음 서브</li><li>원 주위 <b>로브·드롭·발리·스매쉬·슬라이스</b></li><li>조이스틱 옆 <b>💨 대시</b>로 몸 날리기</li><li><b>필살기·😜 도발</b>, 왼쪽 <b>아이템</b> 칸</li></ul></div></div></div></div>
+<ul id="splTouch" class="spl-touch" hidden><li><b>왼쪽 아래</b> 누른 채 움직여 이동</li><li><b>오른쪽 원</b> 타격·서브·다음 서브</li><li>원 주위 <b>로브·드롭·발리·스매쉬·슬라이스</b></li><li>로브와 스매쉬 사이 <b>💨 대시</b>로 몸 날리기</li><li><b>필살기·😜 도발</b>, 왼쪽 <b>아이템</b> 칸</li></ul></div></div></div></div>
 <main class="wrap">
 <header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음(숲속 자연 소리) 켜기/끄기">🌿 배경음</button></div></header>
 
@@ -482,9 +482,9 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div id="snakeBody"></div><div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
 <div class="bubble me" id="meBubble"></div><div class="bubble op" id="opBubble"></div>
 <div id="mCtrl"><div class="joyzone" id="joyZone"><div class="joybase" id="joyBase"><div class="joyknob" id="joyKnob"></div></div><span class="zlabel">누른 곳에서 이동</span></div>
-<div class="actpad" id="actPad"><button class="dirb p-up" data-mskill="lob">🌙<small>로브</small></button><button class="dirb p-down" data-mskill="drop">🪶<small>드롭</small></button><button class="dirb p-left" data-mskill="volley">🏐<small>발리</small></button><button class="dirb p-right" data-mskill="speed">💥<small>스매쉬</small></button><button class="dirb p-ul" data-mskill="slice">🔪<small>슬라이스</small></button><b class="padlabel" id="padLabel">타격</b></div>
+<div class="actpad" id="actPad"><button class="dirb p-up" data-mskill="lob">🌙<small>로브</small></button><button class="dirb p-down" data-mskill="drop">🪶<small>드롭</small></button><button class="dirb p-left" data-mskill="volley">🏐<small>발리</small></button><button class="dirb p-right" data-mskill="speed">💥<small>스매쉬</small></button><button class="dirb p-ul" data-mskill="slice">🔪<small>슬라이스</small></button><button class="dirb p-ur mdash" id="mDash" aria-label="대시">💨<small>대시</small></button><b class="padlabel" id="padLabel">타격</b></div>
 <div class="mitems" id="mItems"><button class="mitem" data-slot="2"></button><button class="mitem" data-slot="1"></button><button class="mitem" data-slot="0"></button></div>
-<button class="mdash" id="mDash" aria-label="대시">💨<small>대시</small></button><button class="mtaunt" id="mTaunt" disabled aria-label="도발">😜</button><button class="mspecial" id="mSpecial" disabled>✨<small>0%</small></button></div>
+<button class="mtaunt" id="mTaunt" disabled aria-label="도발">😜</button><button class="mspecial" id="mSpecial" disabled>✨<small>0%</small></button></div>
 <div class="overlay" id="overlay"></div></div>
 <div class="col colR">
 <section class="panel" id="ctrlPanel"><b>🎮 조작</b>
