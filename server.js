@@ -3,10 +3,13 @@ const http = require("http");
 const { WebSocketServer } = require("ws");
 const crypto = require("crypto");
 const E = require("./public/engine.js");   // 개인전과 같은 경기 엔진(실제 테니스 규칙)
+const { setupAccounts } = require("./accounts.js");   // 서버 계정(로그인·전적)
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
+app.set("trust proxy", 1);   // Render 앞단을 거쳐도 접속한 곳(IP)을 알 수 있게
+const accounts = setupAccounts(app, express, { chars: E.CHARS, courts: E.COURTS });
 app.use(express.static("public"));
 app.get("/health", (_, res) => res.json({ ok: true }));
 // 공개된 방 목록: 로비에서 3초마다 불러감 (비공개 방은 빠짐)
@@ -66,7 +69,7 @@ const sysChat = (room, text) => pushChat(room, { side: -1, name: "", text });
 function startMatch(room) {
   room.match = E.newMatch({ format: room.format, court: room.court, chars: [clientAt(room, 0).char, clientAt(room, 1).char], autoNext: AUTO_NEXT, evId: room.evId });
   room.sentEv = room.evId;
-  room.status = "playing";
+  room.status = "playing"; room.recorded = false;
 }
 function tick(room) {
   if (room.clients.length < 2) { room.status = "waiting"; room.match = null; return; }
@@ -76,6 +79,10 @@ function tick(room) {
   const inp = [0, 1].map(s => clientAt(room, s)?.posMode ? { posMode: true } : { keys: room.inputs[s] });
   E.step(room.match, TICK, inp);
   room.evId = room.match.evId;
+  if (room.match.phase === "done" && !room.recorded) {   // 경기가 끝나면 두 선수 전적 기록
+    room.recorded = true;
+    for (const c of room.clients) if (c.acct) accounts.recordMatch(c.acct, room.match.winner === c.side);
+  }
 }
 
 wss.on("connection", (ws) => {
@@ -95,7 +102,7 @@ wss.on("connection", (ws) => {
       if (room.clients.length >= 2) { send(ws, { type: "error", message: "방이 가득 찼습니다. 다른 방을 만들어 주세요." }); room = null; return; }
       const side = clientAt(room, 0) ? 1 : 0;
       const char = E.CHARS.includes(msg.char) ? msg.char : E.CHARS[Math.floor(Math.random() * E.CHARS.length)];
-      client = { ws, name: String(msg.name || "귀뚜라미").slice(0, 12), side, char };
+      client = { ws, name: String(msg.name || "귀뚜라미").slice(0, 12), side, char, acct: accounts.verify(msg.token) };   // 로그인한 선수면 전적을 서버가 기록
       room.clients.push(client);
       send(ws, { type: "joined", room: id, side });
       send(ws, { type: "chatlog", list: room.chat });
