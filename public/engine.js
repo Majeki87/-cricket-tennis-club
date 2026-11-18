@@ -38,7 +38,7 @@ const SF = {   // 능력치 1칸당 효과
 const TAUNT_FREEZE = .9, TAUNT_COMBO = 2.5, TAUNT_REFLECT = 2, TAUNT_GAP = .6;   // 경기 중 도발하면 0.9초 멈춤, 2.5초 안에 또 하면 콤보, 상대 도발 2초 안에 하면 반사
 // 환경 디버프: 게임이 끝날 때 가끔 시작해서 2게임 동안 유지, 세트당 1~2번
 const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
-const HAZARD_POINTS = 2, HAZARD_CHANCE = .22;   // 시작은 게임이 끝날 때, 유지는 포인트 2개(누가 점수를 내든)
+const HAZARD_POINTS = 2, ENV_PER_GAME = .9;   // 버프·디버프: 게임마다 한 번쯤(90%), 게임 중 아무 포인트 사이에 시작해서 점수 2번 동안 유지
 // 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
 const TORNADO = { r: 2.3, loops: 5, squash: .7 };   // 회전회오리샷: 반지름 2.3m 고리를 5바퀴
 const FIREBALL = { T: .45, margin: .06, z: 1.1 };   // 불꽃샷: 0.45초 목표(멸치보다 빠르게), 낮은 공도 허리 높이에서 강타
@@ -122,8 +122,8 @@ function newMatch(opts = {}) {
     events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
     court: COURTS.includes(opts.court) ? opts.court : opts.court === "random" ? COURTS[Math.floor(Math.random() * COURTS.length)] : "hard",
     pvel: [{ x: 0, y: 0 }, { x: 0, y: 0 }], cpatch: [], decor: [], wind: null, windNext: 6, waveNext: 12, pitImmune: [0, 0],
-    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], dash: [null, null], dashCd: [0, 0], peels: [], slip: [null, null], lastDir: [{ x: 0, y: -1 }, { x: 0, y: 1 }], hazard: null, hazardsInSet: 0, hazardCool: 0, lastHazard: null,
-    buff: null, buffsInSet: 0, buffCool: 0, lastBuff: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
+    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], dash: [null, null], dashCd: [0, 0], peels: [], slip: [null, null], lastDir: [{ x: 0, y: -1 }, { x: 0, y: 1 }], hazard: null, lastHazard: null,
+    buff: null, lastBuff: null, envIn: 1 + Math.floor(Math.random() * 3), envRun: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
   };
   pushEv(st, { type: "toss", server: st.server });
   if (st.court === "forest") forestLayout(st);
@@ -482,20 +482,28 @@ function startHazard(st) {
     const own = side === 0 ? 1 : -1;
     patches.push({ x: (Math.random() * 2 - 1) * 3.4, y: own * (1.6 + Math.random() * 9.6), r: type === "weeds" ? .9 + Math.random() * .55 : .8 + Math.random() * .5 });
   }
-  st.hazard = { type, pointsLeft: HAZARD_POINTS, patches }; st.lastHazard = type; st.hazardsInSet++;
+  st.hazard = { type, pointsLeft: HAZARD_POINTS, patches }; st.lastHazard = type;
   pushEv(st, { type: "hazard", kind: type });
 }
-function hazardTick(st) {   // 게임이 끝날 때마다
-  if (st.hazard || st.buff) return;   // 버프와 디버프는 따로따로(동시에 안 나옴)
-  if (st.phase === "done" || st.hazardsInSet >= 2) return;
-  if (st.hazardCool > 0) { st.hazardCool--; return; }
-  const played = st.games[0] + st.games[1];
-  if ((st.hazardsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) startHazard(st);   // 세트에 한 번은 꼭
+function planEnv(st) {   // 새 게임이 시작될 때: 이번 게임 몇 번째 포인트 뒤에 환경이 생길지 미리 정함(0~3)
+  st.envIn = st.phase !== "done" && Math.random() < ENV_PER_GAME ? Math.floor(Math.random() * 4) : null;
 }
-function envPoint(st) {
-  // 하나가 끝나면 버프·디버프 모두 최소 한 게임은 쉬었다가 다음 환경이 나옴
-  if (st.hazard && --st.hazard.pointsLeft <= 0) { pushEv(st, { type: "hazardEnd", kind: st.hazard.type }); st.hazard = null; st.hazardCool = st.buffCool = 1; }
-  if (st.buff && --st.buff.pointsLeft <= 0) { pushEv(st, { type: "buffEnd", kind: st.buff.type }); st.buff = null; st.hazardCool = st.buffCool = 1; }
+function startBuff(st) {
+  const pool = BUFFS.filter(t => t !== st.lastBuff), type = pool[Math.floor(Math.random() * pool.length)];
+  st.buff = { type, pointsLeft: HAZARD_POINTS }; st.lastBuff = type;
+  pushEv(st, { type: "buff", kind: type });
+}
+function startEnv(st) {   // 버프와 디버프 중 하나(반반, 같은 쪽이 세 번 연속 나오지 않게)
+  let kind = Math.random() < .5 ? "hazard" : "buff";
+  if (st.envRun && st.envRun.kind === kind && st.envRun.n >= 2) kind = kind === "hazard" ? "buff" : "hazard";
+  st.envRun = st.envRun && st.envRun.kind === kind ? { kind, n: st.envRun.n + 1 } : { kind, n: 1 };
+  kind === "hazard" ? startHazard(st) : startBuff(st);
+}
+function envPoint(st) {   // 포인트가 끝날 때마다: 진행 중인 환경은 점수 2번이면 끝, 없으면 이번 게임 계획대로 시작(버프·디버프는 동시에 안 나옴)
+  if (st.hazard && --st.hazard.pointsLeft <= 0) { pushEv(st, { type: "hazardEnd", kind: st.hazard.type }); st.hazard = null; return; }
+  if (st.buff && --st.buff.pointsLeft <= 0) { pushEv(st, { type: "buffEnd", kind: st.buff.type }); st.buff = null; return; }
+  if (st.hazard || st.buff || st.envIn == null) return;
+  if (st.envIn <= 0) { st.envIn = null; startEnv(st); } else st.envIn--;
 }
 function courtTick(st) {
   const now = st.clock;
@@ -511,17 +519,6 @@ function courtTick(st) {
     const own = Math.random() < .5 ? 1 : -1, sideX = Math.random() < .5 ? -1 : 1;
     for (let k = 0; k < 2; k++) st.cpatch.push({ type: "water", x: sideX * (1.5 + Math.random() * 2.2), y: own * (2.5 + Math.random() * 8), r: .9 + Math.random() * .35, until: now + SEA.waveLen });
     st.waveNext = now + rnd(SEA.waveGap); pushEv(st, { type: "wave", own, sideX });
-  }
-}
-function buffTick(st) {   // 디버프와 같은 규칙으로 따로 진행
-  if (st.buff || st.hazard) return;
-  if (st.phase === "done" || st.buffsInSet >= 2) return;
-  if (st.buffCool > 0) { st.buffCool--; return; }
-  const played = st.games[0] + st.games[1];
-  if ((st.buffsInSet === 0 && played >= Math.max(2, st.G - 2)) || Math.random() < HAZARD_CHANCE) {
-    const pool = BUFFS.filter(t => t !== st.lastBuff), type = pool[Math.floor(Math.random() * pool.length)];
-    st.buff = { type, pointsLeft: HAZARD_POINTS }; st.lastBuff = type; st.buffsInSet++;
-    pushEv(st, { type: "buff", kind: type });
   }
 }
 function fault(st, reason) {
@@ -565,13 +562,13 @@ function gameWon(st, w) {
   if (wasTb || (gw >= st.G && gw - gl >= 2)) setWon(st, w);
   else if (gw === st.G && gl === st.G) { st.tb = true; st.tbFirst = st.server; pushEv(st, { type: "tiebreak" }); }
   else if ((st.games[0] + st.games[1]) % 2 === 1) pushEv(st, { type: "ends" });
-  if (Math.random() < .5) { hazardTick(st); buffTick(st); } else { buffTick(st); hazardTick(st); }
-  if (st.court === "forest" && st.phase !== "done") { forestLayout(st); pushEv(st, { type: "forestShift" }); }   // 게임마다 함정 위치가 바뀜   // 어느 쪽이 먼저 나올지 공평하게
+  planEnv(st);   // 이번 게임의 버프·디버프 계획
+  if (st.court === "forest" && st.phase !== "done") { forestLayout(st); pushEv(st, { type: "forestShift" }); }   // 게임마다 함정 위치가 바뀜
 }
 function setWon(st, w) {
   st.sets[w]++; st.history.push([...st.games]);
   pushEv(st, { type: "set", winner: w, score: [...st.games] });
-  st.games = [0, 0]; st.hazardsInSet = 0; st.buffsInSet = 0;
+  st.games = [0, 0];
   if (st.sets[w] >= st.setsToWin) { st.phase = "done"; st.winner = w; pushEv(st, { type: "match", winner: w }); }
 }
 
