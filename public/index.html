@@ -406,7 +406,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div class="spl-ctl"><h4>🎮 조작 방법</h4><div id="splKeys" class="spl-g">
 <span class="k">Space</span><span>타격·서브</span><span class="k">R</span><span>필살기</span>
 <span class="k">Q</span><span>스매쉬</span><span class="k">W</span><span>로브샷</span>
-<span class="k">E</span><span>드롭샷</span><span class="k">Z</span><span>발리샷</span>
+<span class="k">E</span><span>드롭샷</span><span class="k">A</span><span>발리샷</span>
 <span class="k">T</span><span>도발</span><span class="k">1·2·3</span><span>아이템</span></div>
 <ul id="splTouch" class="spl-touch" hidden><li><b>왼쪽 아래</b> 누른 채 움직여 이동</li><li><b>오른쪽 원</b> 타격·서브·다음 서브</li><li>원 주위 <b>로브·드롭·발리·스매쉬</b></li><li><b>필살기·😜 도발</b>, 왼쪽 <b>아이템</b> 칸</li></ul></div></div></div></div>
 <main class="wrap">
@@ -480,10 +480,10 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div class="overlay" id="overlay"></div></div>
 <div class="col colR">
 <section class="panel" id="ctrlPanel"><b>🎮 조작</b>
-<div class="keys"><span><kbd>←↑↓→</kbd></span><span>이동 (방향키)</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd></span><span>스매쉬 · 로브 · 드롭 · 필살기 (발리는 <kbd>Z</kbd>)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span><span><kbd>T</kbd></span><span>도발 (경기 중엔 0.9초 멈춤 · 연타 콤보 · 2초 안 맞도발은 반사)</span></div>
+<div class="keys"><span><kbd>←↑↓→</kbd></span><span>이동 (방향키)</span><span><kbd>Space</kbd></span><span>기본 타격 · 서브 · 다음 서브 · 새 경기</span><span><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd></span><span>스매쉬 · 로브 · 드롭 · 필살기 (발리는 <kbd>A</kbd>)</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>아이템 사용</span><span><kbd>T</kbd></span><span>도발 (경기 중엔 0.9초 멈춤 · 연타 콤보 · 2초 안 맞도발은 반사)</span></div>
 <div class="pad"><button class="blank">·</button><button data-key="up">⬆️</button><button class="blank">·</button><button data-key="left">⬅️</button><button data-key="down">⬇️</button><button data-key="right">➡️</button></div>
 <div class="row" style="margin-top:9px"><button id="hit" class="btn">🎾 기본 타격</button><button id="serve" class="btn" style="background:#c66b16" disabled>🎾 서브 (Space)</button></div>
-<div class="skillrow"><button class="skill" data-skill="speed">💥 스매쉬<small>빠르지만 아웃 위험 · Q</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · W</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · Z</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · R</small></button></div>
+<div class="skillrow"><button class="skill" data-skill="speed">💥 스매쉬<small>빠르지만 아웃 위험 · Q</small></button><button class="skill" data-skill="lob">🌙 로브샷<small>머리 위로 높이 넘김 · W</small></button><button class="skill" data-skill="drop">🪶 드롭샷<small>네트 앞에 짧게 · E</small></button><button class="skill" data-skill="volley">🏐 발리샷<small>넓은 범위 · 날카로운 각도 · A</small></button><button class="skill special" id="specialBtn" data-skill="special" disabled>✨ 필살기<small>기 100% 필요 · R</small></button></div>
 </section>
 <section class="panel" id="tipPanel"><b>💡 플레이 팁</b><ul class="tips"><li>공 아래 <b>그림자</b>가 공의 실제 위치입니다. 그림자가 내 선수 가까이 올 때 치세요.</li><li>칠 때 <kbd>←</kbd><kbd>→</kbd>를 누르고 있으면 그쪽으로, 네트 쪽 키는 깊게·반대쪽 키는 짧게 보냅니다.</li><li>서브 전에는 <kbd>←</kbd><kbd>→</kbd>로 서는 위치를 잡고, 키를 누른 채 서브하면 코스가 바뀝니다.</li><li>공을 받아치거나 실점하면 기가 차고, 100%가 되면 <kbd>R</kbd>로 필살기!</li><li><kbd>T</kbd>(휴대폰은 😜)로 언제든 도발! 연달아 누르면 최대 3단계 콤보, 상대 도발에 2초 안에 맞도발하면 반사돼요. 단, 경기 중엔 0.9초 동안 멈춰요.</li><li>포인트가 끝날 때 가끔 아이템을 얻습니다(최대 3개). 효과는 그 포인트가 끝날 때까지 유지돼요.</li></ul></section>
 </div>
@@ -1377,7 +1377,7 @@ function sendKeys(){if(mode==="multi")send({type:"input",keys:worldKeys()})}
 document.querySelectorAll("[data-key]").forEach(b=>{let k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();keys[k]=true;sendKeys()});["pointerup","pointercancel","pointerleave"].forEach(ev=>b.addEventListener(ev,()=>{keys[k]=false;sendKeys()}))});
 // 한/영 상태와 상관없이 동작하도록 e.code(물리 키) 기준
 const MOVE={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};   // 이동은 방향키(W가 기술 키가 되어 WASD 이동은 뺌)
-const SKILL_KEY={KeyQ:"speed",KeyW:"lob",KeyE:"drop",KeyR:"special",KeyZ:"volley"};   // 왼손 QWER: 스매쉬·로브·드롭·필살기, 발리는 Z
+const SKILL_KEY={KeyQ:"speed",KeyW:"lob",KeyE:"drop",KeyR:"special",KeyA:"volley"};   // 왼손 QWER: 스매쉬·로브·드롭·필살기, 발리는 A
 const ITEM_KEY={Digit1:0,Numpad1:0,Digit2:1,Numpad2:1,Digit3:2,Numpad3:2};
 window.addEventListener("keydown",e=>{
   if(splashOn){if(["Space","Enter"].includes(e.code)||e.key.length===1){e.preventDefault();closeSplash()}return}
