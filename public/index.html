@@ -9,7 +9,7 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .sndbox{position:absolute;right:0;top:4px;display:flex;gap:6px}
 .sndbtn{background:#294650;color:#e4f4ee;border:1px solid #52717a;border-radius:9px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer}
 .sndbtn.off{opacity:.45;text-decoration:line-through}
-@media (max-width:640px){.sndbox{position:static;justify-content:center;margin-top:8px}}
+@media (max-width:640px){body:not(.mobile) .sndbox{position:static;justify-content:center;margin-top:8px}}
 .sub{font-size:12px;color:#a9c2b8;font-weight:700;letter-spacing:1px}
 .title{font-size:25px;font-weight:900}
 .panel{background:linear-gradient(145deg,#172b35,#203a42);border:1px solid #41616a;border-radius:15px;padding:13px;box-shadow:0 10px 24px #0004}
@@ -578,70 +578,80 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 @media (min-width:900px){#lobby.lobby{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
 /* 노치·홈 막대를 피해서 */
 .wrap{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
-@media (max-width:640px){
-  .wrap{padding:10px max(10px,env(safe-area-inset-left)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-right))}
+/* 휴대폰 모드(터치 기기 또는 직접 고른 경우)에서만 적용 — PC는 창이 좁아도 PC 화면 그대로 */
+body.mobile .wrap{padding:10px max(10px,env(safe-area-inset-left)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-right))}
   /* 2) 머리글을 한 줄로 작게: 제목 왼쪽, 소리 버튼은 아이콘만 오른쪽 */
-  body:not(.playing) .top{display:flex;align-items:center;gap:8px;text-align:left;min-height:44px}
-  body:not(.playing) .top .sub{display:none}
-  body:not(.playing) .top .title{flex:1;font-size:19px;margin:0}
-  body:not(.playing) .sndbox{position:static;margin:0;gap:6px}
-  body:not(.playing) .sndbtn{width:42px;height:42px;padding:0;font-size:0;border-radius:12px}
-  body:not(.playing) .sndbtn::first-letter{font-size:18px}
+body.mobile:not(.playing) .top{display:flex;align-items:center;gap:8px;text-align:left;min-height:44px}
+body.mobile:not(.playing) .top .sub{display:none}
+body.mobile:not(.playing) .top .title{flex:1;font-size:19px;margin:0}
+body.mobile:not(.playing) .sndbox{position:static;margin:0;gap:6px}
+body.mobile:not(.playing) .sndbtn{width:42px;height:42px;padding:0;font-size:0;border-radius:12px}
+body.mobile:not(.playing) .sndbtn::first-letter{font-size:18px}
+body.mobile:not(.playing) .viewbtn{width:auto;padding:0 10px;font-size:12px}
   /* 3) 손가락으로 누르기 편하게(최소 42px) */
-  .mini{min-height:42px;padding:8px 14px;font-size:13px}
-  .chk{display:flex;align-items:center;gap:8px;min-height:40px}
-  .chk input[type=checkbox]{width:22px;height:22px;flex:none}
-  .seg button{min-height:46px}
+body.mobile .mini{min-height:42px;padding:8px 14px;font-size:13px}
+body.mobile .chk{display:flex;align-items:center;gap:8px;min-height:40px}
+body.mobile .chk input[type=checkbox]{width:22px;height:22px;flex:none}
+body.mobile .seg button{min-height:46px}
   /* 4) 아이폰에서 입력칸을 누르면 화면이 확대되지 않게(16px 이상) */
-  .field,.chatin,input[type=text],input[type=password],input:not([type]){font-size:16px!important}
+body.mobile .field, body.mobile .chatin, body.mobile input[type=text], body.mobile input[type=password], body.mobile input:not([type]){font-size:16px!important}
   /* 입장 화면: 작은 폰에서도 한 화면에 */
-  .entry{padding:8px 0}
-  .entry-card{padding:16px 16px 14px;border-radius:16px}
-  .entry-logo{font-size:21px}.entry-sub{margin:2px 0 6px}
-  .entry-card .btn.big{padding:13px;font-size:16px;margin-top:8px}
-  .entry-or{margin:8px 0 0}
+body.mobile .entry{padding:8px 0}
+body.mobile .entry-card{padding:16px 16px 14px;border-radius:16px}
+body.mobile .entry-logo{font-size:21px}
+body.mobile .entry-sub{margin:2px 0 6px}
+body.mobile .entry-card .btn.big{padding:13px;font-size:16px;margin-top:8px}
+body.mobile .entry-or{margin:8px 0 0}
   /* 모드 선택 */
-  .modes{margin-top:6px;padding:0}
-  .modes-hello{font-size:19px;margin-top:6px}
-  .mode-card{padding:18px 12px;flex-direction:row;justify-content:flex-start;gap:14px;text-align:left}
-  .mode-card .mc-ic{font-size:38px}.mode-card b{font-size:19px;display:block}.mode-card small{display:block;margin-top:2px}
-  .mode-card>b,.mode-card>small{grid-column:2}
-  .mode-card{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:center}
-  .mode-card .mc-ic{grid-row:1/3}
-  .rec-open{width:100%;min-height:48px;margin-top:12px}
+body.mobile .modes{margin-top:6px;padding:0}
+body.mobile .modes-hello{font-size:19px;margin-top:6px}
+body.mobile .mode-card{padding:18px 12px;flex-direction:row;justify-content:flex-start;gap:14px;text-align:left}
+body.mobile .mode-card .mc-ic{font-size:38px}
+body.mobile .mode-card b{font-size:19px;display:block}
+body.mobile .mode-card small{display:block;margin-top:2px}
+body.mobile .mode-card>b, body.mobile .mode-card>small{grid-column:2}
+body.mobile .mode-card{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:center}
+body.mobile .mode-card .mc-ic{grid-row:1/3}
+body.mobile .rec-open{width:100%;min-height:48px;margin-top:12px}
   /* 전적 화면 */
-  .records{padding:0;gap:10px}
-  .rec-big b{font-size:30px}
-  .rec-tabs button{font-size:13px;padding:8px 4px}
-  .rec-main b{font-size:13px}.rec-score{font-size:13px}.rec-score i{margin-left:5px}
+body.mobile .records{padding:0;gap:10px}
+body.mobile .rec-big b{font-size:30px}
+body.mobile .rec-tabs button{font-size:13px;padding:8px 4px}
+body.mobile .rec-main b{font-size:13px}
+body.mobile .rec-score{font-size:13px}
+body.mobile .rec-score i{margin-left:5px}
   /* 5) 로비: 무대는 낮게, 능력치는 작게 옆으로, 시작 버튼은 화면 아래에 항상 */
-  #lobby.lobby{gap:10px;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
-  .stagebar b{font-size:16px}
-  .stage{height:215px}
-  .stage-bubble{font-size:13px;top:5%}
-  .stagebug{width:min(40%,170px);bottom:12%}
-  #lobby .statbox{display:grid;grid-template-columns:132px 1fr;grid-template-rows:auto auto auto 1fr;column-gap:10px;text-align:left;align-items:start;padding:8px 10px}
-  #lobby .statbox svg{grid-column:1;grid-row:1/5;max-width:132px;margin:0}
-  #lobby .statbox .sb-title{grid-column:2;font-size:14px}
-  #lobby .statbox .sb-type{grid-column:2}
-  #lobby .statbox .sb-cmp{display:none}
-  #lobby .statbox .sb-style{grid-column:2;font-size:12px;margin-top:4px}
-  #lobby .char{flex:0 0 94px;padding:6px 4px}#lobby .char svg{width:58px;height:48px}
-  #lobby .char b{font-size:11px}
-  #lobby .cpk{flex:0 0 88px}#lobby .cpk i{height:22px}
-  .panel{padding:12px}
-  .h2{font-size:15px}
-  #lobbyStart{position:fixed;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));width:auto;margin:0;z-index:30;padding:15px;font-size:17px;border-radius:14px;box-shadow:0 8px 24px #000a}
-  body:not([data-scr="lobby"]) #lobbyStart{display:none}
-  #pickSummary{font-size:12.5px}
-  .roomlist{max-height:220px;overflow-y:auto}
-  #multiSetup .row{flex-wrap:wrap}
-  #multiSetup .row .field{flex:1 1 120px;min-width:0}
-  #multiSetup .row .btn{flex:none;white-space:nowrap}
-}
+body.mobile #lobby.lobby{gap:10px;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+body.mobile .stagebar b{font-size:16px}
+body.mobile .stage{height:215px}
+body.mobile .stage-bubble{font-size:13px;top:5%}
+body.mobile .stagebug{width:min(40%,170px);bottom:12%}
+body.mobile #lobby .statbox{display:grid;grid-template-columns:132px 1fr;grid-template-rows:auto auto auto 1fr;column-gap:10px;text-align:left;align-items:start;padding:8px 10px}
+body.mobile #lobby .statbox svg{grid-column:1;grid-row:1/5;max-width:132px;margin:0}
+body.mobile #lobby .statbox .sb-title{grid-column:2;font-size:14px}
+body.mobile #lobby .statbox .sb-type{grid-column:2}
+body.mobile #lobby .statbox .sb-cmp{display:none}
+body.mobile #lobby .statbox .sb-style{grid-column:2;font-size:12px;margin-top:4px}
+body.mobile #lobby .char{flex:0 0 94px;padding:6px 4px}
+body.mobile #lobby .char svg{width:58px;height:48px}
+body.mobile #lobby .char b{font-size:11px}
+body.mobile #lobby .cpk{flex:0 0 88px}
+body.mobile #lobby .cpk i{height:22px}
+body.mobile .panel{padding:12px}
+body.mobile .h2{font-size:15px}
+body.mobile #lobbyStart{position:fixed;left:max(12px,env(safe-area-inset-left),calc(50% - 300px));right:max(12px,env(safe-area-inset-right),calc(50% - 300px));bottom:calc(10px + env(safe-area-inset-bottom));width:auto;margin:0;z-index:30;padding:15px;font-size:17px;border-radius:14px;box-shadow:0 8px 24px #000a}
+body.mobile:not([data-scr="lobby"]) #lobbyStart{display:none}
+body.mobile #pickSummary{font-size:12.5px}
+body.mobile .roomlist{max-height:220px;overflow-y:auto}
+body.mobile #multiSetup .row{flex-wrap:wrap}
+body.mobile #multiSetup .row .field{flex:1 1 120px;min-width:0}
+body.mobile #multiSetup .row .btn{flex:none;white-space:nowrap}
+
 /* 경기 화면(휴대폰): 위쪽 작은 버튼을 크게 */
 body.mobile #mExit,body.mobile #mSnd,body.mobile #mChatBtn{min-width:40px;min-height:40px;font-size:17px}
 body.mobile #mChatSheet .chatin{font-size:16px}
+/* PC 창이 좁을 때(한 줄 배치): 코트를 맨 위에 두어 스크롤 없이 경기 */
+@media (max-width:759px){body:not(.mobile) .layout #arena{order:-1}}
 </style></head><body><div id="splash" role="dialog" aria-label="게임 불러오는 중"><div class="spl-frame"><img id="splImg" src="loading_bg.jpg" alt="귀뚜라미 테니스 — 최강의 귀뚜라미를 가려라!">
 <div class="spl-ui"><div><div class="spl-lbl">GAME LOADING<span id="splDots">...</span><small id="splStage">게임 불러오는 중</small></div>
 <div class="spl-barrow"><div class="spl-bar"><i id="splBar"></i></div><div class="spl-pct" id="splPct">0%</div></div>
@@ -655,7 +665,7 @@ body.mobile #mChatSheet .chatin{font-size:16px}
 <span class="k">T</span><span>도발</span><span class="k">1·2·3</span><span>아이템</span></div>
 <ul id="splTouch" class="spl-touch" hidden><li><b>왼쪽 아래</b> 누른 채 움직여 이동</li><li><b>오른쪽 원</b> 타격·서브·다음 서브</li><li>원 주위 <b>로브·드롭·발리·스매쉬·슬라이스</b></li><li>로브와 스매쉬 사이 <b>💨 대시</b>로 몸 날리기</li><li><b>필살기·😜 도발</b>, 왼쪽 <b>아이템</b> 칸</li></ul></div></div></div></div>
 <main class="wrap">
-<header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음(숲속 자연 소리) 켜기/끄기">🌿 배경음</button></div></header>
+<header class="top"><div class="sub">KRE TENNIS CLUB · CRICKET CHAMPIONSHIP 2026</div><div class="title">🦗 귀뚜라미 테니스</div><div class="sndbox"><button class="sndbtn" id="sfxBtn" title="효과음 켜기/끄기">🔊 효과음</button><button class="sndbtn" id="bgmBtn" title="배경음(숲속 자연 소리) 켜기/끄기">🌿 배경음</button><button class="sndbtn viewbtn" id="viewBtn" title="화면 모드 바꾸기">🖥️ 자동</button></div></header>
 
 
 <div id="entry" class="entry hidden"><div class="entry-card">
@@ -1804,9 +1814,16 @@ $("lobby").addEventListener("click",e=>{const b=e.target.closest("button,summary
 // 휴대폰: 버튼 하나로 [모두 켬 → 배경음 끔 → 모두 끔] 순환
 $("mSnd").onclick=()=>{if(Snd.pref.sfx&&Snd.pref.bgm)Snd.toggle("bgm");else if(Snd.pref.sfx)Snd.toggle("sfx");else{Snd.toggle("sfx");Snd.toggle("bgm")}renderSnd()};
 renderSnd();
-function updateMobile(){const m=matchMedia("(pointer:coarse)").matches||innerWidth<600;if(m!==isMobile()){document.body.classList.toggle("mobile",m);lobbyCache="";msg(curMsg)}
+let viewPref=(()=>{try{return localStorage.getItem("ct_view")||"auto"}catch{return "auto"}})();   // 화면 모드: auto(자동) · pc · mobile
+const TOUCH_DEVICE=matchMedia("(hover:none) and (pointer:coarse)").matches||(matchMedia("(pointer:coarse)").matches&&!matchMedia("(any-pointer:fine)").matches);   // 처음 열 때 한 번만 판단(도중에 바뀌지 않게)
+const touchDevice=()=>TOUCH_DEVICE;
+function updateMobile(){const m=viewPref==="mobile"||(viewPref==="auto"&&touchDevice());
+  if(m!==isMobile()){document.body.classList.toggle("mobile",m);lobbyCache="";msg(curMsg)}
+  const vb=$("viewBtn");if(vb){vb.textContent={auto:(m?"📱":"🖥️")+" 자동",pc:"🖥️ PC 화면",mobile:"📱 모바일 화면"}[viewPref];vb.title="화면 모드 바꾸기 (자동 → PC → 모바일)"}
   layoutView()}
 addEventListener("resize",updateMobile);
+$("viewBtn").onclick=()=>{viewPref={auto:"pc",pc:"mobile",mobile:"auto"}[viewPref];try{localStorage.setItem("ct_view",viewPref)}catch{}updateMobile();
+  Snd.play("pop");msg({auto:"화면 모드: 자동 (터치 기기는 모바일, 마우스는 PC 화면)",pc:"화면 모드: PC 화면으로 고정",mobile:"화면 모드: 모바일 화면으로 고정"}[viewPref])};
 $("hit").onclick=()=>hitBall("normal");
 $("serve").onclick=serveNow;
 document.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>{difficulty=b.dataset.level;setSeg("level",difficulty);updateStage(false);msg("컴퓨터 난이도: "+({easy:"쉬움 · 느리고 실수가 잦아요",normal:"보통 · 적당한 발과 정확도",hard:"어려움 · 빠른 발, 아웃 공은 정확히 보내 줘요"}[difficulty]))});
