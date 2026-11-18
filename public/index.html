@@ -319,6 +319,46 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 #mChatDot{position:absolute;right:3px;top:3px;width:8px;height:8px;border-radius:50%;background:#ff5b4a}
 #mChatSheet{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#172b35;border-top:1px solid #52717a;border-radius:16px 16px 0 0;padding:12px 12px calc(env(safe-area-inset-bottom) + 12px);box-shadow:0 -10px 30px #0008;touch-action:auto}
 #mChatSheet .chatlog{height:130px}
+/* 코트 선택 */
+.courtpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-top:4px}
+.cpk{position:relative;background:#10242d;border:2px solid #3c5a63;border-radius:10px;color:#e8f5ef;padding:6px 5px 6px;cursor:pointer;text-align:center;font:inherit}
+.cpk i{display:block;height:26px;border-radius:5px;margin-bottom:4px;border:1.5px solid #ffffffaa;background:#2d7d6a}
+.cpk b{display:block;font-size:11.5px;word-break:keep-all}.cpk small{display:block;font-size:10px;color:#9fb8af;margin-top:1px;word-break:keep-all}
+.cpk.active{border-color:#ffd84a;box-shadow:0 0 0 2px #ffd84a55}.cpk:disabled{opacity:.55;cursor:default}
+.cpk-clay i{background:#c8643a}.cpk-grass i{background:repeating-linear-gradient(90deg,#3f8a33 0 8px,#4a9a3d 8px 16px)}.cpk-ice i{background:linear-gradient(135deg,#d8eef7,#a9d6ea)}
+.cpk-sea i{background:linear-gradient(#8a5a33,#8a5a33) center/70% 70% no-repeat,#2f7fb8}.cpk-forest i{background:radial-gradient(circle at 30% 50%,#1f4f1c 0 5px,transparent 6px),radial-gradient(circle at 75% 40%,#6b4a2b 0 4px,transparent 5px),#2f6b2a}
+.cpk-random i{background:conic-gradient(#2d7d6a 0 25%,#c8643a 0 50%,#3f8a33 0 75%,#a9d6ea 0)}
+/* 코트별 모습 */
+.arena.c-clay{background:radial-gradient(ellipse at center,#b65a33,#9c4826 60%,#7a3518)}.arena.c-clay .court .surface{fill:#c8643a}.arena.c-clay .court .alley{fill:#a64e28}
+.arena.c-grass{background:radial-gradient(ellipse at center,#3a7d2e,#2f6b26 60%,#235220)}.arena.c-grass .court .surface{fill:url(#grassStripe)}.arena.c-grass .court .alley{fill:#2f6e27}
+.arena.c-ice{background:radial-gradient(ellipse at center,#cfe7f2,#a9cfe0 60%,#86b6cc)}.arena.c-ice .court .surface{fill:#e3f3fa}.arena.c-ice .court .alley{fill:#c2e1ee}.arena.c-ice .court .ln line,.arena.c-ice .court .ln rect{stroke:#4a8fb5}
+.arena.c-sea{background:repeating-linear-gradient(90deg,#8a5a33 0 18px,#7a4d2a 18px 20px)}.arena.c-sea .court .surface{fill:#2a8a72}
+.arena.c-forest{background:radial-gradient(ellipse at center,#24552a,#1b4220 60%,#12301a)}.arena.c-forest .court .surface{fill:#3b7a3a}.arena.c-forest .court .alley{fill:#2c5f2b}
+.arena.c-sea .court{animation:none}
+#courtDeco{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#courtDeco .sea-l,#courtDeco .sea-r{position:absolute;top:0;bottom:0;width:7%;background:repeating-linear-gradient(180deg,#2f7fb8 0 14px,#3d93cc 14px 20px);animation:seaFlow 2.4s linear infinite}
+#courtDeco .sea-l{left:0}#courtDeco .sea-r{right:0}
+@keyframes seaFlow{to{background-position:0 40px}}
+#courtDeco .rail{position:absolute;top:0;bottom:0;width:2px;background:#e8e0d0}
+#courtDeco .tree{position:absolute;font-size:22px;transform:translate(-50%,-50%);filter:drop-shadow(0 3px 2px #0006)}
+#courtDeco .glint{position:absolute;width:30px;height:3px;background:#fff;border-radius:2px;opacity:.7;transform:rotate(-25deg);animation:glint 3s ease-in-out infinite}
+@keyframes glint{50%{opacity:.1}}
+#cpLayer{position:absolute;inset:0;z-index:1;pointer-events:none}
+.cpt{position:absolute;transform:translate(-50%,-50%);border-radius:50%}
+.cpt.bush{background:radial-gradient(circle,#1d4a1b 0,#24581f 55%,#24581f00 72%)}.cpt.bush span{position:absolute;transform:translate(-50%,-55%);line-height:1;filter:drop-shadow(0 2px 2px #0007)}
+.cpt.mud{background:radial-gradient(ellipse,#5a3a1fdd 0,#6b4a2bbb 55%,#6b4a2b00 72%)}
+.cpt.mud::after{content:"";position:absolute;inset:30%;border-radius:50%;background:#3d2814aa}
+.cpt.water{background:radial-gradient(ellipse,#7ec8f2cc 0,#4a9fd6aa 50%,#4a9fd600 72%);overflow:hidden}
+.cpt.water::after{content:"";position:absolute;inset:22%;border-radius:50%;border:2px solid #e6f6ffaa;animation:ripple 1.6s ease-out infinite}
+.cpt.leaves{display:flex;align-items:center;justify-content:center}
+.cpt.pit{background:radial-gradient(circle,#0d0a07 0,#2a1d10 55%,#2a1d1000 72%)}
+.bmark{position:absolute;width:15px;height:9px;border-radius:50%;background:#4a1d06;opacity:.6;box-shadow:0 0 0 2px #e8a07a55;transform:translate(-50%,-50%);pointer-events:none;z-index:1;animation:bmark 6s linear forwards}
+@keyframes bmark{80%{opacity:.5}100%{opacity:0}}
+#windFx{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden}
+#windFx i{position:absolute;height:2px;width:22%;border-radius:2px;background:linear-gradient(90deg,#ffffff00,#ffffffcc,#ffffff00);animation:windR .7s linear infinite}
+#windFx.left i{animation-name:windL}
+@keyframes windR{from{transform:translateX(-30vw)}to{transform:translateX(60vw)}}@keyframes windL{from{transform:translateX(60vw)}to{transform:translateX(-30vw)}}
+#windChip{position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:6;background:#0b3a5acc;color:#fff;border-radius:12px;padding:3px 10px;font-size:12px;font-weight:900}
 .roomline{margin-top:9px;font-size:13px;font-weight:700;color:#ffe25a}
 .ov-btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .ov-btns .btn{font-size:14px;padding:10px 14px}
@@ -446,11 +486,12 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <div class="row" style="margin-top:9px"><button id="soloTab" class="btn">개인 연습</button><button id="multiTab" class="btn alt">실시간 대전</button></div>
 <label class="muted">경기 방식</label><div class="seg" id="formatPick"><button data-format="short">짧은 세트<br><small>4게임</small></button><button data-format="set1" class="active">1세트<br><small>6게임</small></button><button data-format="set3">3세트<br><small>2세트 선승</small></button></div>
 
+<label class="muted">코트</label><div class="courtpick" id="courtPick"></div>
 <div id="soloSetup"><label class="muted">컴퓨터 난이도</label><div class="seg" id="levelPick"><button data-level="easy" class="active">쉬움</button><button data-level="normal">보통</button><button data-level="hard">어려움</button></div></div>
 <div id="multiSetup" class="hidden" style="margin-top:10px"><label class="muted" style="margin-top:0">내 닉네임</label><input id="name" class="field" maxlength="12" value="귀뚜라미 선수"><div class="row" style="margin-top:8px"><button id="createRoom" class="btn">방 만들기</button><input id="roomCode" class="field" placeholder="방 코드"><button id="joinRoom" class="btn alt">참가</button></div><label class="muted chk"><input type="checkbox" id="privateRoom"> 비공개 방으로 만들기 (방 코드를 아는 사람만 참가)</label>
 <div class="roomline" id="roomLine">아직 방에 들어가지 않았습니다.</div>
 <div id="lobbyChat" class="chatbox hidden"><b class="chat-h">💬 채팅</b><div class="chatlog" id="lobbyChatLog"></div><div class="quick" data-quick></div><div class="chatrow"><input class="field chatin" id="lobbyChatIn" maxlength="80" placeholder="메시지를 입력하세요" autocomplete="off"><button class="btn chatsend" data-send="lobbyChatIn">보내기</button></div></div>
-<div id="roomBrowser"><div class="rl-head"><b>열린 방</b><button id="refreshRooms" class="mini">새로고침</button></div><div class="roomlist" id="roomList"><div class="muted">불러오는 중…</div></div></div><div class="muted" style="margin-top:5px">경기 방식은 방을 만든 사람이 정합니다. 두 명이 모이면 호스트가 경기를 시작합니다. 만든 방은 비공개로 하지 않으면 모든 사람의 '열린 방' 목록에 보입니다.</div></div>
+<div id="roomBrowser"><div class="rl-head"><b>열린 방</b><button id="refreshRooms" class="mini">새로고침</button></div><div class="roomlist" id="roomList"><div class="muted">불러오는 중…</div></div></div><div class="muted" style="margin-top:5px">경기 방식과 코트는 방을 만든 사람이 정합니다. 두 명이 모이면 호스트가 경기를 시작합니다. 만든 방은 비공개로 하지 않으면 모든 사람의 '열린 방' 목록에 보입니다.</div></div>
 <div class="summary" id="pickSummary">선수를 먼저 골라 주세요.</div>
 <button id="lobbyStart" class="btn big" disabled>선수를 먼저 선택하세요</button>
 <div class="hint" id="lobbyHint"></div>
@@ -467,6 +508,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <li>🎒 아이템: 포인트가 끝날 때마다 무작위로 얻을 수 있고 최대 3개까지 모입니다. 🐟 죽방멸치는 공이 빨라지고, 🥛 서울우유는 몸이 커져 공을 받기 쉬워지고, ☕ 로빈 쿠폰은 정확도와 스핀이 좋아집니다. 효과는 쓴 포인트가 끝나면 사라집니다.</li>
 <li>⚠️ 환경 디버프: 세트마다 1~2번, 점수가 2번 날 때까지 🌿 잡초(공이 아무 데로나 튀고 밟으면 느려짐), 🚨 비상벨(모두 우왕좌왕, 조작이 틀어짐), 🌧️ 비(웅덩이에서 공이 멈추거나 엉뚱하게 튀고 밟으면 느려짐)가 생겨요.</li>
 <li>✨ 환경 버프: 디버프와 같은 빈도로 🍃 맑은 공기(두 선수 모든 능력치 +1), ♨️ AI 코트 난방(선수·공이 빨라짐)이 점수가 2번 날 때까지 생겨요. 버프와 디버프는 서로 겹치지 않고 따로 나와요.</li>
+<li>🏟️ 코트: 하드(표준) · 클레이(느리고 높게) · 잔디(빠르고 낮게) · 빙판(미끄러짐) · 우리 바다(출렁임·돌풍·파도) · 숲속(덤불·진흙·숨은 구덩이)</li>
 <li>실제 경기는 홀수 게임마다 코트를 바꾸지만, 이 게임은 내 선수가 항상 화면 아래에 보이도록 화면을 유지합니다.</li>
 </ul></details>
 </div>
@@ -485,7 +527,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="tauntBtn" class="btn alt" disabled>😜 도발 (T)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
 </div>
 <div class="arena" id="arena">
-<svg class="court" viewBox="-7.3 -15.5 14.6 31" preserveAspectRatio="none" aria-hidden="true">
+<svg class="court" viewBox="-7.3 -15.5 14.6 31" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="grassStripe" width="10.97" height="2.4" patternUnits="userSpaceOnUse"><rect width="10.97" height="1.2" fill="#3f8a33"/><rect y="1.2" width="10.97" height="1.2" fill="#4a9a3d"/></pattern></defs>
 <rect class="surface" x="-5.485" y="-11.885" width="10.97" height="23.77"/>
 <rect class="alley" x="-5.485" y="-11.885" width="1.37" height="23.77"/><rect class="alley" x="4.115" y="-11.885" width="1.37" height="23.77"/>
 <rect class="target" id="targetBox" x="0" y="0" width="4.115" height="6.4"/>
@@ -493,7 +535,7 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 <line class="netshadow" x1="-6.4" y1=".28" x2="6.4" y2=".28"/><line class="net" x1="-6.4" y1="0" x2="6.4" y2="0"/><line class="netmesh" x1="-6.3" y1="0" x2="6.3" y2="0"/>
 <rect class="post" x="-6.55" y="-.16" width=".3" height=".32"/><rect class="post" x="6.25" y="-.16" width=".3" height=".32"/>
 </svg>
-<div id="hzLayer"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="freshFx" class="hidden"><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span></div><div id="heatFx" class="hidden"></div><div id="hzChip" class="hidden"></div><div id="buffChip" class="hidden"></div>
+<div id="courtDeco"></div><div id="cpLayer"></div><div id="markLayer"></div><div id="hzLayer"></div><div id="windFx" class="hidden"></div><div id="windChip" class="hidden"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="freshFx" class="hidden"><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span></div><div id="heatFx" class="hidden"></div><div id="hzChip" class="hidden"></div><div id="buffChip" class="hidden"></div>
 <div class="bug opponent" id="opponent" role="img" aria-label="상대 귀뚜라미 선수"></div>
 <div class="bug" id="player" role="img" aria-label="내 귀뚜라미 선수"></div>
 <div id="snakeBody"></div><div id="peelLayer"></div><div class="ball husky decoy" id="decoy0"></div><div class="ball husky decoy" id="decoy1"></div><div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
@@ -600,6 +642,37 @@ function buffAnnounce(kind){
   const b=BF[kind];if(!b)return;const el=document.createElement("div");el.className="hzann buff "+kind;el.innerHTML=`<span class="ic">${b.ic}</span>${b.ann}`;
   $("arena").appendChild(el);setTimeout(()=>el.remove(),3300);Snd.play(kind);msg(b.ic+" "+b.fx+" (점수 2번 날 때까지)");
 }
+let courtKey="",cpKey="";
+function renderCourt(){
+  const c=screen==="game"&&st?st.court:null,a=$("arena");
+  if(c!=="clay"&&$("markLayer").children.length)$("markLayer").innerHTML="";   // 클레이가 아니면 볼 마크 지움
+  const key=(c||"")+viewAX+viewTop+side+a.clientWidth;
+  if(key!==courtKey){courtKey=key;["hard","clay","grass","ice","sea","forest"].forEach(k=>a.classList.toggle("c-"+k,c===k));
+    const d=$("courtDeco");let h="";
+    if(c==="sea")h='<div class="sea-l"></div><div class="sea-r"></div><div class="rail" style="left:7%"></div><div class="rail" style="right:7%"></div>';
+    if(c==="forest"){for(let i=0;i<7;i++){h+=`<span class="tree" style="left:4%;top:${8+i*14}%">🌲</span><span class="tree" style="left:96%;top:${14+i*14}%">🌳</span>`}}
+    if(c==="ice"){for(let i=0;i<6;i++)h+=`<i class="glint" style="left:${15+(i*37)%70}%;top:${10+i*15}%;animation-delay:${-i*.5}s"></i>`}
+    d.innerHTML=h}
+  // 배가 출렁임(코트가 살짝 기울어짐)
+  document.querySelector(".court").style.transform=c==="sea"?`rotate(${Math.sin((st.clock||0)*2*Math.PI/6.5)*1.1}deg)`:"";
+  // 함정·웅덩이·낙엽
+  const list=(st&&screen==="game"?(st.cpatch||[]):[]),dec=(st&&screen==="game"?(st.decor||[]):[]);
+  const k2=JSON.stringify(list)+JSON.stringify(dec)+key;
+  if(k2!==cpKey){cpKey=k2;const aw=a.clientWidth,L=$("cpLayer");L.innerHTML="";
+    const put=(q,cls,inner)=>{const d=document.createElement("div");d.className="cpt "+cls;d.style.left=sx(q.x)+"%";d.style.top=sy(q.y)+"%";
+      d.style.width=(2*q.r/(2*viewAX)*100)+"%";d.style.height=(2*q.r/(viewBot-viewTop)*100)+"%";if(inner)d.innerHTML=inner;L.appendChild(d);return d};
+    const fs=q=>(2*q.r/(2*viewAX)*aw);
+    list.forEach((q,i)=>{
+      if(q.type==="bush"){const d=put(q,"bush");for(let k=0;k<5;k++){const t=document.createElement("span");t.textContent=k%2?"🌿":"🌳";t.style.left=(20+hash(i*31+k)%60)+"%";t.style.top=(22+hash(i*57+k*3)%56)+"%";t.style.fontSize=(fs(q)*.3)+"px";d.appendChild(t)}}
+      else if(q.type==="pit"&&q.hidden)put(q,"leaves",`<span style="font-size:${fs(q)*.55}px">🍂</span>`);   // 숨은 구덩이: 낙엽 더미와 똑같이 보임
+      else put(q,q.type)});
+    dec.forEach(q=>put(q,"leaves",`<span style="font-size:${fs(q)*.55}px">🍂</span>`))}
+  // 바람
+  const w=st&&screen==="game"?st.wind:null,on=!!(w&&(w.on===undefined||w.on));
+  $("windFx").classList.toggle("hidden",!on);$("windChip").classList.toggle("hidden",!on);
+  if(on){const dir=w.dir*(side===1?-1:1);$("windFx").classList.toggle("left",dir<0);$("windChip").textContent=dir<0?"💨 ← 돌풍":"돌풍 → 💨";
+    if(!$("windFx").children.length)$("windFx").innerHTML=[...Array(7)].map((_,i)=>`<i style="top:${8+i*13}%;animation-delay:${-i*.11}s"></i>`).join("")}
+}
 let hzKey="",nextSiren=0;
 function renderHazard(){
   const hz=st?.hazard,game=screen==="game"&&!!st;
@@ -622,6 +695,23 @@ function hazardAnnounce(kind){
   Snd.play(kind==="alarm"?"siren":kind==="rain"?"thunder":"rustle",3);if(kind==="alarm")nextSiren=performance.now()+9000;
   msg(h.ic+" "+h.fx+" (점수 2번 날 때까지)");
 }
+/* ───── 코트 ───── */
+const COURT_INFO={
+  hard:{ic:"🟦",name:"하드 코트",cup:"귀뚜라미 오픈",desc:"표준 속도의 기본 코트"},
+  clay:{ic:"🟧",name:"클레이 코트",cup:"귀랑스 오픈",desc:"튄 뒤 느려지고 높게 솟아요. 스핀이 잘 먹고 랠리가 길어져요"},
+  grass:{ic:"🟩",name:"잔디 코트",cup:"귀블던",desc:"튄 뒤 빠르고 낮게 깔려요. 서브와 슬라이스가 강해져요"},
+  ice:{short:"미끄러짐 주의",ic:"❄️",name:"빙판 코트",cup:"",desc:"선수가 쭉 미끄러지고 공도 낮게 미끄러져요"},
+  sea:{short:"출렁임·돌풍·파도",ic:"🚢",name:"우리 바다 코트",cup:"",desc:"배가 출렁여 몸이 쏠리고, 돌풍이 공을 밀고, 파도가 웅덩이를 만들어요"},
+  forest:{short:"함정 가득",ic:"🌲",name:"숲속 코트",cup:"",desc:"덤불·진흙·숨은 구덩이 함정이 가득! 게임마다 위치가 바뀌어요"},
+  random:{short:"매번 다르게",ic:"🎲",name:"무작위",cup:"",desc:"경기마다 코트가 무작위로 정해져요"}};
+const courtLabel=k=>{const c=COURT_INFO[k];return c?c.ic+" "+(c.cup?c.cup+" · ":"")+c.name:""};
+let court=(()=>{try{const v=localStorage.getItem("ct_court");return COURT_INFO[v]?v:"hard"}catch{return "hard"}})(),roomCourt="hard";
+$("courtPick").innerHTML=["hard","clay","grass","ice","sea","forest","random"].map(k=>{const c=COURT_INFO[k];
+  return `<button type="button" class="cpk cpk-${k}" data-court="${k}" title="${c.desc}"><i></i><b>${c.ic} ${c.name}</b><small>${c.cup||c.short}</small></button>`}).join("");
+function setCourtPick(k){document.querySelectorAll("[data-court]").forEach(b=>b.classList.toggle("active",b.dataset.court===k))}
+setCourtPick(court);
+document.querySelectorAll("[data-court]").forEach(b=>b.onclick=()=>{if(formatLocked())return;court=b.dataset.court;setCourtPick(court);try{localStorage.setItem("ct_court",court)}catch{}
+  msg(COURT_INFO[court].ic+" "+COURT_INFO[court].name+": "+COURT_INFO[court].desc+".");if(mode==="multi"&&room)send({type:"court",court})});
 const ITEMS={anchovy:{name:"죽방멸치",emoji:"🐟",fx:"순간 튼튼해져 공이 훨씬 빠르고 묵직해져요"},
   milk:{name:"서울우유",emoji:"🥛",fx:"몸이 커져서 공을 받기 쉬워져요"},
   coupon:{name:"로빈 쿠폰",emoji:"☕",fx:"공짜 커피로 집중력이 올라 정확도와 스핀이 좋아져요"}};
@@ -757,6 +847,8 @@ const Snd=(()=>{
     chatter(n=5,at=0){for(let i=0;i<n;i++){const f=1350+Math.random()*350;tone({f,f2:f*.72,type:"square",lp:2400,q:2,at:at+i*.075,dur:.06,vol:.1,atk:.003});noise({at:at+i*.075,dur:.03,vol:.045,f:2600,q:2})}},   // 끼끼끼끼
     screech(at=0){tone({f:900,f2:1700,f3:1250,type:"sawtooth",lp:2600,q:3,at,dur:.5,vol:.12,atk:.02,vib:40,vibRate:18});noise({at,dur:.4,vol:.07,f:2200,q:1.5})},   // 끼야아악!
     cackle(at=0){for(let i=0;i<6;i++){const f=i%2?1050:1350;tone({f,f2:f*.8,type:"square",lp:2200,at:at+i*.11,dur:.08,vol:.1});noise({at:at+i*.11,dur:.05,vol:.045,f:1800,q:2})}},   // 끼히히히히
+    whoosh(){noise({dur:.9,vol:.12,f:500,f2:1800,q:.5,atk:.25})},
+    thud(){tone({f:140,f2:50,dur:.25,vol:.25});noise({dur:.2,vol:.1,f:300,q:.8})},
     boing(){tone({f:180,f2:520,dur:.12,vol:.12});tone({f:520,f2:260,at:.12,dur:.22,vol:.1})},
     split(){for(let i=0;i<3;i++)tone({f:1800+i*500,f2:2600+i*500,at:i*.05,dur:.15,vol:.05})},
     slip(){tone({f:1400,f2:300,dur:.45,vol:.09})},
@@ -927,6 +1019,11 @@ function handleEvent(e){
     case "buffEnd":{const b=BF[e.kind];if(b){popup(b.ic+" 끝!",0,2,"call");setTimeout(()=>msg(b.end),1000)}break}
     case "hazardEnd":{const h=HZ[e.kind];if(h){popup(h.ic+" 끝!",0,0,"call");setTimeout(()=>msg(h.end),900)}break}
     case "hzBounce":{const t={weeds:"🌿 어디로 튈지 몰라!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~ 미끄러졌다!"}[e.mode];popup(t,e.x,e.y,"call");Snd.play(e.kind==="weeds"?"rustle":"splash");break}
+    case "gust":Snd.play("whoosh");popup("💨 돌풍!",0,0,"call");break;
+    case "wave":Snd.play("splash");Snd.play("whoosh");popup("🌊 파도가 덮쳤다!",e.sideX*3,e.own*6,"call");break;
+    case "pitfall":{Snd.play("slip");Snd.play("thud");const p=st.players[e.side];popup("🕳️ 함정에 빠졌다!",p.x,p.y,"bad");if(e.side===side)msg("숨은 구덩이에 빠졌어요! 잠깐 움직일 수 없어요.");break}
+    case "cpBounce":{const t={bush:"🌿 덤불에서 튀었다!",mud:"💩 진흙에 푹!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~",pit:"🕳️ 구덩이에 쏙!"}[e.mode];if(t)popup(t,e.x,e.y,"call");Snd.play(e.kind==="bush"?"rustle":"splash");break}
+    case "forestShift":setTimeout(()=>msg("🌲 새 게임! 숲속 함정 위치가 바뀌었어요."),1200);break;
     case "split":Snd.play("split");popup("❄️ 분신! 진짜는 그림자가 있는 공",e.x,e.y,"call");break;
     case "peel":Snd.play("boing");popup("🍌",e.x,e.y);break;
     case "slip":{Snd.play("slip");const p=st.players[e.side];popup("🍌 미끄덩!",p.x,p.y,"bad");if(e.side===side)msg("바나나 껍질을 밟았어요! 잠깐 조작이 안 돼요.");break}
@@ -938,7 +1035,7 @@ function handleEvent(e){
       popup("💨",e.x,e.y);Snd.play("whiff");if(e.side===side&&mode==="solo")dashReadyAt=performance.now()+E.DASH.cd*1000;break}
     case "netcord":Snd.play("netcord");popup("NET CORD",e.x,e.y,"call");break;
     case "net":Snd.play("net");popup("NET",e.x,e.y,"bad");break;
-    case "bounce":Snd.play("bounce");if(e.out)Snd.play("buzz");mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
+    case "bounce":if(st.court==="clay"&&!e.out){const m=document.createElement("div");m.className="bmark";m.style.left=sx(e.x)+"%";m.style.top=sy(e.y)+"%";$("markLayer").appendChild(m);setTimeout(()=>m.remove(),6000)}Snd.play("bounce");if(e.out)Snd.play("buzz");mark(e.x,e.y,e.out);if(e.out)popup("OUT",e.x,e.y,"bad");break;
     case "quake":Snd.play("quake");shake();popup("💫 기절!",st.players[e.side].x,st.players[e.side].y);break;
     case "fault":
       if(e.reason!=="out")Snd.play("buzz");
@@ -1081,11 +1178,12 @@ function render(){
   else{sp.textContent="다음 서브 (Space)";sp.disabled=st.phase!=="point"}
   const locked=isLocked();
   $("charPick").classList.toggle("locked",locked);document.querySelectorAll(".char").forEach(x=>x.disabled=locked);
-  const fl=formatLocked();$("formatPick").classList.toggle("locked",fl);document.querySelectorAll("[data-format]").forEach(x=>x.disabled=fl);
+  const fl=formatLocked();$("formatPick").classList.toggle("locked",fl);document.querySelectorAll("[data-format],[data-court]").forEach(x=>x.disabled=fl);
   // 상태 줄
   let status="대기 중";
   if(!st)status=mode==="multi"?({waiting:"상대를 기다리는 중",ready:"선수 준비 완료"}[roomStatus]||"대기 중"):"대기 중";
   else status=({serve:(st.serveNo===1?"퍼스트":"세컨드")+" 서브 · "+(E.serveCourt(st)==="deuce"?"듀스 코트":"애드 코트"),rally:"랠리 중",point:"포인트 종료",fault:st.serveNo===2?"폴트":"레트",done:"경기 종료"})[st.phase]+(st.tb&&st.phase!=="done"?" · 타이브레이크":"");
+  if(st?.court&&st.court!=="hard")status=COURT_INFO[st.court].ic+" "+status;
   if(st?.hazard&&HZ[st.hazard.type])status+=" · "+HZ[st.hazard.type].ic+" "+HZ[st.hazard.type].name;
   if(st?.buff&&BF[st.buff.type])status+=" · "+BF[st.buff.type].ic+" "+BF[st.buff.type].name;
   $("gameStatus").textContent=status;
@@ -1100,6 +1198,7 @@ function render(){
   if(!st)lastPhase="";
   renderItems();
   {const cool=performance.now()<dashReadyAt;$("dashBtn").classList.toggle("cool",cool);$("mDash").classList.toggle("cool",cool)}
+  renderCourt();
   renderHazard();
   renderBuff();
   renderChatUI();
@@ -1157,7 +1256,8 @@ function renderLobby(){
     else if(side!==0){t="호스트가 시작하면 경기 화면으로 넘어갑니다";dis=true}
   }
   const fm=mode==="multi"&&room?roomFormat:format;
-  const sum=c?`${c.emoji} <b>${c.name}</b> · 필살기 <b>${c.special}</b><br>${FORMAT_SHORT[fm]} · ${mode==="solo"?"컴퓨터 난이도 "+LEVEL[difficulty]:"실시간 대전"}`:"선수를 먼저 골라 주세요.";
+  const ck=mode==="multi"&&room?roomCourt:court;
+  const sum=c?`${c.emoji} <b>${c.name}</b> · 필살기 <b>${c.special}</b><br>${FORMAT_SHORT[fm]} · ${COURT_INFO[ck].ic} ${COURT_INFO[ck].name} · ${mode==="solo"?"컴퓨터 난이도 "+LEVEL[difficulty]:"실시간 대전"}`:"선수를 먼저 골라 주세요.";
   const opp=roomChars[1-side];
   const line=room?`방 코드 ${room} · ${side===0?"호스트":"참가자"} · ${roomStatus==="waiting"?"상대를 기다리는 중":"상대 "+(names[1-side]||"선수")+(opp?" ("+charLabel(opp)+")":"")}${pingText?" · "+pingText:""}`:"아직 방에 들어가지 않았습니다.";
   const key=t+dis+sum+line;
@@ -1224,8 +1324,8 @@ function setSeg(attr,v){document.querySelectorAll(`[data-${attr}]`).forEach(b=>b
 function startSolo(){
   if(!myChar){msg("먼저 캐릭터를 선택하세요.");return}
   const others=SPECIALS.filter(k=>k!==myChar),ai=others[Math.floor(Math.random()*others.length)];
-  st=E.newMatch({format,chars:[myChar,ai],autoNext:0});lastEv=0;lastPhase="";
-  tossText="상대는 "+charLabel(ai)+"! ";processEvents();
+  st=E.newMatch({format,court,chars:[myChar,ai],autoNext:0});lastEv=0;lastPhase="";
+  tossText=courtLabel(st.court)+" · 상대는 "+charLabel(ai)+"! ";processEvents();
   showScreen("game");
 }
 function toLobby(){
@@ -1296,7 +1396,7 @@ function tauntUI(){
   if(mode==="multi")send({type:"taunt",n});else E.taunt(st,side,n);
 }
 /* 대시: 방향키(조이스틱)를 누른 쪽으로 몸을 날림. 대전에서는 내 화면에서 먼저 날아가고 서버가 확인 */
-let localDash=null,dashReadyAt=0;
+let localDash=null,dashReadyAt=0,myVel={x:0,y:0};
 function dashUI(){
   if(!st||(st.phase!=="rally"&&st.phase!=="serve"))return;
   if(performance.now()<dashReadyAt){msg("대시는 3초마다 쓸 수 있어요.");return}
@@ -1340,7 +1440,7 @@ function connect(create){
   if(ws)ws.close();
   const proto=location.protocol==="https:"?"wss":"ws";
   ws=new WebSocket(proto+"://"+location.host);lastEv=0;lastPhase="";st=null;snaps=[];myPos=null;rtt=0;
-  ws.onopen=()=>{clearInterval(pingTimer);pingTimer=setInterval(()=>send({type:"ping",t:performance.now(),rtt:Math.round(rtt)}),2000);send({type:"ping",t:performance.now(),rtt:0});send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format,private:create&&$("privateRoom").checked})};
+  ws.onopen=()=>{clearInterval(pingTimer);pingTimer=setInterval(()=>send({type:"ping",t:performance.now(),rtt:Math.round(rtt)}),2000);send({type:"ping",t:performance.now(),rtt:0});send({type:"join",room:create?"":$("roomCode").value,name:$("name").value||"귀뚜라미",char:myChar,format,court,private:create&&$("privateRoom").checked})};
   ws.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch{return}
     if(d.type==="error"){msg(d.message);return}
     if(d.type==="joined"){room=d.room;side=d.side;$("roomCode").value=room;$("roomInfo").textContent="방 코드: "+room+" · "+(side===0?"호스트":"참가자");msg("방에 입장했습니다. 상대에게 방 코드를 공유하세요.");return}
@@ -1349,7 +1449,7 @@ function connect(create){
     if(d.type==="chat"){addChat(d);return}
     if(d.type==="pong"){const r=performance.now()-d.t;rtt=rtt?rtt*.7+r*.3:r;showPing();return}
     if(d.type==="state"){
-      const prevStatus=roomStatus;roomStatus=d.status;names=d.names||["",""];roomChars=d.chars||[null,null];roomFormat=d.format||roomFormat;setSeg("format",roomFormat);
+      const prevStatus=roomStatus;roomStatus=d.status;names=d.names||["",""];roomChars=d.chars||[null,null];roomFormat=d.format||roomFormat;setSeg("format",roomFormat);roomCourt=d.court||roomCourt;setCourtPick(roomCourt);
       st=d.match||null;
       if(st){
         snaps.push({t:performance.now(),players:st.players,ball:st.ball});if(snaps.length>12)snaps.shift();
@@ -1381,7 +1481,7 @@ async function loadRooms(force){
     const r=await fetch("rooms",{cache:"no-store"});if(!r.ok)throw 0;
     const list=await r.json(),key=JSON.stringify(list);if(key===roomListKey&&!force)return;roomListKey=key;
     $("roomList").innerHTML=list.length?list.map(x=>{const c=CHARS[x.char],busy=x.status!=="waiting";
-      return `<div class="room${busy?" busy":""}"><div class="rinfo"><div class="rname">${c?c.emoji+" ":""}${esc(x.name)}의 방</div><div class="rsub">${FMT_SHORT[x.format]||""} · ${x.count}/2명 · ${busy?(x.status==="playing"?"경기 중":"자리 없음"):"참가 가능"}</div></div>${busy?"":`<button class="btn" data-join="${esc(x.id)}">참가</button>`}</div>`}).join("")
+      return `<div class="room${busy?" busy":""}"><div class="rinfo"><div class="rname">${c?c.emoji+" ":""}${esc(x.name)}의 방</div><div class="rsub">${FMT_SHORT[x.format]||""}${COURT_INFO[x.court]?" · "+COURT_INFO[x.court].ic+" "+COURT_INFO[x.court].name:""} · ${x.count}/2명 · ${busy?(x.status==="playing"?"경기 중":"자리 없음"):"참가 가능"}</div></div>${busy?"":`<button class="btn" data-join="${esc(x.id)}">참가</button>`}</div>`}).join("")
       :'<div class="muted">아직 열린 방이 없어요. 방을 만들어 보세요.</div>';
   }catch{roomListKey="";$("roomList").innerHTML='<div class="muted">방 목록을 불러올 수 없어요. 게임 서버 주소로 접속했는지 확인해 주세요.</div>'}
 }
@@ -1518,7 +1618,7 @@ window.addEventListener("blur",()=>{keys={};sendKeys()});
 let splashOn=true,splashReady=false;
 (function(){
   const TIPS=["상대 도발에 2초 안에 맞도발하면 <em>반사!</em>","공 아래 <em>그림자</em>가 공의 실제 위치예요","웅덩이에 떨어진 공은 <em>멈출 수도</em> 있어요","기가 100%가 되면 <em>필살기</em>를 쓸 수 있어요",
-    "포인트가 끝나면 가끔 <em>아이템</em>을 얻어요","<em>파이어 뚜리</em>의 공은 휘지 않고 곧게 날아가요","<em>스네이크샷</em>은 꿈틀대다 막판에 확 달려들어요","잡초에 떨어진 공은 <em>어디로 튈지</em> 몰라요","<em>개시키</em>의 분신샷은 그림자가 있는 공이 진짜!","<em>바나킹</em>이 남긴 바나나 껍질을 조심하세요"];
+    "포인트가 끝나면 가끔 <em>아이템</em>을 얻어요","<em>파이어 뚜리</em>의 공은 휘지 않고 곧게 날아가요","<em>스네이크샷</em>은 꿈틀대다 막판에 확 달려들어요","잡초에 떨어진 공은 <em>어디로 튈지</em> 몰라요","<em>개시키</em>의 분신샷은 그림자가 있는 공이 진짜!","<em>바나킹</em>이 남긴 바나나 껍질을 조심하세요","<em>숲속 코트</em>의 낙엽 더미 중 몇 개는 구덩이예요","<em>우리 바다 코트</em>에선 돌풍 방향을 보고 치세요"];
   const touch=matchMedia("(pointer:coarse)").matches||innerWidth<600;
   if(touch){$("splKeys").hidden=true;$("splTouch").hidden=false}
   let ti=Math.floor(Math.random()*TIPS.length);const showTip=()=>{$("splTip").innerHTML=TIPS[ti%TIPS.length];ti++};showTip();
@@ -1554,7 +1654,7 @@ function loop(t){
   const dt=Math.min((t-last)/1000,.05);last=t;
   if(mode==="solo"&&st){E.step(st,dt,[{keys:worldKeys()},E.aiThink(st,1,difficulty,dt)]);processEvents()}
   if(mode==="multi"&&st&&myPos&&(st.phase==="serve"||st.phase==="rally")){
-    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,hazard:st.hazard,buff:st.buff,clock:st.clock,players:[...st.players]};view.players[side]=myPos;
+    const view={phase:st.phase,server:st.server,pts:st.pts,stun:st.stun,freeze:st.freeze,chars:st.chars,hazard:st.hazard,buff:st.buff,clock:st.clock,court:st.court,cpatch:st.cpatch,pvel:[myVel,myVel],players:[...st.players]};view.players[side]=myPos;
     if(localDash&&localDash.t>0){myPos.x+=localDash.vx*dt;myPos.y+=localDash.vy*dt;E.constrainPos(view,side);localDash.t-=dt}
     else if(localDash&&localDash.rec>0)localDash.rec-=dt;
     else{localDash=null;E.moveLocal(view,side,worldKeys(),dt)}
