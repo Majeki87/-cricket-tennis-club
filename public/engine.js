@@ -43,7 +43,7 @@ const HAZARD_POINTS = 2, HAZARD_CHANCE = .22;   // 시작은 게임이 끝날 �
 const TORNADO = { r: 2.3, loops: 5, squash: .7 };   // 회전회오리샷: 반지름 2.3m 고리를 5바퀴
 const FIREBALL = { T: .45, margin: .06, z: 1.1 };   // 불꽃샷: 0.45초 목표(멸치보다 빠르게), 낮은 공도 허리 높이에서 강타
 const BLIZZ = { S: 1.8 };                                 // 눈보라 분신샷: 네트를 넘으면 공이 1.8m 간격 셋으로 갈라짐(진짜는 그림자가 있는 하나)
-const PEEL = { r: .6, slip: .8, speed: 5.5 };           // 바나나 껍질: 밟으면 0.8초 동안 미끄덩
+const PEEL = { r: .6, slip: 1.0, speed: 5.5, max: 6 };   // 바나나 껍질: 밟으면 1초 동안 미끄덩
 const MONKEY = { steal: .15, fake: .2, fakeAmp: 1.6 };   // 바나킹: 득점 때 15% 아이템 훔치기, 20% 페이크 샷
 const HUSKY = { justice: 1.5 };                          // 개시키: 게임에서 2점 이상 지고 있으면 기가 1.5배로 참
 const SNAKE = { coil: .62, slow: .52, fast: 1.783, amp: 1.7, waves: 4.5 };   // 4번 반 꿈틀 · .62×.52 + .38×1.783 ≈ 1 (총 이동 거리 유지)
@@ -58,9 +58,9 @@ const SLICE = { e: .32, keep: .88, side: .45, recvReach: .85 };
 // 대시·다이빙: 0.22초 동안 초속 13m로 몸을 날림(약 2.9m) → 착지 후 0.25초 경직, 3초마다 사용. 날아가는 동안 받는 범위 15% 증가
 const DASH = { speed: 13, time: .22, recover: .25, cd: 3, reach: 1.15 };
 const AI = {
-  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3, reflect: .3, slice: .05, dash: .15, readSplit: .4 },
-  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35, item: .5, reflect: .45, slice: .12, dash: .35, readSplit: .65 },
-  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55, item: .7, reflect: .6, slice: .18, dash: .6, readSplit: .85 }
+  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3, reflect: .3, slice: .05, dash: .15, readSplit: .4, dodge: .45 },
+  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35, item: .5, reflect: .45, slice: .12, dash: .35, readSplit: .65, dodge: .7 },
+  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55, item: .7, reflect: .6, slice: .18, dash: .6, readSplit: .85, dodge: .9 }
 };
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -292,7 +292,7 @@ function shoot(st, side, skill, aim) {
   itemBall(st, side, b);
   if (skill !== "special") charSpin(st, side, b);
   b.slot = slot; b.split = false; b.sg = 0;
-  if (skill === "special" && char === "monkey") { b.spin = Math.random() < .5 ? -1 : 1; b.spinAmp = 1; }
+  if (skill === "special" && char === "monkey") { b.spin = Math.random() < .5 ? -1 : 1; b.spinAmp = 2.1; }   // 바나나처럼 크게 휘어 들어감
   // 바나킹 페이크: 라켓 방향과 반대로 — 공이 한쪽으로 가는 척하다가 반대로 꺾여 들어감
   if (char === "monkey" && (skill === "normal" || skill === "speed") && Math.random() < MONKEY.fake) {
     b.spin = -(Math.sign(tx - b.x) || 1); b.spinAmp = MONKEY.fakeAmp; pushEv(st, { type: "fake", side, x: b.x, y: b.y });
@@ -401,9 +401,14 @@ function bounce(st) {
     if (b.serve && b.let) { b.live = false; letServe(st); return true; }
     if (b.kind === "quake") { st.stun[recv] = STUN_TIME; pushEv(st, { type: "quake", side: recv, x: b.x, y: b.y }); }
     if (inPatch(st, b.x, b.y)) hazardBounce(st, b);
-    if (b.kind === "monkey" && st.peels.length < 4) {   // 껍질을 남기고, 공도 바나나처럼 엉뚱하게 옆으로 튀며 낮게 깔림
-      st.peels.push({ x: b.x, y: b.y }); pushEv(st, { type: "peel", x: b.x, y: b.y });
-      b.vx += (Math.random() < .5 ? -1 : 1) * (1.8 + Math.random()); b.e = .45; b.keep = .9;
+    if (b.kind === "monkey") {   // 바나나 송이: 떨어진 자리 + 받으러 오는 길목에 껍질을 뿌리고, 공은 엉뚱하게 옆으로 튀며 낮게 깔림
+      b.vx += (Math.random() < .5 ? -1 : 1) * (2.4 + Math.random()); b.e = .4; b.keep = .92;
+      const r = st.players[recv], spot = { x: b.x + b.vx * .9 * .35, y: b.y + b.vy * .9 * .35 };
+      const mid = Math.random() < .5;   // 길목 한 곳에 하나 더(중간 또는 받는 자리 근처, 조금씩 빗나가게)
+      const drops = [{ x: b.x, y: b.y }, mid
+        ? { x: (r.x + spot.x) / 2 + (Math.random() - .5) * 2, y: (r.y + spot.y) / 2 + (Math.random() - .5) * 1.6 }
+        : { x: spot.x + (Math.random() - .5) * 2.6, y: spot.y + (Math.random() - .5) * 1.8 }];
+      for (const q of drops) { if (st.peels.length >= PEEL.max) st.peels.shift(); st.peels.push(q); pushEv(st, { type: "peel", x: q.x, y: q.y }); }
     }
     return false;
   }
@@ -583,6 +588,19 @@ function aiThink(st, side, level, dt) {
   }
   if (ai.leave) { out.target = { x: spot.x + (me.x >= spot.x ? 1.8 : -1.8), y: me.y }; return out; }
   out.target = { x: spot.x + ai.off, y: spot.y + own * .35 };
+  if (st.peels && st.peels.length) {   // 바나나 껍질 피하기(공 하나에 한 번, 난이도만큼 성공)
+    if (ai.peelFor !== b.id) { ai.peelFor = b.id; ai.dodge = Math.random() < cfg.dodge; }
+    if (ai.dodge) {   // 가는 길을 막는 가장 가까운 껍질 옆으로 돌아감
+      const tx = out.target.x - me.x, ty = out.target.y - me.y, L = Math.hypot(tx, ty) || 1;
+      let best = null, bu = 2;
+      for (const q of st.peels) {
+        const u = ((q.x - me.x) * tx + (q.y - me.y) * ty) / (L * L); if (u < 0 || u > 1.05) continue;
+        const d = Math.abs((q.x - me.x) * ty - (q.y - me.y) * tx) / L;
+        if (d < PEEL.r + .3 && u < bu) { bu = u; best = q; }
+      }
+      if (best) { let px = -ty / L, py = tx / L; if ((best.x - me.x) * px + (best.y - me.y) * py > 0) { px = -px; py = -py; } out.target = { x: best.x + px * (PEEL.r + .55), y: best.y + py * (PEEL.r + .55) }; }
+    }
+  }
   if (ai.dashFor !== b.id && b.crossed) {   // 멀리 떨어진 공이면 몸을 날림(공 하나에 한 번 판단)
     const gx = out.target.x - me.x, gy = out.target.y - me.y, far = Math.hypot(gx, gy);
     if (far > 2.6) { ai.dashFor = b.id; if (Math.random() < cfg.dash) dash(st, side, null, { x: gx, y: gy }); }
@@ -592,7 +610,7 @@ function aiThink(st, side, level, dt) {
     const reach = REACH.normal * SF.reach(statOf(st, side, "reach")) * recvMul(st, side, b) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
     if ((b.bounces === 1 || (b.bounces === 0 && canVolley)) && ballDist(b, me) < reach) {
       ai.tried = true;
-      const miss = cfg.error + (b.kind === "slice" ? .06 : 0) + (b.kind === "monkey" ? .12 : 0) + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
+      const miss = cfg.error + (b.kind === "slice" ? .06 : 0) + (b.kind === "monkey" ? .15 : 0) + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
       if (Math.random() < miss) pushEv(st, { type: "whiff", side });
       else {
         let skill = "normal";
