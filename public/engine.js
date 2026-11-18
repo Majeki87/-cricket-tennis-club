@@ -9,7 +9,7 @@
 const COURT = { L: 11.885, S: 4.115, D: 5.485, SV: 6.40, NET: 0.914, POST: 1.07, POSTX: 6.4, AX: 7.3, AY: 15.5 };
 const G = 9.8, LINE = 0.04;
 const CHARS = ["tornado", "snake", "fire", "quake"];
-const SKILLS = ["normal", "volley", "drop", "speed", "lob", "special"];
+const SKILLS = ["normal", "volley", "drop", "speed", "lob", "slice", "special"];
 const FORMATS = { short: { games: 4, sets: 1 }, set1: { games: 6, sets: 1 }, set3: { games: 6, sets: 2 } };
 // 아이템: 경기 중 포인트가 끝날 때마다 무작위로 얻고(최대 3개), 쓰면 그 포인트가 끝날 때까지 효과 유지
 const ITEMS = ["anchovy", "milk", "coupon"];        // 죽방멸치 · 서울우유 · 로빈 쿠폰
@@ -46,11 +46,15 @@ const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면
 function h01(n) { let x = Math.imul(n | 0, 0x9E3779B1); x ^= x >>> 16; x = Math.imul(x, 0x85EBCA6B); x ^= x >>> 13; x = Math.imul(x, 0xC2B2AE35); x ^= x >>> 16; return (x >>> 0) / 4294967296; }
 function inPatch(st, x, y) { const hz = st.hazard; if (!hz || !hz.patches) return null; for (const p of hz.patches) if ((x - p.x) ** 2 + (y - p.y) ** 2 <= p.r * p.r) return p; return null; }
 const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.85, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
-const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, special: 1.7 };
+const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, slice: 1.45, special: 1.7 };
+// 슬라이스: 낮게 깔리고 튄 뒤 거의 안 솟고 미끄러짐 → 받는 쪽은 허리를 숙여야 해서 받는 범위 15% 감소
+const SLICE = { e: .32, keep: .88, side: .45, recvReach: .85 };
+// 대시·다이빙: 0.22초 동안 초속 13m로 몸을 날림(약 2.9m) → 착지 후 0.25초 경직, 3초마다 사용. 날아가는 동안 받는 범위 15% 증가
+const DASH = { speed: 13, time: .22, recover: .25, cd: 3, reach: 1.15 };
 const AI = {
-  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3, reflect: .3 },
-  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35, item: .5, reflect: .45 },
-  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55, item: .7, reflect: .6 }
+  easy:   { speed: 3.8, error: .20, err: 1.5,  serveErr: 1.25, judge: .5,  special: .5, drop: .04, power: .05, aim: .35, lob: .15, item: .3, reflect: .3, slice: .05, dash: .15 },
+  normal: { speed: 4.8, error: .09, err: 1.1,  serveErr: 1.0,  judge: .85, special: .8, drop: .10, power: .15, aim: .7,  lob: .35, item: .5, reflect: .45, slice: .12, dash: .35 },
+  hard:   { speed: 5.9, error: .03, err: .75,  serveErr: .8,   judge: 1,   special: 1,  drop: .14, power: .25, aim: .9,  lob: .55, item: .7, reflect: .6, slice: .18, dash: .6 }
 };
 
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -85,7 +89,7 @@ function newMatch(opts = {}) {
     players: [{ x: 0, y: COURT.L + .8 }, { x: 0, y: -COURT.L - .8 }],
     ball: idleBall(0), gauge: [0, 0], stun: [0, 0], winner: null, rally: 0,
     events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
-    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], hazard: null, hazardsInSet: 0, hazardCool: 0, lastHazard: null,
+    posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], dash: [null, null], dashCd: [0, 0], hazard: null, hazardsInSet: 0, hazardCool: 0, lastHazard: null,
     buff: null, buffsInSet: 0, buffCool: 0, lastBuff: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
   };
   pushEv(st, { type: "toss", server: st.server });
@@ -100,7 +104,7 @@ function startPoint(st) {
   st.players[r] = { x: -sign * 2.3, y: ownSign(r) * (COURT.L + .7) };
   st.ball = idleBall(st.ball.id); st.ball.held = true;
   holdBall(st);
-  st.phase = "serve"; st.stun = [0, 0]; st.freeze = [0, 0]; st.rally = 0;
+  st.phase = "serve"; st.stun = [0, 0]; st.freeze = [0, 0]; st.dash = [null, null]; st.rally = 0;
   st.posEpoch = (st.posEpoch || 0) + 1; st.hist = [];     // 실시간 대전: 선수 위치를 새로 맞추는 기준
   st.serveWait = 1 + Math.random() * .6;
 }
@@ -118,6 +122,9 @@ function constrain(st, i) {
 }
 function movePlayer(st, i, inp, dt) {
   if (st.stun[i] > 0 || (st.freeze && st.freeze[i] > 0)) return;   // 기절 또는 도발 중
+  const dsh = st.dash && st.dash[i];
+  if (dsh && dsh.t > 0) { if (!inp.posMode) { st.players[i].x += dsh.vx * dt; st.players[i].y += dsh.vy * dt; constrain(st, i); } return; }   // 대시 중(대전에선 화면이 직접 위치를 보냄)
+  if (dsh && dsh.rec > 0) return;   // 착지 경직
   const p = st.players[i], hz = st.hazard;
   let sp = (inp.speed || MOVE_SPEED) * SF.speed(statOf(st, i, "speed"));
   if (hz && HZ_SLOW[hz.type] && inPatch(st, p.x, p.y)) sp *= HZ_SLOW[hz.type];
@@ -184,6 +191,23 @@ function serve(st, side, aim = {}) {
   return true;
 }
 
+function recvMul(st, side, b) {
+  return (b.kind === "slice" && b.bounces >= 1 ? SLICE.recvReach : 1) * (st.dash && st.dash[side] && st.dash[side].t > 0 ? DASH.reach : 1);
+}
+function dash(st, side, keys, vec) {
+  if (st.phase !== "rally" && st.phase !== "serve") return "idle";
+  if (st.phase === "serve" && side === st.server) return "idle";
+  if (st.stun[side] > 0 || (st.freeze && st.freeze[side] > 0)) return "busy";
+  if (st.dashCd[side] > 0 || st.dash[side]) return "cool";
+  const p = st.players[side], k = keys || {};
+  let dx = vec ? vec.x : (k.right ? 1 : 0) - (k.left ? 1 : 0), dy = vec ? vec.y : (k.down ? 1 : 0) - (k.up ? 1 : 0);
+  if (!dx && !dy) { dx = st.ball.live ? (Math.sign(st.ball.x - p.x) || 1) : 1; }   // 방향키 없이 누르면 공이 있는 옆쪽으로
+  const m = Math.hypot(dx, dy);
+  st.dash[side] = { t: DASH.time, rec: 0, vx: dx / m * DASH.speed, vy: dy / m * DASH.speed };
+  st.dashCd[side] = DASH.cd;
+  pushEv(st, { type: "dash", side, x: p.x, y: p.y, dx: dx / m, dy: dy / m });
+  return "ok";
+}
 function ballDist(b, p) {   // 이번 프레임 동안 공(그림자)이 지나간 선분과 선수 사이 최단 거리
   const ax = b.px, ay = b.py, dx = b.x - ax, dy = b.y - ay, L2 = dx * dx + dy * dy;
   const t = L2 ? clamp(((p.x - ax) * dx + (p.y - ay) * dy) / L2, 0, 1) : 0;
@@ -198,7 +222,7 @@ function tryHit(st, side, skill, aim = {}, lookback = 0) {
   if (b.serve && b.bounces === 0) return "serveBounce";    // 서브는 반드시 한 번 튄 뒤에 리턴
   if (b.bounces >= 2) return "late";
   if (skill === "special" && (st.gauge[side] < 100 || !CHARS.includes(st.chars[side]))) return "noGauge";
-  const reach = REACH[skill] * SF.reach(statOf(st, side, "reach")) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
+  const reach = REACH[skill] * SF.reach(statOf(st, side, "reach")) * recvMul(st, side, b) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
   const pl = st.players[side];
   let best = b.z <= MAX_HIT_Z ? ballDist(b, pl) : Infinity;
   // 실시간 대전: 상대 화면에 보이던 조금 전 공 위치까지 인정(네트워크 지연 보정)
@@ -222,6 +246,8 @@ function shoot(st, side, skill, aim) {
     case "speed":  tx = h ? h * 3.1 : away * 2.7; depth = 9.7; T = .8; sig = .9; margin = 0; zSig = .45; break;
     // 탑스핀 로브: 상대 머리 위로 높이 띄워 베이스라인 근처에 떨어지고, 튄 뒤에도 높이 솟아오름
     case "lob":    tx = h ? h * 2.4 : away * 1.8; depth = 10.1; T = 2.05; sig = .6; margin = .6; zSig = .2; break;
+    // 슬라이스(백스핀): 낮고 길게 깔려 날아감
+    case "slice":  tx = h ? h * 2.8 : away * 2.4; depth = 7.8 + v * 1.2; T = 1.05; sig = .5; margin = .05; zSig = .1; break;
     case "special":
       kind = char; tx = away * 3.1; sig = .2; zSig = 0; margin = .3;
       if (char === "tornado") { depth = 9; T = 1.35; curve = "tornado"; }
@@ -247,6 +273,7 @@ function shoot(st, side, skill, aim) {
   if (kind === "fire") { b.e = .6; b.keep = .92; }
   itemBall(st, side, b);
   if (skill !== "special") charSpin(st, side, b);
+  if (skill === "slice") { b.e = SLICE.e; b.keep = SLICE.keep; b.spinAmp = (b.spinAmp || 0) * .5 + SLICE.side; }   // 튄 뒤 거의 안 솟고 쭉 미끄러짐, 옆으로 살짝 휨
   st.rally++;
   if (skill === "special") { st.gauge[side] = 0; pushEv(st, { type: "special", side, kind }); }
   else st.gauge[side] = Math.min(100, st.gauge[side] + GAUGE_HIT);
@@ -450,7 +477,13 @@ function step(st, dt, inputs = []) {
   st.ball.px = st.ball.x; st.ball.py = st.ball.y;
   const n = Math.max(1, Math.ceil(dt / .017)), h = dt / n;
   for (let s = 0; s < n; s++) {
-    for (let i = 0; i < 2; i++) { st.stun[i] = Math.max(0, st.stun[i] - h); if (st.freeze) st.freeze[i] = Math.max(0, st.freeze[i] - h); movePlayer(st, i, inputs[i] || {}, h); }
+    for (let i = 0; i < 2; i++) {
+      st.stun[i] = Math.max(0, st.stun[i] - h); if (st.freeze) st.freeze[i] = Math.max(0, st.freeze[i] - h);
+      if (st.dashCd) st.dashCd[i] = Math.max(0, st.dashCd[i] - h);
+      const d = st.dash && st.dash[i];
+      if (d) { if (d.t > 0) { d.t -= h; if (d.t <= 0) d.rec = DASH.recover; } else if (d.rec > 0) d.rec -= h; else st.dash[i] = null; }
+      movePlayer(st, i, inputs[i] || {}, h);
+    }
     if (st.phase === "serve") { holdBall(st); continue; }   // 서브 대기 중에도 남은 시간만큼 이동
     if (st.phase !== "rally") return;
     stepBall(st, h);
@@ -503,12 +536,16 @@ function aiThink(st, side, level, dt) {
   const spot = hitSpot(b);
   if (ai.leave) { out.target = { x: spot.x + (me.x >= spot.x ? 1.8 : -1.8), y: me.y }; return out; }
   out.target = { x: spot.x + ai.off, y: spot.y + own * .35 };
+  if (ai.dashFor !== b.id && b.crossed) {   // 멀리 떨어진 공이면 몸을 날림(공 하나에 한 번 판단)
+    const gx = out.target.x - me.x, gy = out.target.y - me.y, far = Math.hypot(gx, gy);
+    if (far > 2.6) { ai.dashFor = b.id; if (Math.random() < cfg.dash) dash(st, side, null, { x: gx, y: gy }); }
+  }
   if (!ai.tried && b.crossed && b.z <= MAX_HIT_Z) {
     const canVolley = !b.serve && Math.abs(me.y) < 6;
-    const reach = REACH.normal * SF.reach(statOf(st, side, "reach")) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
+    const reach = REACH.normal * SF.reach(statOf(st, side, "reach")) * recvMul(st, side, b) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
     if ((b.bounces === 1 || (b.bounces === 0 && canVolley)) && ballDist(b, me) < reach) {
       ai.tried = true;
-      const miss = cfg.error + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
+      const miss = cfg.error + (b.kind === "slice" ? .06 : 0) + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
       if (Math.random() < miss) pushEv(st, { type: "whiff", side });
       else {
         let skill = "normal";
@@ -516,6 +553,7 @@ function aiThink(st, side, level, dt) {
         else if (Math.abs(st.players[1 - side].y) < 6 && Math.random() < cfg.lob) skill = "lob";       // 상대가 네트에 붙으면 로브로 넘김
         else if (Math.abs(st.players[1 - side].y) > COURT.L - .5 && Math.random() < cfg.drop) skill = "drop";
         else if (Math.random() < cfg.power) skill = "speed";
+        else if (Math.random() < cfg.slice) skill = "slice";
         const ox = st.players[1 - side].x;
         tryHit(st, side, skill, { keys: Math.random() < cfg.aim ? (ox < 0 ? { right: true } : { left: true }) : {}, err: cfg.err });
       }
@@ -524,7 +562,7 @@ function aiThink(st, side, level, dt) {
   return out;
 }
 
-const api = { HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { DASH, dash, HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
