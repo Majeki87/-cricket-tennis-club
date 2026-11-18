@@ -16,7 +16,23 @@ CREATE TABLE IF NOT EXISTS ct_users (
   imported   BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_login TIMESTAMPTZ
-);`;
+);
+CREATE TABLE IF NOT EXISTS ct_matches (
+  id        BIGSERIAL PRIMARY KEY,
+  played_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  p0_key    TEXT,
+  p1_key    TEXT,
+  p0_name   TEXT NOT NULL,
+  p1_name   TEXT NOT NULL,
+  p0_char   TEXT,
+  p1_char   TEXT,
+  court     TEXT,
+  format    TEXT,
+  winner    SMALLINT NOT NULL,
+  score     TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ct_matches_p0 ON ct_matches (p0_key, played_at DESC);
+CREATE INDEX IF NOT EXISTS ct_matches_p1 ON ct_matches (p1_key, played_at DESC);`;
 
 const keyOf = nick => String(nick || "").trim().toLowerCase();
 const pub = r => r && { nick: r.nick, char: r.fav_char || null, court: r.fav_court || "hard", w: r.wins | 0, l: r.losses | 0 };
@@ -31,11 +47,13 @@ function pgStore(pool) {
     prefs: (key, p) => one("UPDATE ct_users SET fav_char = COALESCE($2, fav_char), fav_court = COALESCE($3, fav_court) WHERE nick_key = $1 RETURNING *", [key, p.char ?? null, p.court ?? null]),
     result: (key, win) => one("UPDATE ct_users SET wins = wins + $2, losses = losses + $3 WHERE nick_key = $1 RETURNING *", [key, win ? 1 : 0, win ? 0 : 1]),
     importStats: (key, w, l) => one("UPDATE ct_users SET wins = $2, losses = $3, imported = TRUE WHERE nick_key = $1 AND NOT imported AND wins = 0 AND losses = 0 RETURNING *", [key, w, l]),
-    top: n => pool.query("SELECT nick, wins, losses FROM ct_users WHERE wins + losses > 0 ORDER BY wins DESC, losses ASC LIMIT $1", [n]).then(r => r.rows)
+    top: n => pool.query("SELECT nick, wins, losses FROM ct_users WHERE wins + losses > 0 ORDER BY wins DESC, losses ASC LIMIT $1", [n]).then(r => r.rows),
+    addMatch: m => one("INSERT INTO ct_matches (p0_key, p1_key, p0_name, p1_name, p0_char, p1_char, court, format, winner, score) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id", [m.k[0], m.k[1], m.n[0], m.n[1], m.c[0], m.c[1], m.court, m.format, m.winner, m.score]),
+    history: (key, n) => pool.query("SELECT * FROM ct_matches WHERE p0_key = $1 OR p1_key = $1 ORDER BY played_at DESC LIMIT $2", [key, n]).then(r => r.rows)
   };
 }
 function memStore() {
-  const m = new Map();
+  const m = new Map(), matches = [];
   return {
     kind: "memory",
     get: async key => m.get(key) || null,
@@ -44,7 +62,9 @@ function memStore() {
     prefs: async (key, p) => { const r = m.get(key); if (!r) return null; if (p.char != null) r.fav_char = p.char; if (p.court != null) r.fav_court = p.court; return r; },
     result: async (key, win) => { const r = m.get(key); if (!r) return null; win ? r.wins++ : r.losses++; return r; },
     importStats: async (key, w, l) => { const r = m.get(key); if (!r || r.imported || r.wins || r.losses) return null; Object.assign(r, { wins: w, losses: l, imported: true }); return r; },
-    top: async n => [...m.values()].filter(r => r.wins + r.losses).sort((a, b) => b.wins - a.wins || a.losses - b.losses).slice(0, n).map(r => ({ nick: r.nick, wins: r.wins, losses: r.losses }))
+    top: async n => [...m.values()].filter(r => r.wins + r.losses).sort((a, b) => b.wins - a.wins || a.losses - b.losses).slice(0, n).map(r => ({ nick: r.nick, wins: r.wins, losses: r.losses })),
+    addMatch: async x => { const r = { id: matches.length + 1, played_at: new Date(), p0_key: x.k[0], p1_key: x.k[1], p0_name: x.n[0], p1_name: x.n[1], p0_char: x.c[0], p1_char: x.c[1], court: x.court, format: x.format, winner: x.winner, score: x.score }; matches.push(r); return r; },
+    history: async (key, n) => matches.filter(r => r.p0_key === key || r.p1_key === key).slice(-n).reverse()
   };
 }
 
@@ -113,25 +133,31 @@ function setupAccounts(app, express, { chars, courts }) {
     const p = {}; if (chars.includes(req.body?.char)) p.char = req.body.char; if (courts.includes(req.body?.court)) p.court = req.body.court;
     const r = await store.prefs(req.key, p); r ? res.json({ user: pub(r) }) : res.status(404).json({ error: "계정을 찾을 수 없어요." });
   }));
-  // 개인 연습 결과(실시간 대전 결과는 서버가 직접 기록) — 너무 잦은 기록은 무시
-  const lastRec = new Map();
-  api.post("/record", need, auth, wrap(async (req, res) => {
-    const t = lastRec.get(req.key) || 0; if (Date.now() - t < 15000) return res.status(429).json({ error: "잠시 후 다시 기록돼요." });
-    lastRec.set(req.key, Date.now());
-    const r = await store.result(req.key, req.body?.result === "w"); res.json({ user: pub(r) });
-  }));
   // 이 기기에 저장돼 있던 같은 닉네임의 전적을 처음 한 번만 옮겨 옴
   api.post("/import", need, auth, wrap(async (req, res) => {
     const w = Math.max(0, Math.min(999, req.body?.w | 0)), l = Math.max(0, Math.min(999, req.body?.l | 0));
     const r = await store.importStats(req.key, w, l); res.json({ imported: !!r, user: pub(r || await store.get(req.key)) });
   }));
   api.get("/top", need, wrap(async (req, res) => res.json({ top: await store.top(10) })));
+  // 내 최근 실시간 대전 기록(내 쪽에서 본 결과로 바꿔서 보냄)
+  api.get("/history", need, auth, wrap(async (req, res) => {
+    const rows = await store.history(req.key, 30);
+    res.json({ list: rows.map(r => { const me = r.p0_key === req.key ? 0 : 1, op = 1 - me; let sc = []; try { sc = JSON.parse(r.score); } catch {}
+      return { at: new Date(r.played_at).getTime(), win: Number(r.winner) === me, opp: me ? r.p0_name : r.p1_name, oppChar: me ? r.p0_char : r.p1_char, oppAcct: !!(me ? r.p0_key : r.p1_key),
+        myChar: me ? r.p1_char : r.p0_char, court: r.court, format: r.format, score: sc.map(g => [g[me], g[op]]) }; }) });
+  }));
   app.use("/api", api);
 
   return {
     verify,
-    // 실시간 대전이 끝나면 로그인한 선수의 전적을 서버가 직접 기록
-    recordMatch: async (key, win) => { try { await ready; if (store && key) await store.result(key, win); } catch (e) { console.error("전적 기록 실패:", e.message); } }
+    // 실시간 대전이 끝나면 서버가 직접 기록: 로그인한 선수의 승패 + 경기 기록 한 줄
+    recordMatch: async m => {
+      try {
+        await ready; if (!store || !(m.k[0] || m.k[1])) return;
+        await store.addMatch({ ...m, score: JSON.stringify(m.history || []) });
+        for (const s of [0, 1]) if (m.k[s]) await store.result(m.k[s], m.winner === s);
+      } catch (e) { console.error("전적 기록 실패:", e.message); }
+    }
   };
 }
 
