@@ -13,7 +13,7 @@ app.get("/health", (_, res) => res.json({ ok: true }));
 app.get("/rooms", (_, res) => {
   const list = [...rooms.values()].filter(r => !r.private && r.clients.length > 0).map(r => {
     const host = r.clients[0];
-    return { id: r.id, name: host.name, char: host.char, format: r.format, count: r.clients.length,
+    return { id: r.id, name: host.name, char: host.char, format: r.format, court: r.court, count: r.clients.length,
       status: r.clients.length >= 2 ? (r.match && r.match.phase !== "done" ? "playing" : "full") : "waiting", created: r.created };
   }).sort((a, b) => (a.status === "waiting" ? 0 : 1) - (b.status === "waiting" ? 0 : 1) || b.created - a.created).slice(0, 30);
   res.set("Cache-Control", "no-store").json(list);
@@ -37,6 +37,8 @@ function packMatch(room) {
     history: st.history, tb: st.tb, winner: st.winner, chars: st.chars, items: st.items, active: st.active, rally: st.rally,
     gauge: st.gauge.map(Math.round), stun: st.stun.map(r2), freeze: (st.freeze || [0, 0]).map(r2), posEpoch: st.posEpoch,
     buff: st.buff ? { type: st.buff.type, pointsLeft: st.buff.pointsLeft } : null,
+    court: st.court, cpatch: (st.cpatch || []).map(q => ({ type: q.type, x: r2(q.x), y: r2(q.y), r: r2(q.r), hidden: q.hidden ? 1 : 0 })), decor: (st.decor || []).map(q => ({ x: r2(q.x), y: r2(q.y), r: r2(q.r) })),
+    wind: st.wind && st.wind.on ? { dir: st.wind.dir } : null,
     clock: r2(st.clock || 0), hazard: st.hazard ? { type: st.hazard.type, pointsLeft: st.hazard.pointsLeft, patches: st.hazard.patches.map(p => ({ x: r2(p.x), y: r2(p.y), r: r2(p.r) })) } : null,
     players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
     ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id, split: b.split ? 1 : 0, slot: b.slot || 0, sg: r2(b.sg || 0) },
@@ -44,7 +46,7 @@ function packMatch(room) {
     events };
 }
 function snapshot(room) {
-  return { type: "state", room: room.id, status: room.status, format: room.format,
+  return { type: "state", room: room.id, status: room.status, format: room.format, court: room.court,
     names: [0, 1].map(s => clientAt(room, s)?.name || ""),
     chars: [0, 1].map(s => clientAt(room, s)?.char || null),
     match: packMatch(room) };
@@ -62,7 +64,7 @@ function pushChat(room, m) {
 }
 const sysChat = (room, text) => pushChat(room, { side: -1, name: "", text });
 function startMatch(room) {
-  room.match = E.newMatch({ format: room.format, chars: [clientAt(room, 0).char, clientAt(room, 1).char], autoNext: AUTO_NEXT, evId: room.evId });
+  room.match = E.newMatch({ format: room.format, court: room.court, chars: [clientAt(room, 0).char, clientAt(room, 1).char], autoNext: AUTO_NEXT, evId: room.evId });
   room.sentEv = room.evId;
   room.status = "playing";
 }
@@ -86,7 +88,8 @@ wss.on("connection", (ws) => {
       room = rooms.get(id);
       if (!room) {
         room = { id, clients: [], inputs: [{}, {}], match: null, status: "waiting", evId: 0, sentEv: 0, created: Date.now(), private: !!msg.private, chat: [],
-          format: E.FORMATS[msg.format] ? msg.format : "set1" };     // 경기 방식은 방을 만든 사람 기준
+          format: E.FORMATS[msg.format] ? msg.format : "set1",     // 경기 방식·코트는 방을 만든 사람 기준
+          court: E.COURTS.includes(msg.court) || msg.court === "random" ? msg.court : "hard" };
         rooms.set(id, room);
       }
       if (room.clients.length >= 2) { send(ws, { type: "error", message: "방이 가득 찼습니다. 다른 방을 만들어 주세요." }); room = null; return; }
@@ -131,6 +134,7 @@ wss.on("connection", (ws) => {
     const idle = !st || st.phase === "done";
     if (msg.type === "char" && idle && E.CHARS.includes(msg.char)) client.char = msg.char;
     if (msg.type === "format" && idle && side === 0 && E.FORMATS[msg.format]) room.format = msg.format;
+    if (msg.type === "court" && idle && side === 0 && (E.COURTS.includes(msg.court) || msg.court === "random")) room.court = msg.court;
     if (msg.type === "serve" && st) E.serve(st, side, { keys: cleanKeys(msg.keys), err: 1 });
     if (msg.type === "item" && st) E.useItem(st, side, Number(msg.slot) | 0);
     if (msg.type === "dash" && st) E.dash(st, side, cleanKeys(msg.keys));
