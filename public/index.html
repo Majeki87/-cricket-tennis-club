@@ -34,7 +34,7 @@ body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#1d34
 .charpick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}
 .char{--body:#42a86b;--belly:#8bdc85;--head:#62c878;--band:transparent;--glow:#9fffb0;position:relative;background:#10242d;border:2px solid #3c5a63;border-radius:12px;padding:8px 5px 9px;color:#eaf8f1;cursor:pointer;text-align:center;font:inherit}
 .char svg{width:52px;height:43px;display:block;margin:0 auto 2px}
-.char b{display:block;font-size:12px}
+.char b{display:block;font-size:12px;word-break:keep-all}
 .char .sp{display:block;font-size:12px;font-weight:800;color:var(--glow);margin-top:3px}
 .char small{display:block;font-size:10px;color:#a9c2b8;margin-top:3px;line-height:1.35;word-break:keep-all}
 .char.active{border-color:var(--glow);background:#16323b;box-shadow:0 0 0 2px #0006,0 0 16px -2px var(--glow)}
@@ -526,8 +526,8 @@ const CHARS={
   snake:{name:"스네이크 뚜리",emoji:"🐍",special:"스네이크샷",desc:"뱀처럼 좌우로 크게 휘어 들어가요",type:"스피드·테크닉형",style:"발이 가장 빠르고 공을 정확하게 보내요. 대신 공의 힘과 서브가 약한 편이에요.",body:"#6f4cc0",belly:"#c9b2f3",head:"#8d6ad8",band:"#9cff6b",glow:"#a77bff"},
   fire:{name:"파이어 뚜리",emoji:"🔥",special:"불꽃샷",desc:"불덩이처럼 빨라서 받아치기 어려워요",type:"파워·직진형",style:"공이 휘지 않고 빠르게 곧장 날아가고 서브가 강해요. 대신 정확도가 낮아 아웃이 잦아요.",body:"#d9542a",belly:"#ffc58a",head:"#ef7a3c",band:"#ffe14a",glow:"#ff7a2e"},
   quake:{name:"어스 뚜리",emoji:"🌋",special:"어스퀘이크샷",desc:"공이 튀는 순간 상대가 잠시 못 움직여요",type:"정석·올라운드형",style:"모든 능력이 고르고 실수가 적어요. 처음 하는 분께 추천해요.",body:"#86663b",belly:"#dcc296",head:"#a8824d",band:"#4a3520",glow:"#e0b26a"},
-  husky:{name:"개시키",emoji:"🐺",special:"눈보라 분신샷",desc:"네트를 넘으며 공이 셋으로 갈라져요. 진짜는 그림자가 있는 하나!",type:"카리스마·올라운드형",style:"정의롭고 귀엽지만 코트에선 카리스마 폭발! 힘·발·수비가 고루 좋고, 지고 있을수록 기가 빨리 차요.",glow:"#7fd8ff"},
-  monkey:{name:"바나킹",emoji:"🐒",special:"바나나 껍질샷",desc:"떨어진 자리에 바나나 껍질이 남아 밟으면 미끄덩!",type:"트릭스터·테크닉형",style:"얍삽하고 사악하지만 기술은 최고. 힘은 약해도 공을 원하는 곳에 휘어 넣고, 가끔 페이크로 속이고 아이템까지 훔쳐요.",glow:"#c77dff"}
+  husky:{name:"정의의 허스키 개시키",emoji:"🐺",special:"눈보라 분신샷",desc:"네트를 넘으며 공이 셋으로 갈라져요. 진짜는 그림자가 있는 하나!",type:"카리스마·올라운드형",style:"정의롭고 귀엽지만 코트에선 카리스마 폭발! 힘·발·수비가 고루 좋고, 지고 있을수록 기가 빨리 차요.",glow:"#7fd8ff"},
+  monkey:{name:"흑막 원숭이 바나킹",emoji:"🐒",special:"바나나 껍질샷",desc:"떨어진 자리에 바나나 껍질이 남아 밟으면 미끄덩!",type:"트릭스터·테크닉형",style:"얍삽하고 사악하지만 기술은 최고. 힘은 약해도 공을 원하는 곳에 휘어 넣고, 가끔 페이크로 속이고 아이템까지 훔쳐요.",glow:"#c77dff"}
 };
 const SPECIALS=Object.keys(CHARS);
 /* 선수 멘트: 같은 상황에 여러 개면 그중 하나 (이벤트 번호로 골라서 실시간 대전 두 화면에 같은 멘트가 뜸) */
