@@ -18,7 +18,7 @@ const ITEM_FX = { anchovyT: .55, anchovyKeep: .93, anchovyE: .6, anchovyRecv: .7
 // 캐릭터 능력치(1~5, 3이 기본). 합계는 모두 19로 같게 맞춤
 const STAT_KEYS = ["power", "speed", "control", "spin", "reach", "serve"];
 const CHAR_STATS = {
-  husky:   { power: 4, speed: 4, control: 3, spin: 2, reach: 4, serve: 2 },   // 정시키(시베리안 허스키) 카리스마·올라운드형: 힘·발·수비가 좋은 정면 승부형
+  husky:   { power: 4, speed: 4, control: 3, spin: 2, reach: 4, serve: 2 },   // 개시키(시베리안 허스키) 카리스마·올라운드형: 힘·발·수비가 좋은 정면 승부형
   monkey:  { power: 2, speed: 4, control: 5, spin: 5, reach: 2, serve: 1 },   // 바나킹(원숭이) 트릭스터·테크닉형: 힘은 약하지만 원하는 곳에 휘어 넣는 기교파
   fire:    { power: 5, speed: 3, control: 2, spin: 1, reach: 3, serve: 5 },   // 파워·직진형: 빠르고 곧게, 대신 정확도가 낮음
   tornado: { power: 3, speed: 3, control: 3, spin: 5, reach: 2, serve: 3 },   // 스핀형: 공이 크게 휘고 튄 뒤 뻗음
@@ -45,7 +45,7 @@ const FIREBALL = { T: .45, margin: .06, z: 1.1 };   // 불꽃샷: 0.45초 목표
 const BLIZZ = { S: 1.8 };                                 // 눈보라 분신샷: 네트를 넘으면 공이 1.8m 간격 셋으로 갈라짐(진짜는 그림자가 있는 하나)
 const PEEL = { r: .6, slip: .8, speed: 5.5 };           // 바나나 껍질: 밟으면 0.8초 동안 미끄덩
 const MONKEY = { steal: .15, fake: .2, fakeAmp: 1.6 };   // 바나킹: 득점 때 15% 아이템 훔치기, 20% 페이크 샷
-const HUSKY = { justice: 1.5 };                          // 정시키: 게임에서 2점 이상 지고 있으면 기가 1.5배로 참
+const HUSKY = { justice: 1.5 };                          // 개시키: 게임에서 2점 이상 지고 있으면 기가 1.5배로 참
 const SNAKE = { coil: .62, slow: .52, fast: 1.783, amp: 1.7, waves: 4.5 };   // 4번 반 꿈틀 · .62×.52 + .38×1.783 ≈ 1 (총 이동 거리 유지)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
