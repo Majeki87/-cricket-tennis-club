@@ -707,6 +707,8 @@ const Snd=(()=>{
   function tone(o){   // {f,f2,type,at,dur,vol,bus,pan}
     const t=ctx.currentTime+(o.at||0),osc=ctx.createOscillator(),g=ctx.createGain(),dur=o.dur||.15;
     osc.type=o.type||"sine";osc.frequency.setValueAtTime(o.f,t);if(o.f2)osc.frequency.exponentialRampToValueAtTime(o.f2,t+dur);
+    if(o.f3)osc.frequency.exponentialRampToValueAtTime(o.f3,t+dur*.999);
+    if(o.vib){const l=ctx.createOscillator(),lg=ctx.createGain();l.frequency.value=o.vibRate||5.5;lg.gain.value=o.vib;l.connect(lg);lg.connect(osc.frequency);l.start(t);l.stop(t+dur+.02)}
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.vol||.2,t+(o.atk||.005));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
     if(o.lp){const fl=ctx.createBiquadFilter();fl.type="lowpass";fl.frequency.value=o.lp;fl.Q.value=o.q||1;osc.connect(fl);fl.connect(g)}else osc.connect(g);
     out(g,o);osc.start(t);osc.stop(t+dur+.02);
@@ -730,12 +732,12 @@ const Snd=(()=>{
     netcord(){tone({f:700,dur:.05,vol:.12});tone({f:520,at:.06,dur:.05,vol:.1})},
     buzz(){tone({f:185,type:"square",dur:.16,vol:.08});tone({f:140,type:"square",at:.17,dur:.2,vol:.08})},
     let(){notes([76,72],{gap:.12,vol:.12})},
-    win(){notes([84,88,91],{gap:.08,vol:.15});chirp(.3,.04)},
+    win(noChirp){notes([84,88,91],{gap:.08,vol:.15});if(!noChirp)chirp(.3,.04)},
     lose(){notes([79,76,72],{gap:.12,vol:.12,dur:.22})},
     cheer(big){noise({dur:big?2:1.3,vol:big?.16:.1,f:1300,q:.4,atk:.15});const n=big?22:12;for(let i=0;i<n;i++)noise({at:Math.random()*(big?1.6:1),dur:.03,vol:.06+Math.random()*.06,f:2500+Math.random()*2500,q:1.5})},
     game(){notes([72,76,79,84],{gap:.11,vol:.15,type:"square",dur:.16});tone({f:N(84),type:"triangle",at:.44,dur:.5,vol:.14})},
     set(){notes([72,76,79,84,88],{gap:.1,vol:.15,type:"square",dur:.15});[72,76,79].forEach(n=>tone({f:N(n),type:"triangle",at:.52,dur:.8,vol:.09}))},
-    victory(){notes([72,72,72,76,79,76,79,84],{gap:.13,vol:.15,type:"square",dur:.18});[72,76,79,84].forEach(n=>tone({f:N(n),type:"triangle",at:1.1,dur:1.2,vol:.08}));chirp(1.3,.05)},
+    victory(noChirp){notes([72,72,72,76,79,76,79,84],{gap:.13,vol:.15,type:"square",dur:.18});[72,76,79,84].forEach(n=>tone({f:N(n),type:"triangle",at:1.1,dur:1.2,vol:.08}));if(!noChirp)chirp(1.3,.05)},
     defeat(){notes([76,74,72,71,67],{gap:.2,vol:.12,dur:.3})},
     tiebreak(){tone({f:N(48),type:"sawtooth",dur:.35,vol:.08});tone({f:N(49),type:"sawtooth",at:.38,dur:.5,vol:.08})},
     coin(){tone({f:988,type:"square",dur:.07,vol:.08});tone({f:1319,type:"square",at:.07,dur:.18,vol:.08})},
@@ -744,9 +746,17 @@ const Snd=(()=>{
       if(kind==="tornado"){tone({f:300,f2:1400,dur:.45,vol:.14});tone({f:1400,f2:300,at:.45,dur:.45,vol:.12});noise({dur:.9,vol:.08,f:600,f2:3000,q:2})}
       else if(kind==="snake"){for(let i=0;i<8;i++)noise({at:i*.09,dur:.11,vol:.06+.02*(i%2),f:5200,ft:"highpass",atk:.03})}   // 쉬이익~ 꿈틀꿈틀
       else if(kind==="fire"){noise({dur:.6,vol:.22,f:300,f2:3000,q:.6});tone({f:200,f2:900,type:"sawtooth",dur:.4,vol:.06})}
-      else if(kind==="husky"){for(let i=0;i<6;i++)noise({at:i*.06,dur:.05,vol:.08,f:7000,q:3});tone({f:420,f2:760,type:"sawtooth",lp:1400,at:.15,dur:.5,vol:.06,atk:.08});tone({f:760,f2:520,type:"sawtooth",lp:1400,at:.65,dur:.6,vol:.05})}   // 쨍그랑 + 아우우~
-      else if(kind==="monkey"){FX.boing();for(let i=0;i<4;i++)tone({f:1000+i*60,f2:1300,type:"square",lp:2600,at:.25+i*.11,dur:.07,vol:.05})}   // 띠용 + 끼끼끼
+      else if(kind==="husky"){for(let i=0;i<6;i++)noise({at:i*.06,dur:.05,vol:.08,f:7000,q:3});FX.howl(.15,1.2)}   // 쨍그랑 + 아우우우~
+      else if(kind==="monkey"){FX.boing();FX.chatter(6,.25);FX.screech(.75)}   // 띠용 + 끼끼끼 + 끼야아!
       else{FX.quake()}},
+    /* 🐺 강아지(허스키) 소리 */
+    bark(n=1,at=0){for(let i=0;i<n;i++){const t=at+i*.2;tone({f:620,f2:260,type:"sawtooth",lp:1300,q:3,at:t,dur:.13,vol:.13,atk:.004});tone({f:310,f2:150,type:"square",lp:700,at:t,dur:.12,vol:.06});noise({at:t,dur:.06,vol:.07,f:1100,q:1.2})}},   // 멍! 멍!
+    howl(at=0,len=1.3){tone({f:330,f2:620,f3:470,type:"sawtooth",lp:1150,q:2,at,dur:len,vol:.09,atk:.18,vib:14,vibRate:5});tone({f:660,f2:1240,f3:940,type:"sine",at,dur:len,vol:.03,atk:.2,vib:20})},   // 아우우우~
+    whine(at=0){tone({f:1050,f2:700,type:"sine",at,dur:.45,vol:.07,atk:.03,vib:25,vibRate:9});tone({f:900,f2:620,type:"sine",at:at+.42,dur:.35,vol:.05,vib:25,vibRate:9})},   // 끼잉~ 낑
+    /* 🐒 원숭이 소리 */
+    chatter(n=5,at=0){for(let i=0;i<n;i++){const f=1350+Math.random()*350;tone({f,f2:f*.72,type:"square",lp:2400,q:2,at:at+i*.075,dur:.06,vol:.1,atk:.003});noise({at:at+i*.075,dur:.03,vol:.045,f:2600,q:2})}},   // 끼끼끼끼
+    screech(at=0){tone({f:900,f2:1700,f3:1250,type:"sawtooth",lp:2600,q:3,at,dur:.5,vol:.12,atk:.02,vib:40,vibRate:18});noise({at,dur:.4,vol:.07,f:2200,q:1.5})},   // 끼야아악!
+    cackle(at=0){for(let i=0;i<6;i++){const f=i%2?1050:1350;tone({f,f2:f*.8,type:"square",lp:2200,at:at+i*.11,dur:.08,vol:.1});noise({at:at+i*.11,dur:.05,vol:.045,f:1800,q:2})}},   // 끼히히히히
     boing(){tone({f:180,f2:520,dur:.12,vol:.12});tone({f:520,f2:260,at:.12,dur:.22,vol:.1})},
     split(){for(let i=0;i<3;i++)tone({f:1800+i*500,f2:2600+i*500,at:i*.05,dur:.15,vol:.05})},
     slip(){tone({f:1400,f2:300,dur:.45,vol:.09})},
@@ -775,6 +785,10 @@ const Snd=(()=>{
       const one=(at,f)=>{tone({f,f2:f*2.3,at,dur:.09,vol:.17,atk:.003});tone({f:f*2,f2:f*4.2,at,dur:.05,vol:.04,atk:.002})};
       one(0,base);if(kind==="big")one(.1,base*1.33)}
   };
+  // 캐릭터 목소리: 개시키는 강아지, 바나킹은 원숭이 소리(귀뚜라미 선수는 기존 소리)
+  const VOICE={husky:{win:()=>FX.bark(2),ace:()=>FX.howl(0,1.1),lose:()=>FX.whine(),game:()=>{FX.bark(2);FX.howl(.45,1)},match:()=>{FX.howl(0,1.6);FX.bark(3,1.7)},taunt:()=>Math.random()<.5?FX.howl(0,1.2):FX.bark(3),mock:()=>FX.bark(2)},
+    monkey:{win:()=>FX.chatter(5),ace:()=>FX.cackle(),lose:()=>FX.screech(),game:()=>{FX.chatter(4);FX.cackle(.4)},match:()=>{FX.cackle();FX.screech(.75);FX.chatter(6,1.3)},taunt:()=>FX.cackle(),mock:()=>FX.cackle(.7),steal:()=>FX.cackle(.15)}};
+  function voice(k,what){if(!ctx||!pref.sfx)return false;const v=VOICE[k]&&VOICE[k][what];if(!v)return false;if(ctx.state==="suspended"&&!document.hidden)ctx.resume();try{v()}catch{}return true}
   function play(name,...a){if(!ctx||!pref.sfx)return;if(ctx.state==="suspended"&&!document.hidden)ctx.resume();try{FX[name]&&FX[name](...a)}catch{}}
   /* 배경음: 숲속 자연의 소리 — 산들바람, 나뭇잎 바스락, 졸졸 시냇물, 찌르르 귀뚜라미, 여러 가지 새소리
      로비에서는 계속, 경기에 들어가면 처음 몇 초만 들리다가 조용히 사라져 경기에 집중할 수 있게 함 */
@@ -868,7 +882,7 @@ const Snd=(()=>{
   }
   function toggle(k){pref[k]=!pref[k];save();init();apply();return pref[k]}
   document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else ctx.resume()});
-  return{init,play,setScene,toggle,pref,rain};
+  return{init,play,setScene,toggle,pref,rain,voice,isAnimal:k=>!!VOICE[k]};
 })();
 
 /* ───── 점수 표기 ───── */
@@ -916,7 +930,7 @@ function handleEvent(e){
     case "split":Snd.play("split");popup("❄️ 분신! 진짜는 그림자가 있는 공",e.x,e.y,"call");break;
     case "peel":Snd.play("boing");popup("🍌",e.x,e.y);break;
     case "slip":{Snd.play("slip");const p=st.players[e.side];popup("🍌 미끄덩!",p.x,p.y,"bad");if(e.side===side)msg("바나나 껍질을 밟았어요! 잠깐 조작이 안 돼요.");break}
-    case "steal":{const it=ITEMS[e.item];Snd.play("steal");popup("🐒 "+(it?it.emoji:"")+" 슬쩍!",st.players[e.side].x,st.players[e.side].y,"bad");say(e.side,pick(LINES.byChar.monkey.steal,e.id),3,true);
+    case "steal":{const it=ITEMS[e.item];Snd.play("steal");Snd.voice("monkey","steal");popup("🐒 "+(it?it.emoji:"")+" 슬쩍!",st.players[e.side].x,st.players[e.side].y,"bad");say(e.side,pick(LINES.byChar.monkey.steal,e.id),3,true);
       msg(e.side===side?"상대의 "+(it?it.emoji+" "+it.name:"아이템")+"을(를) 훔쳤어요! 끼히히":"바나킹이 내 "+(it?it.emoji+" "+it.name:"아이템")+"을(를) 훔쳐 갔어요!");break}
     case "fake":popup("🙈 페이크!",e.x,e.y,"call");break;
     case "snakeStrike":strikeUntil=performance.now()+500;popup("🐍 쉭! 물었다!",e.x,e.y,"call");Snd.play("strike");break;
@@ -934,7 +948,8 @@ function handleEvent(e){
     case "let":Snd.play("let");popup("LET",0,(e.side===0?-1:1)*4,"call");msg("레트! 네트에 맞고 박스에 들어가서 서브를 다시 넣습니다.");break;
     case "point":{
       const r=REASON[e.reason]||"포인트";
-      Snd.play(e.winner===side?"win":"lose");Snd.play("cheer",e.reason==="ace");
+      Snd.play(e.winner===side?"win":"lose",Snd.isAnimal(st.chars?.[side]));Snd.play("cheer",e.reason==="ace");
+      Snd.voice(st.chars?.[e.winner],e.reason==="ace"?"ace":"win");setTimeout(()=>Snd.voice(st.chars?.[1-e.winner],"lose"),350);   // 개시키·바나킹 목소리
       if(e.reason==="ace")popup("ACE!",0,(e.winner===0?-1:1)*8,"call");
       {const w=e.winner,deuce=!e.tb&&e.pts[0]>=3&&e.pts[0]===e.pts[1];
        const vsBoss=st.chars?.[w]==="husky"&&st.chars?.[1-w]==="monkey"&&hash(e.id*3)%3===0;
@@ -942,14 +957,14 @@ function handleEvent(e){
        say(1-w,lineFor(1-w,"lose",e.id+2),2);}
       msg(r+"! "+who(e.winner)+" 포인트 · "+callScore(e.pts,e.server,e.tb)+nextHint);break}
     case "game":
-      if(!e.tb)Snd.play("game");
+      if(!e.tb)Snd.play("game");Snd.voice(st.chars?.[e.winner],"game");
       say(e.winner,lineFor(e.winner,"game",e.id),4,true);
       banner(e.tb?"타이브레이크 승리":"게임 "+who(e.winner),"게임 스코어 "+e.games[side]+" - "+e.games[1-side]);
       msg("게임, "+who(e.winner)+"! 게임 스코어 "+e.games[side]+"-"+e.games[1-side]+" (나-"+who(1-side)+")"+nextHint);break;
     case "tiebreak":Snd.play("tiebreak");banner("타이브레이크","7점 먼저 · 2점 차");msg("게임 스코어 동점! 타이브레이크로 세트를 결정합니다. 7점을 먼저, 2점 차로 따야 합니다."+nextHint);break;
     case "ends":msg(curMsg+" · 코트 체인지(화면은 그대로)");break;
     case "set":Snd.play("set");Snd.play("cheer",true);banner("세트 "+who(e.winner),e.score[side]+" - "+e.score[1-side]);msg("세트, "+who(e.winner)+"! "+e.score[side]+"-"+e.score[1-side]+nextHint);break;
-    case "match":Snd.play(e.winner===side?"victory":"defeat");say(e.winner,lineFor(e.winner,"match",e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
+    case "match":Snd.play(e.winner===side?"victory":"defeat",Snd.isAnimal(st.chars?.[side]));Snd.voice(st.chars?.[e.winner],"match");say(e.winner,lineFor(e.winner,"match",e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"||side===0?"Space로 새 경기를 시작하세요.":"호스트가 새 경기를 시작할 수 있습니다."));break;
   }
 }
 function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;lastEv=e.id;handleEvent(e)}}
@@ -1244,6 +1259,7 @@ function mockCricket(e){
   el.style.left=sx(p.x+dx)+"%";el.style.top=sy(p.y)+"%";
   $("arena").appendChild(el);setTimeout(()=>el.remove(),1800);
   if(kind==="monkey")setTimeout(()=>Snd.play("boing"),650);
+  Snd.voice(kind,"mock");
 }
 function directHit(e,line){   // 상대가 나를 도발: 내 화면에 크게
   const c=CHARS[st.chars?.[e.side]],el=document.createElement("div"),lv=e.lv||1;
@@ -1261,7 +1277,7 @@ const canTaunt=()=>!!st;
 function onTaunt(e){
   const lv=e.lv||1,mine=e.side===side;
   playTaunt(e.side,e.n,lv);
-  Snd.play("taunt",e.n);Snd.play(e.reflect?"oooh":TAUNT_CROWD[e.n],lv);   // 관중 반응: 야유·웃음, 반사 때는 "오오~!"
+  if(!Snd.voice(st.chars?.[e.side],"taunt"))Snd.play("taunt",e.n);Snd.play(e.reflect?"oooh":TAUNT_CROWD[e.n],lv);   // 관중 반응: 야유·웃음, 반사 때는 "오오~!"
   const own=LINES.byChar[st.chars?.[e.side]];
   const line=own?(e.reflect?pick(LINES.reflect,e.id):pick(hash(e.id)%3===0?own.taunt:own.mock,e.id))   // 개시키·바나킹: 자기 멘트로 귀뚜라미를 놀림
     :e.reflect?pick(LINES.reflect,e.id):lv===3?pick(LINES.taunt3,e.id):pick(LINES.taunt[e.n]||LINES.win,e.id);
