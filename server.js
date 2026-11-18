@@ -70,7 +70,7 @@ function tick(room) {
   if (room.status === "waiting") room.status = "ready";
   if (!room.match) return;
   // 자기 위치를 직접 보내는 화면(새 버전)은 서버가 키로 움직이지 않음
-  const inp = [0, 1].map(s => clientAt(room, s)?.posMode ? {} : { keys: room.inputs[s] });
+  const inp = [0, 1].map(s => clientAt(room, s)?.posMode ? { posMode: true } : { keys: room.inputs[s] });
   E.step(room.match, TICK, inp);
   room.evId = room.match.evId;
 }
@@ -120,7 +120,8 @@ wss.on("connection", (ws) => {
       let x = Number(msg.x), y = Number(msg.y); if (!isFinite(x) || !isFinite(y)) return;
       const now = Date.now(), p = st.players[side], dts = Math.min(.25, (now - (client.lastPos || now - 33)) / 1000);
       client.lastPos = now;
-      const dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy), max = E.MOVE_SPEED * dts * 1.4 + .15;
+      const dashing = st.dash && st.dash[side] && st.dash[side].t > -0.1;
+      const dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy), max = (dashing ? E.DASH.speed : E.MOVE_SPEED) * dts * 1.4 + .15;
       if (d > max) { x = p.x + dx / d * max; y = p.y + dy / d * max; }
       p.x = x; p.y = y; E.constrainPos(st, side);
       return;
@@ -131,6 +132,7 @@ wss.on("connection", (ws) => {
     if (msg.type === "format" && idle && side === 0 && E.FORMATS[msg.format]) room.format = msg.format;
     if (msg.type === "serve" && st) E.serve(st, side, { keys: cleanKeys(msg.keys), err: 1 });
     if (msg.type === "item" && st) E.useItem(st, side, Number(msg.slot) | 0);
+    if (msg.type === "dash" && st) E.dash(st, side, cleanKeys(msg.keys));
     if (msg.type === "taunt" && st) E.taunt(st, side, Number(msg.n) | 0);
     if (msg.type === "hit" && st) {
       const skill = E.SKILLS.includes(msg.skill) ? msg.skill : "normal";
