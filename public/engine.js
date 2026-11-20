@@ -71,7 +71,7 @@ const HUSKY = { justice: 1.5 };
 const CAT = { say: .5, lie: .65, fakeDX: 3, snap: .35, callLine: .3, callFar: 2.2, callRate: .75 };
 // 청개구리: 0.22초 점프 + 0.05초 착지(평균 속도는 1.13배), 점프 중엔 방향 고정 · 혀가 길어 0.5m 더 높은 공까지 침
 // 비가 좋아: 비 디버프 중 1.1배, 물웅덩이에선 느려지지 않고 1.15배 · 청개구리 심보: 상대가 도발하면 내 기 +10, 맞도발(반사) 인정 시간 +0.5초
-const FROG = { move: 1.13, hopT: .22, rest: .05, hitZ: .5, rain: 1.1, puddle: 1.15, tauntGauge: 10, reflect: .5, zig: 2.8 };
+const FROG = { move: 1.13, hopT: .22, rest: .05, hitZ: .5, rain: 1.1, puddle: 1.15, tauntGauge: 10, reflect: .5, zig: 3.8, hopH: [.7, 1.5, .8, .6], hopSide: 1.9 };
 const maxHitZ = (st, side) => MAX_HIT_Z + (st.chars && st.chars[side] === "frog" ? FROG.hitZ : 0);                          // 개시키: 게임에서 2점 이상 지고 있으면 기가 1.5배로 참
 const SNAKE = { coil: .62, slow: .52, fast: 1.783, amp: 1.7, waves: 4.5 };   // 4번 반 꿈틀 · .62×.52 + .38×1.783 ≈ 1 (총 이동 거리 유지)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
@@ -353,7 +353,7 @@ function shoot(st, side, skill, aim) {
       else if (char === "husky") { depth = 9; T = 1.15; }
       else if (char === "monkey") { depth = 9.2; T = 1.2; }
       else if (char === "cat") { depth = 9; T = 1.25; tx = away * 2.9; }      // 시치미샷: 실제 궤적은 평범, 화면에 가짜 자리로 보임
-      else if (char === "frog") { depth = 9.4; T = 1.05; tx = away * 2.6; }   // 폴짝폴짝샷: 낮게 튀며 반대 방향으로 지그재그
+      else if (char === "frog") { depth = 9.4; T = 1.15; tx = away * 2.6; margin = null; curve = "frog"; }   // 폴짝폴짝샷: 날아가는 내내 지그재그로 폴짝폴짝(네트는 큰 점프로 넘음), 떨어진 뒤에도 반대로 꺾임
       else { depth = 8.4; T = 1.15; }
       break;
     default: tx = h ? h * 3 : clamp(-opp.x * .45 + (Math.random() - .5) * 3.2, -3.1, 3.1); depth = 8.6 + v * 1.4; T = 1.25 - v * .08; sig = .5;
@@ -377,6 +377,7 @@ function shoot(st, side, skill, aim) {
   itemBall(st, side, b);
   if (skill !== "special") charSpin(st, side, b);
   b.slot = slot; b.split = false; b.sg = 0;
+  if (curve === "frog") frogPlan(b);
   if (skill === "special" && char === "cat") b.fakeDX = -(Math.sign(tx) || 1) * CAT.fakeDX;   // 반대쪽에 떨어지는 것처럼 보이게
   if (char === "cat" && skill !== "special" && Math.abs(tx) > .8 && Math.random() < CAT.say) {   // 거짓 예고: "왼쪽으로 칠 거다냥"(65%는 반대)
     const real = Math.sign(tx), lie = Math.random() < CAT.lie;
@@ -394,6 +395,19 @@ function shoot(st, side, skill, aim) {
   pushEv(st, { type: "hit", side, skill, x: b.x, y: b.y });
 }
 
+// 폴짝폴짝샷 비행 계획: 4번 점프(내 코트 1 · 네트를 넘는 큰 점프 1 · 상대 코트 2). 점프 사이엔 바닥 바로 위(0.15m)를 스치고, 옆으로 지그재그
+function frogPlan(b) {
+  const yEnd = b.by + b.vy * b.T, un = Math.abs(b.by) / (Math.abs(b.by) + Math.abs(yEnd)), w = .17;
+  const s1 = clamp(un - w, .1, .6), s2 = clamp(un + w, s1 + .15, .85), s3 = (s2 + 1) / 2, A = FROG.hopSide * (Math.random() < .5 ? -1 : 1);
+  b.frog = { u: [0, s1, s2, s3, 1], z: [b.z, .15, .15, .15, 0], H: FROG.hopH, ox: [0, A, -A, A, 0], seg: 0 };
+}
+function frogAt(b, u) {   // u(0~1) 시점의 높이·높이 변화 속도·옆 흔들림
+  const F = b.frog; let i = 0; while (i < 3 && u > F.u[i + 1]) i++;
+  const L = F.u[i + 1] - F.u[i], f = clamp((u - F.u[i]) / L, 0, 1), H = F.H[i];
+  const z = F.z[i] + (F.z[i + 1] - F.z[i]) * f + H * Math.sin(Math.PI * f);
+  const dz = ((F.z[i + 1] - F.z[i]) + H * Math.PI * Math.cos(Math.PI * f)) / L / b.T;
+  return { i, z, dz, ox: F.ox[i] + (F.ox[i + 1] - F.ox[i]) * f * f * (3 - 2 * f) };
+}
 function itemBall(st, side, b) {
   const act = st.active[side];
   b.pow = !!act.anchovy;
@@ -451,10 +465,16 @@ function stepBall(st, dt) {
   }
   if (st.wind && st.wind.on && b.z > .02) b.vx += st.wind.dir * st.wind.str * dt;   // 바다 돌풍이 공을 옆으로 밂
   b.bx += b.vx * dt * mul; b.by += b.vy * dt * mul; b.z += b.vz * dt - .5 * G * dt * dt; b.vz -= G * dt;
+  if (b.curve === "frog" && b.bounces === 0 && b.frog) {   // 폴짝폴짝: 높이는 점프 계획을 그대로 따라감(마지막에 바닥에 닿으며 튐)
+    const u = Math.min(1, b.t / b.T), h = frogAt(b, u);
+    b.z = u >= 1 ? 0 : h.z; b.vz = Math.min(h.dz, u >= 1 ? -1 : h.dz);
+    if (h.i !== b.frog.seg && u < 1) { b.frog.seg = h.i; pushEv(st, { type: "frogSkip", x: b.bx + h.ox, y: b.by }); }
+  }
   let ox = 0, oy = 0;
   if (b.curve && b.bounces === 0 && b.t < b.T) {        // 필살기 궤적: 착지 순간에는 휘어짐이 0이 되도록
     const u = b.t / b.T;
     if (b.curve === "tornado") { const r = TORNADO.r * Math.sin(Math.PI * u), ph = u * Math.PI * 2 * TORNADO.loops; ox = r * Math.sin(ph); oy = r * TORNADO.squash * (Math.cos(ph) - 1); }
+    else if (b.curve === "frog" && b.frog) ox = frogAt(b, u).ox;
     else if (b.curve === "snake" && u < SNAKE.coil) ox = SNAKE.amp * Math.sin(2 * Math.PI * SNAKE.waves * u / SNAKE.coil) * Math.min(1, u / .06);   // 촘촘하게 좌우로 꿈틀꿈틀(물기 직전에 정확히 가운데로 돌아옴)
   }
   if (b.spinAmp && b.bounces === 0 && b.t < b.T) ox += b.spinAmp * Math.sin(Math.PI * b.t / b.T) * b.spin;   // 스핀으로 바나나처럼 휘었다가 목표 지점에 떨어짐
@@ -468,7 +488,7 @@ function stepBall(st, dt) {
     b.crossed = true;
     if (b.kind === "husky" && b.slot !== undefined && b.bounces === 0) { b.split = true; b.splitT = b.t; pushEv(st, { type: "split", x: b.bx, y: 0, slot: b.slot }); }
     const tb = Math.abs(b.vy) > 0 ? Math.abs(b.by) / Math.abs(b.vy) : 0;
-    const zc = b.z - b.vz * tb - .5 * G * tb * tb, nh = netHeight(b.bx);
+    const zc = b.curve === "frog" ? b.z : b.z - b.vz * tb - .5 * G * tb * tb, nh = netHeight(b.bx);
     if (zc < nh - .12) {                                  // 네트에 걸림
       b.by = -dirOf(b.owner) * .15; b.x = b.bx; b.y = b.by; b.z = Math.max(0, zc * .4); b.live = false; b.fx = 0; b.fakeDX = 0;
       pushEv(st, { type: "net", x: b.x, y: 0, side: b.owner });
@@ -506,7 +526,7 @@ function bounce(st) {
     }
     if (b.kind === "frog") {   // 폴짝폴짝샷: 낮게 깡충 튀며 옆 방향이 반대로 꺾임
       const s0 = Math.sign(b.vx) || (Math.random() < .5 ? 1 : -1);
-      b.vx = -s0 * FROG.zig + b.vx * .2; b.e = .4; b.keep = 1;
+      b.vx = -s0 * FROG.zig + b.vx * .2; b.e = .18; b.keep = .92;
       pushEv(st, { type: "frogHop", x: b.x, y: b.y });
     }
     if (b.kind === "quake") { st.stun[recv] = STUN_TIME; pushEv(st, { type: "quake", side: recv, x: b.x, y: b.y }); }
@@ -722,6 +742,7 @@ function step(st, dt, inputs = []) {
 
 /* ───── 컴퓨터 선수 ───── */
 function landing(b) {
+  if (b.curve === "frog" && b.bounces === 0 && b.frog) { const t = Math.max(0, b.T - b.t); return { x: b.bx + b.vx * t, y: b.by + b.vy * t, vz: frogAt(b, 1).dz }; }   // 폴짝폴짝샷은 정해진 자리에 떨어짐
   const t = (b.vz + Math.sqrt(b.vz * b.vz + 2 * G * Math.max(0, b.z))) / G;
   return { x: b.bx + b.vx * t, y: b.by + b.vy * t, vz: b.vz - G * t };
 }
@@ -804,7 +825,7 @@ function aiCore(st, side, level, dt) {
     const reach = REACH.normal * SF.reach(statOf(st, side, "reach")) * recvMul(st, side, b) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
     if ((b.bounces === 1 || (b.bounces === 0 && canVolley)) && ballDist(b, me) < reach) {
       ai.tried = true;
-      const miss = cfg.error + (b.kind === "slice" ? .06 : 0) + (b.kind === "monkey" ? .15 : 0) + (b.kind === "cat" ? .12 : 0) + (b.kind === "frog" ? .2 : 0) + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
+      const miss = cfg.error + (b.kind === "slice" ? .06 : 0) + (b.kind === "monkey" ? .15 : 0) + (b.kind === "cat" ? .12 : 0) + (b.kind === "frog" ? .26 : 0) + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
       if (Math.random() < miss) pushEv(st, { type: "whiff", side });
       else {
         let skill = "normal";
