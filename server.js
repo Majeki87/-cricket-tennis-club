@@ -45,7 +45,7 @@ function packMatch(room) {
     glare: st.glare ? { own: st.glare.own } : null, rockWarn: st.rockWarn ? { x: r2(st.rockWarn.x), y: r2(st.rockWarn.y), r: r2(st.rockWarn.r) } : null,
     clock: r2(st.clock || 0), hazard: st.hazard ? { type: st.hazard.type, pointsLeft: st.hazard.pointsLeft, patches: st.hazard.patches.map(p => ({ x: r2(p.x), y: r2(p.y), r: r2(p.r) })) } : null,
     players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
-    ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id, split: b.split ? 1 : 0, slot: b.slot || 0, sg: r2(b.sg || 0) },
+    ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id, split: b.split ? 1 : 0, slot: b.slot || 0, sg: r2(b.sg || 0), fx: r2(b.fx || 0) },
     peels: (st.peels || []).map(q => ({ x: r2(q.x), y: r2(q.y) })), slip: (st.slip || [null, null]).map(x => x ? r2(x.t) : 0),
     events };
 }
@@ -133,7 +133,8 @@ wss.on("connection", (ws) => {
       const now = Date.now(), p = st.players[side], dts = Math.min(.25, (now - (client.lastPos || now - 33)) / 1000);
       client.lastPos = now;
       const dashing = st.dash && st.dash[side] && st.dash[side].t > -0.1;
-      const dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy), max = (dashing ? E.DASH.speed : E.MOVE_SPEED) * dts * 1.4 + .15;
+      const frog = st.chars[side] === "frog" ? 1.35 : 1;   // 청개구리는 점프하는 순간 평균보다 빨리 움직임
+      const dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy), max = (dashing ? E.DASH.speed : E.MOVE_SPEED * frog) * dts * 1.4 + .15;
       if (d > max) { x = p.x + dx / d * max; y = p.y + dy / d * max; }
       p.x = x; p.y = y; E.constrainPos(st, side);
       return;
