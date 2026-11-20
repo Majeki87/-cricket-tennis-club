@@ -345,10 +345,12 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 @media (max-width:640px){.stage{height:250px}}
 .stage-court{position:absolute;left:8%;right:8%;bottom:-6%;height:78%;transform:perspective(520px) rotateX(56deg);transform-origin:50% 100%;border:3px solid #f4fbf7;border-radius:4px;
   background:linear-gradient(#f4fbf7,#f4fbf7) 50% 50%/100% 3px no-repeat,linear-gradient(#f4fbf7,#f4fbf7) 50% 28%/72% 2px no-repeat,linear-gradient(#f4fbf7,#f4fbf7) 50% 72%/72% 2px no-repeat,linear-gradient(90deg,#f4fbf7,#f4fbf7) 50% 50%/2px 44% no-repeat,linear-gradient(90deg,#f4fbf7,#f4fbf7) 14% 50%/2px 100% no-repeat,linear-gradient(90deg,#f4fbf7,#f4fbf7) 86% 50%/2px 100% no-repeat,#23946f}
-.sc-clay{background-color:#c8643a}.sc-grass{background-color:#3f8a33}.sc-ice{background-color:#dff1f9;border-color:#4a8fb5}.sc-sea{background-color:#2a8a72}.sc-forest{background-color:#3b7a3a}
+.sc-clay{background-color:#c8643a}.sc-grass{background-color:#3f8a33}.sc-ice{background-color:#dff1f9;border-color:#4a8fb5}.sc-sea{background-color:#2a8a72}.sc-forest{background-color:#3b7a3a}.sc-parking{background-color:#4b4f55}.sc-cliff{background-color:#9a7046}
 .sc-random{background-color:#555;filter:hue-rotate(0);animation:scRand 3s linear infinite}@keyframes scRand{to{filter:hue-rotate(360deg)}}
 .stage.st-clay{background:linear-gradient(#f2b27a,#f6d2a8)}.stage.st-grass{background:linear-gradient(#7cc4f0,#c8ecff)}.stage.st-ice{background:linear-gradient(#b8dff2,#eaf7fd)}
 .stage.st-sea{background:linear-gradient(#5aa6dc,#8fcaf0 45%,#2f7fb8 46%,#2a6fa3)}.stage.st-forest{background:linear-gradient(#1f4a2a,#2f6b3a 60%,#24552a)}.stage.st-random{background:linear-gradient(135deg,#5ba8d8,#c8643a,#3f8a33)}
+.stage.st-parking{background:radial-gradient(circle at 86% 8%,#fffbe0 0 6%,#ffe08a88 14%,#ffe08a00 34%),linear-gradient(#ffcf5c,#ffe7a8 42%,#9aa0a8 43%,#6d7178)}
+.stage.st-cliff{background:linear-gradient(90deg,#0000 60%,#c8d6e055 80%,#e6eef3aa),repeating-linear-gradient(180deg,#0000 0 54px,#14171c 54px 56px),repeating-linear-gradient(90deg,#3d434c 0 16px,#262a31 16px 19px,#4d545e 19px 33px,#1e2228 33px 36px)}
 .stage.st-sea .stage-court{background-color:#8a5a33;animation:seaRock 6.5s ease-in-out infinite}@keyframes seaRock{50%{transform:perspective(520px) rotateX(58deg) rotateZ(2deg)}}
 .stage-deco span{position:absolute;font-size:30px;filter:drop-shadow(0 3px 3px #0005)}
 .stagebug{--body:#42a86b;--belly:#8bdc85;--head:#62c878;--band:transparent;--glow:#9fffb0;position:absolute;left:50%;bottom:9%;width:min(44%,230px);transform:translateX(-50%);filter:drop-shadow(0 10px 8px #0006)}
@@ -386,7 +388,9 @@ details.panel ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:#c7d9d2;l
 /* 코트를 바꿀 때 한 번 반응 (기분 모션보다 우선) */
 .react-ice svg{animation:sgSlip 1.6s ease-in-out}.react-sea svg{animation:sgSea 1.6s ease-in-out;filter:hue-rotate(50deg) saturate(.8)}
 .react-forest svg{animation:sgLook 1.6s steps(1)}.react-clay svg{animation:sgDust 1.6s linear}.react-grass svg{animation:sgStretch 1.6s ease-in-out}
-.react-hard svg{animation:sgNod 1.6s ease-in-out}.react-random svg{animation:sgSpinAll 1.2s ease-in-out}
+.react-hard svg{animation:sgNod 1.6s ease-in-out}.react-parking svg{animation:sgHot 1.6s ease-in-out}.react-cliff svg{animation:sgTeeter 1.6s ease-in-out}
+@keyframes sgHot{0%,100%{transform:none;filter:none}30%{transform:scaleY(.94) translateY(6px);filter:brightness(1.25) saturate(1.3)}60%{transform:scaleY(1.03);filter:brightness(1.15)}}
+@keyframes sgTeeter{0%,100%{transform:none}20%{transform:rotate(9deg) translateX(8px)}40%{transform:rotate(-14deg) translateX(-12px)}60%{transform:rotate(6deg)}80%{transform:rotate(-3deg)}}.react-random svg{animation:sgSpinAll 1.2s ease-in-out}
 @keyframes sgSlip{0%,100%{transform:none}20%{transform:rotate(-26deg) translateX(-22px)}40%{transform:rotate(20deg) translateX(16px)}60%{transform:rotate(-12deg)}80%{transform:rotate(6deg)}}
 @keyframes sgSea{0%,100%{transform:none}25%{transform:rotate(-11deg) translateX(-10px)}75%{transform:rotate(11deg) translateX(10px)}}
 @keyframes sgLook{0%{transform:scaleX(1)}25%{transform:scaleX(-1)}50%{transform:scaleX(1)}75%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
@@ -410,6 +414,8 @@ body[data-scr="lobby"][data-court="grass"]{background:radial-gradient(circle at 
 body[data-scr="lobby"][data-court="ice"]{background:radial-gradient(circle at 30% 0%,#3e6f86,#1a3644 60%,#10222c)}
 body[data-scr="lobby"][data-court="sea"]{background:radial-gradient(circle at 30% 0%,#1f5f8f,#0e2e4c 60%,#081c30)}
 body[data-scr="lobby"][data-court="forest"]{background:radial-gradient(circle at 30% 0%,#1f4a2a,#0f2616 60%,#08180e)}
+body[data-scr="lobby"][data-court="parking"]{background:radial-gradient(circle at 70% 0%,#6b5320,#2a2a2e 60%,#18191c)}
+body[data-scr="lobby"][data-court="cliff"]{background:radial-gradient(circle at 30% 0%,#3a4652,#1a2028 60%,#0e1217)}
 body[data-scr="lobby"][data-court="random"]{background:radial-gradient(circle at 20% 0%,#4a2a5e,#1b1e33 60%,#101420)}
 body{transition:background .5s}
 /* 전적 화면 */
@@ -435,6 +441,7 @@ body{transition:background .5s}
 .cpk.active{border-color:#ffd84a;box-shadow:0 0 0 2px #ffd84a55}.cpk:disabled{opacity:.55;cursor:default}
 .cpk-clay i{background:#c8643a}.cpk-grass i{background:repeating-linear-gradient(90deg,#3f8a33 0 8px,#4a9a3d 8px 16px)}.cpk-ice i{background:linear-gradient(135deg,#d8eef7,#a9d6ea)}
 .cpk-sea i{background:linear-gradient(#8a5a33,#8a5a33) center/70% 70% no-repeat,#2f7fb8}.cpk-forest i{background:radial-gradient(circle at 30% 50%,#1f4f1c 0 5px,transparent 6px),radial-gradient(circle at 75% 40%,#6b4a2b 0 4px,transparent 5px),#2f6b2a}
+.cpk-parking i{background:repeating-linear-gradient(90deg,#4b4f55 0 12px,#ffd23a 12px 14px)}.cpk-cliff i{background:linear-gradient(90deg,#2e333a 0 22%,#9a7046 22% 78%,#16202a 78%)}
 .cpk-random i{background:conic-gradient(#2d7d6a 0 25%,#c8643a 0 50%,#3f8a33 0 75%,#a9d6ea 0)}
 /* 코트별 모습 */
 .arena.c-clay{background:radial-gradient(ellipse at center,#b65a33,#9c4826 60%,#7a3518)}.arena.c-clay .court .surface{fill:#c8643a}.arena.c-clay .court .alley{fill:#a64e28}
@@ -443,6 +450,31 @@ body{transition:background .5s}
 .arena.c-sea{background:repeating-linear-gradient(90deg,#8a5a33 0 18px,#7a4d2a 18px 20px)}.arena.c-sea .court .surface{fill:#2a8a72}
 .arena.c-forest{background:radial-gradient(ellipse at center,#24552a,#1b4220 60%,#12301a)}.arena.c-forest .court .surface{fill:#3b7a3a}.arena.c-forest .court .alley{fill:#2c5f2b}
 .arena.c-sea .court{animation:none}
+/* 땡볕 주차장 */
+.arena.c-parking{background:radial-gradient(circle at 25% 35%,#ffffff0a 0 1.5px,transparent 2px) 0 0/13px 13px,radial-gradient(ellipse at 80% 0%,#ffe9a040,#ffe9a000 55%),#35383d}
+.arena.c-parking .court .surface{fill:#4b4f55}.arena.c-parking .court .alley{fill:#44484e}
+#courtDeco .stall{position:absolute;height:2px;background:#ffd23a;opacity:.85}
+#courtDeco .car{position:absolute;font-size:28px;transform:translate(-50%,-50%) rotate(90deg);filter:drop-shadow(0 4px 2px #0008)}
+#courtDeco .car.r{transform:translate(-50%,-50%) rotate(-90deg) scaleY(-1)}
+#courtDeco .haze{position:absolute;inset:0;background:repeating-linear-gradient(0deg,#ffffff00 0 7px,#fff3d612 7px 10px);animation:haze 1.6s ease-in-out infinite alternate}
+@keyframes haze{to{transform:translateY(6px);opacity:.55}}
+#courtDeco .sunflare{position:absolute;right:-12%;top:-10%;width:46%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fffbe0aa,#ffe08a44 30%,#ffe08a00 66%);animation:sunPulse 3.2s ease-in-out infinite}
+@keyframes sunPulse{50%{transform:scale(1.08);opacity:.75}}
+#glareFx{position:absolute;left:0;right:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 62% 50%,#fffef4e0,#fff7c8aa 35%,#fff7c800 78%);animation:glareFlick .3s ease-in-out infinite alternate}
+#glareFx::after{content:"";position:absolute;left:58%;top:50%;width:38%;height:3px;background:#fff;box-shadow:0 0 18px 6px #fff;transform:rotate(-28deg);opacity:.9}
+@keyframes glareFlick{to{opacity:.82}}
+#glareChip{position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:6;background:#7a5a0acc;color:#fff;border-radius:12px;padding:3px 10px;font-size:12px;font-weight:900;white-space:nowrap}
+/* 주상절리 잔도 */
+.arena.c-cliff{background:repeating-linear-gradient(180deg,#6e4f32 0 20px,#3a2716 20px 22px),#6e4f32}
+.arena.c-cliff .court .surface{fill:url(#plankPat)}.arena.c-cliff .court .alley{fill:url(#plankPatD)}
+#courtDeco .basalt{position:absolute;top:0;bottom:0;left:0;box-shadow:inset -10px 0 14px #0009;
+  background:repeating-linear-gradient(180deg,#0000 0 52px,#12151a 52px 54px,#0000 54px 70px),repeating-linear-gradient(90deg,#4a515b 0 7px,#2f343c 7px 9px,#3c424b 9px 15px,#1c1f25 15px 17px)}
+#courtDeco .abyss{position:absolute;top:0;bottom:0;right:0;background:linear-gradient(90deg,#0a0f15,#1f2a36 55%,#5b6b7a);overflow:hidden}
+#courtDeco .abyss::after{content:"";position:absolute;inset:-20% 0;background:repeating-radial-gradient(ellipse at 80% 50%,#e6eef318 0 18px,#e6eef300 30px 60px);animation:mist 9s linear infinite}
+@keyframes mist{to{transform:translateY(20%)}}
+#courtDeco .rope{position:absolute;top:0;bottom:0;width:6px;transform:translateX(-50%);background:linear-gradient(90deg,#0000 2px,#c9a46a 2px 4px,#0000 4px),repeating-linear-gradient(180deg,#6b4a2b 0 7px,#0000 7px 46px)}
+#rockWarn{position:absolute;z-index:2;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;border:3px dashed #ff3a2a;box-shadow:0 0 0 3px #ff3a2a55,0 0 18px #ff3a2a88;background:radial-gradient(circle,#000d,#300a05aa 55%,#ff3a2a33 100%);animation:rockWarn 1.5s ease-in forwards;display:flex;align-items:center;justify-content:center}
+@keyframes rockWarn{from{transform:translate(-50%,-50%) scale(.45);opacity:.5}to{transform:translate(-50%,-50%) scale(1.05);opacity:1}}
 #courtDeco{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 #courtDeco .sea-l,#courtDeco .sea-r{position:absolute;top:0;bottom:0;width:7%;background:repeating-linear-gradient(180deg,#2f7fb8 0 14px,#3d93cc 14px 20px);animation:seaFlow 2.4s linear infinite}
 #courtDeco .sea-l{left:0}#courtDeco .sea-r{right:0}
@@ -460,6 +492,10 @@ body{transition:background .5s}
 .cpt.water::after{content:"";position:absolute;inset:22%;border-radius:50%;border:2px solid #e6f6ffaa;animation:ripple 1.6s ease-out infinite}
 .cpt.leaves{display:flex;align-items:center;justify-content:center}
 .cpt.pit{background:radial-gradient(circle,#0d0a07 0,#2a1d10 55%,#2a1d1000 72%)}
+.cpt.tar{background:radial-gradient(ellipse,#0a0a0bf2 0,#141416e6 55%,#14141600 72%)}.cpt.tar::after{content:"";position:absolute;left:30%;top:28%;width:22%;height:12%;border-radius:50%;background:#ffffff55;animation:glint 2.2s ease-in-out infinite}
+.cpt.manhole{background:radial-gradient(circle,#0000 0 60%,#2b2d31 61% 68%,#2b2d3100 70%),repeating-linear-gradient(45deg,#5c6066 0 3px,#71757c 3px 6px);-webkit-mask:radial-gradient(circle,#000 0 69%,#0000 70%);mask:radial-gradient(circle,#000 0 69%,#0000 70%)}
+.cpt.plank{background:linear-gradient(#0000 0 34%,#140d06 34% 44%,#0000 44% 56%,#140d06 56% 66%,#0000 66%),radial-gradient(ellipse,#5a3d2299 0,#5a3d2200 70%)}
+.cpt.rock{display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 62%,#0008 0,#0000 62%)}
 .bmark{position:absolute;width:15px;height:9px;border-radius:50%;background:#4a1d06;opacity:.6;box-shadow:0 0 0 2px #e8a07a55;transform:translate(-50%,-50%);pointer-events:none;z-index:1;animation:bmark 6s linear forwards}
 @keyframes bmark{80%{opacity:.5}100%{opacity:0}}
 #windFx{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden}
@@ -797,7 +833,7 @@ body:not(.mobile) #lobbyStart{padding:16px;font-size:18px}
 <section class="panel" id="statusPanel"><div class="row"><b id="gameStatus">대기 중</b><span class="muted" id="roomInfo" style="text-align:right">개인 연습 모드</span></div><div class="status" id="message"></div><div class="row" style="margin-top:10px"><button id="startPoint" class="btn" disabled>다음 서브 (Space)</button><button id="tauntBtn" class="btn alt" disabled>😜 도발 (T)</button><button id="toLobby" class="btn alt">로비로 나가기</button></div></section>
 </div>
 <div class="arena" id="arena">
-<svg class="court" viewBox="-7.3 -15.5 14.6 31" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="grassStripe" width="10.97" height="2.4" patternUnits="userSpaceOnUse"><rect width="10.97" height="1.2" fill="#3f8a33"/><rect y="1.2" width="10.97" height="1.2" fill="#4a9a3d"/></pattern></defs>
+<svg class="court" viewBox="-7.3 -15.5 14.6 31" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="grassStripe" width="10.97" height="2.4" patternUnits="userSpaceOnUse"><rect width="10.97" height="1.2" fill="#3f8a33"/><rect y="1.2" width="10.97" height="1.2" fill="#4a9a3d"/></pattern><pattern id="plankPat" width="10.97" height="1.1" patternUnits="userSpaceOnUse"><rect width="10.97" height="1.1" fill="#9a7046"/><rect y=".53" width="10.97" height=".04" fill="#4a3320"/><rect y="1.06" width="10.97" height=".04" fill="#4a3320"/><rect y=".1" width="10.97" height=".12" fill="#a87a4e"/></pattern><pattern id="plankPatD" width="10.97" height="1.1" patternUnits="userSpaceOnUse"><rect width="10.97" height="1.1" fill="#7a5634"/><rect y=".53" width="10.97" height=".04" fill="#3a2716"/><rect y="1.06" width="10.97" height=".04" fill="#3a2716"/></pattern></defs>
 <rect class="surface" x="-5.485" y="-11.885" width="10.97" height="23.77"/>
 <rect class="alley" x="-5.485" y="-11.885" width="1.37" height="23.77"/><rect class="alley" x="4.115" y="-11.885" width="1.37" height="23.77"/>
 <rect class="target" id="targetBox" x="0" y="0" width="4.115" height="6.4"/>
@@ -805,7 +841,7 @@ body:not(.mobile) #lobbyStart{padding:16px;font-size:18px}
 <line class="netshadow" x1="-6.4" y1=".28" x2="6.4" y2=".28"/><line class="net" x1="-6.4" y1="0" x2="6.4" y2="0"/><line class="netmesh" x1="-6.3" y1="0" x2="6.3" y2="0"/>
 <rect class="post" x="-6.55" y="-.16" width=".3" height=".32"/><rect class="post" x="6.25" y="-.16" width=".3" height=".32"/>
 </svg>
-<div id="courtDeco"></div><div id="cpLayer"></div><div id="markLayer"></div><div id="hzLayer"></div><div id="windFx" class="hidden"></div><div id="windChip" class="hidden"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="freshFx" class="hidden"><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span></div><div id="heatFx" class="hidden"></div><div id="hzChip" class="hidden"></div><div id="buffChip" class="hidden"></div>
+<div id="courtDeco"></div><div id="cpLayer"></div><div id="markLayer"></div><div id="hzLayer"></div><div id="windFx" class="hidden"></div><div id="windChip" class="hidden"></div><div id="glareFx" class="hidden"></div><div id="glareChip" class="hidden"></div><div id="rainFx" class="hidden"></div><div id="alarmFx" class="hidden"><div class="exit-sign"><span class="exit-run">🏃</span><b>EXIT</b><small>비상구</small></div></div><div id="freshFx" class="hidden"><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span><span>🍃</span><span>✨</span></div><div id="heatFx" class="hidden"></div><div id="hzChip" class="hidden"></div><div id="buffChip" class="hidden"></div>
 <div class="bug opponent" id="opponent" role="img" aria-label="상대 귀뚜라미 선수"></div>
 <div class="bug" id="player" role="img" aria-label="내 귀뚜라미 선수"></div>
 <div id="snakeBody"></div><div id="peelLayer"></div><div class="ball husky decoy" id="decoy0"></div><div class="ball husky decoy" id="decoy1"></div><div class="shadow" id="ballShadow"></div><div class="ball" id="ball"></div>
@@ -917,11 +953,17 @@ function renderCourt(){
   const c=screen==="game"&&st?st.court:null,a=$("arena");
   if(c!=="clay"&&$("markLayer").children.length)$("markLayer").innerHTML="";   // 클레이가 아니면 볼 마크 지움
   const key=(c||"")+viewAX+viewTop+side+a.clientWidth;
-  if(key!==courtKey){courtKey=key;["hard","clay","grass","ice","sea","forest"].forEach(k=>a.classList.toggle("c-"+k,c===k));
+  if(key!==courtKey){courtKey=key;E.COURTS.forEach(k=>a.classList.toggle("c-"+k,c===k));
     const d=$("courtDeco");let h="";
     if(c==="sea")h='<div class="sea-l"></div><div class="sea-r"></div><div class="rail" style="left:7%"></div><div class="rail" style="right:7%"></div>';
     if(c==="forest"){for(let i=0;i<7;i++){h+=`<span class="tree" style="left:4%;top:${8+i*14}%">🌲</span><span class="tree" style="left:96%;top:${14+i*14}%">🌳</span>`}}
     if(c==="ice"){for(let i=0;i<6;i++)h+=`<i class="glint" style="left:${15+(i*37)%70}%;top:${10+i*15}%;animation-delay:${-i*.5}s"></i>`}
+    if(c==="parking"){const w=Math.max(0,(viewAX-C.D-.25)/(2*viewAX)*100),cars=["🚗","🚙","🚕","🚐","🚗","🚙","🚘"];   // 양옆 주차 칸과 세워 둔 차
+      for(let i=0;i<9;i++){const t=4+i*11.5;h+=`<i class="stall" style="left:0;width:${w}%;top:${t}%"></i><i class="stall" style="right:0;width:${w}%;top:${t}%"></i>`;
+        if(i<8&&hash(i*13+5)%3)h+=`<span class="car" style="left:${w/2}%;top:${t+5.7}%">${cars[i%7]}</span>`;if(i<8&&hash(i*29+7)%3)h+=`<span class="car r" style="left:${100-w/2}%;top:${t+5.7}%">${cars[(i+3)%7]}</span>`}
+      h+='<div class="haze"></div><div class="sunflare"></div>'}
+    if(c==="cliff"){const w=Math.max(0,(viewAX-E.CLIFF.lim-.35)/(2*viewAX)*100);   // 왼쪽은 주상절리 절벽, 오른쪽은 낭떠러지와 밧줄 난간
+      h+=`<div class="basalt" style="width:${w}%"></div><div class="abyss" style="width:${w}%"></div><div class="rope" style="left:${w}%"></div><div class="rope" style="left:${100-w}%"></div>`}
     d.innerHTML=h}
   // 배가 출렁임(코트가 살짝 기울어짐)
   document.querySelector(".court").style.transform=c==="sea"?`rotate(${Math.sin((st.clock||0)*2*Math.PI/6.5)*1.1}deg)`:"";
@@ -934,9 +976,20 @@ function renderCourt(){
     const fs=q=>(2*q.r/(2*viewAX)*aw);
     list.forEach((q,i)=>{
       if(q.type==="bush"){const d=put(q,"bush");for(let k=0;k<5;k++){const t=document.createElement("span");t.textContent=k%2?"🌿":"🌳";t.style.left=(20+hash(i*31+k)%60)+"%";t.style.top=(22+hash(i*57+k*3)%56)+"%";t.style.fontSize=(fs(q)*.3)+"px";d.appendChild(t)}}
+      else if(q.type==="rock")put(q,"rock",`<span style="font-size:${fs(q)*.75}px">🪨</span>`);
       else if(q.type==="pit"&&q.hidden)put(q,"leaves",`<span style="font-size:${fs(q)*.55}px">🍂</span>`);   // 숨은 구덩이: 낙엽 더미와 똑같이 보임
       else put(q,q.type)});
     dec.forEach(q=>put(q,"leaves",`<span style="font-size:${fs(q)*.55}px">🍂</span>`))}
+  // 주차장 반사광: 비춰진 쪽 코트 절반이 하얗게
+  const gl=st&&screen==="game"?st.glare:null;$("glareFx").classList.toggle("hidden",!gl);$("glareChip").classList.toggle("hidden",!gl);
+  if(gl){const y1=Math.max(0,Math.min(100,sy(0))),y2=Math.max(0,Math.min(100,sy(gl.own*40))),mine=gl.own===(side===0?1:-1);
+    $("glareFx").style.top=Math.min(y1,y2)+"%";$("glareFx").style.height=Math.abs(y2-y1)+"%";
+    $("glareChip").textContent=mine?"😎 눈부셔! 받는 범위 ↓":"☀️ 상대가 눈부셔요! 지금이 기회"}
+  // 잔도 낙석 경고 그림자
+  const rw=st&&screen==="game"?st.rockWarn:null,re=$("rockWarn");
+  if(!rw){if(re)re.remove()}
+  else{const rk=rw.x+","+rw.y;let el=re;if(!el||el.dataset.k!==rk){if(el)el.remove();el=document.createElement("div");el.id="rockWarn";el.dataset.k=rk;el.innerHTML='<span style="font-size:22px;filter:drop-shadow(0 0 4px #000)">⚠️</span>';$("cpLayer").after(el)}
+    const R=E.CLIFF.hitR;el.style.left=sx(rw.x)+"%";el.style.top=sy(rw.y)+"%";el.style.width=(2*R/(2*viewAX)*100)+"%";el.style.height=(2*R/(viewBot-viewTop)*100)+"%"}
   // 바람
   const w=st&&screen==="game"?st.wind:null,on=!!(w&&(w.on===undefined||w.on));
   $("windFx").classList.toggle("hidden",!on);$("windChip").classList.toggle("hidden",!on);
@@ -973,10 +1026,12 @@ const COURT_INFO={
   ice:{short:"미끄러짐 주의",ic:"❄️",name:"빙판 코트",cup:"",desc:"선수가 쭉 미끄러지고 공도 낮게 미끄러져요"},
   sea:{short:"출렁임·돌풍·파도",ic:"🚢",name:"우리 바다 코트",cup:"",desc:"배가 출렁여 몸이 쏠리고, 돌풍이 공을 밀고, 파도가 웅덩이를 만들어요"},
   forest:{short:"함정 가득",ic:"🌲",name:"숲속 코트",cup:"",desc:"덤불·진흙·숨은 구덩이 함정이 가득! 게임마다 위치가 바뀌어요"},
+  parking:{short:"반사광·타르·맨홀",ic:"☀️",name:"땡볕 주차장 코트",cup:"",desc:"달궈진 아스팔트라 공이 높고 빠르게 튀어요. 차 유리 반사광에 눈이 부시고, 녹은 타르·맨홀 뚜껑이 공을 멋대로 튀겨요"},
+  cliff:{short:"좁은 길·낙석",ic:"🪨",name:"주상절리 잔도 코트",cup:"",desc:"절벽에 매달린 나무 잔도라 옆으로 멀리 못 나가요. 낙석 그림자를 피하고, 헐거운 판자를 조심하세요"},
   random:{short:"매번 다르게",ic:"🎲",name:"무작위",cup:"",desc:"경기마다 코트가 무작위로 정해져요"}};
 const courtLabel=k=>{const c=COURT_INFO[k];return c?c.ic+" "+(c.cup?c.cup+" · ":"")+c.name:""};
 let court=(()=>{try{const v=localStorage.getItem("ct_court");return COURT_INFO[v]?v:"hard"}catch{return "hard"}})(),roomCourt="hard";
-$("courtPick").innerHTML=["hard","clay","grass","ice","sea","forest","random"].map(k=>{const c=COURT_INFO[k];
+$("courtPick").innerHTML=[...E.COURTS,"random"].map(k=>{const c=COURT_INFO[k];
   return `<button type="button" class="cpk cpk-${k}" data-court="${k}" title="${c.desc}"><i></i><b>${c.ic} ${c.name}</b><small>${c.cup||c.short}</small></button>`}).join("");
 function setCourtPick(k){document.querySelectorAll("[data-court]").forEach(b=>b.classList.toggle("active",b.dataset.court===k))}
 setCourtPick(court);
@@ -1296,8 +1351,15 @@ function handleEvent(e){
     case "gust":Snd.play("whoosh");popup("💨 돌풍!",0,0,"call");break;
     case "wave":Snd.play("splash");Snd.play("whoosh");popup("🌊 파도가 덮쳤다!",e.sideX*3,e.own*6,"call");break;
     case "pitfall":{Snd.play("slip");Snd.play("thud");const p=st.players[e.side];popup("🕳️ 함정에 빠졌다!",p.x,p.y,"bad");if(e.side===side)msg("숨은 구덩이에 빠졌어요! 잠깐 움직일 수 없어요.");break}
-    case "cpBounce":{const t={bush:"🌿 덤불에서 튀었다!",mud:"💩 진흙에 푹!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~",pit:"🕳️ 구덩이에 쏙!"}[e.mode];if(t)popup(t,e.x,e.y,"call");Snd.play(e.kind==="bush"?"rustle":"splash");break}
+    case "cpBounce":{const t={bush:"🌿 덤불에서 튀었다!",mud:"💩 진흙에 푹!",stop:"💦 첨벙! 공이 멈췄다",skid:"💦 주르륵~",pit:"🕳️ 구덩이에 쏙!",tar:"🖤 끈적! 타르에 붙었다",manhole:"🔩 깡! 맨홀에서 튀었다",plank:"🪵 텅! 판자가 꺼졌다",rock:"🪨 딱! 바위에 맞고 튀었다"}[e.mode];if(t)popup(t,e.x,e.y,"call");
+      Snd.play({bush:"rustle",manhole:"boing",plank:"thud",rock:"pop",tar:"thud"}[e.kind]||"splash");break}
     case "forestShift":setTimeout(()=>msg("🌲 새 게임! 숲속 함정 위치가 바뀌었어요."),1200);break;
+    case "courtShift":setTimeout(()=>msg(e.court==="parking"?"🅿️ 새 게임! 타르 웅덩이·맨홀 위치가 바뀌었어요.":"🪵 새 게임! 헐거운 판자 위치가 바뀌었어요."),1200);break;
+    case "glare":{Snd.play("heat");const mine=e.own===(side===0?1:-1);popup(mine?"😎 눈부셔!":"☀️ 반사광!",0,e.own*6,"call");
+      msg(mine?"차 유리에 반사된 햇빛! 잠깐 눈이 부셔 공을 받는 범위가 줄어요.":"상대 쪽에 햇빛 반사! 상대가 공을 받기 어려워요.");break}
+    case "rockWarn":Snd.play("click");popup("⚠️ 낙석 주의!",e.x,e.y,"bad");break;
+    case "rockfall":Snd.play("thud");shake();popup("🪨 쿵!",e.x,e.y,"call");break;
+    case "rockHit":{Snd.play("quake");const p=st.players[e.side];popup("💫 낙석에 맞았다!",p.x,p.y,"bad");if(e.side===side)msg("떨어진 바위에 맞았어요! 잠깐 움직일 수 없어요.");break}
     case "split":Snd.play("split");popup("❄️ 분신! 진짜는 그림자가 있는 공",e.x,e.y,"call");break;
     case "peel":Snd.play("boing");popup("🍌",e.x,e.y);break;
     case "slip":{Snd.play("slip");const p=st.players[e.side];popup("🍌 미끄덩!",p.x,p.y,"bad");if(e.side===side)msg("바나나 껍질을 밟았어요! 잠깐 조작이 안 돼요.");break}
@@ -1902,7 +1964,7 @@ window.addEventListener("beforeunload",e=>{if(screen==="game"&&st&&st.phase!=="d
 window.addEventListener("blur",()=>{keys={};sendKeys()});
 
 /* ───── 로비 무대: 고른 코트가 배경, 가운데 선수가 난이도(대전은 상대)에 따라 반응 ───── */
-const STAGE_COURT_LINE={hard:"기본이 최고지!",clay:"흙이 튀네… 운동화 다 버리겠다",grass:"음~ 잔디 냄새 좋다!",ice:"으앗, 미끄러워!",sea:"우욱… 배가 출렁여…",forest:"두리번… 어디 함정 있는 거 아냐?",random:"어디로 가게 될까?"};
+const STAGE_COURT_LINE={hard:"기본이 최고지!",clay:"흙이 튀네… 운동화 다 버리겠다",grass:"음~ 잔디 냄새 좋다!",ice:"으앗, 미끄러워!",sea:"우욱… 배가 출렁여…",forest:"두리번… 어디 함정 있는 거 아냐?",parking:"아 뜨거! 바닥이 지글지글해…",cliff:"히익… 밑을 보면 안 돼…",random:"어디로 가게 될까?"};
 const MOOD_LINE={
   cricket:{dance:["오늘은 몸이 가볍다~ 룰루!","이 정도는 식은 죽 먹기!"],will:["좋아, 제대로 붙어 보자!","머리띠 질끈! 불끈!"],fear:["사, 살살 해 주세요…","더듬이가 덜덜 떨려…"],idle:["상대는 언제 오지?","라켓이나 돌려 볼까~"]},
   husky:{dance:["멍멍! 신난다~","꼬리가 멈추질 않아!"],will:["정의의 이름으로! 아우우~!","절대 지지 않겠어!"],fear:["끼잉… 무서워…","꼬리가 저절로 말려…"],idle:["멍! 상대 기다리는 중~"],vsBoss:["바나킹! 정의는 반드시 승리한다!"]},
@@ -1922,6 +1984,8 @@ function updateStage(react){
   if(ck!==stageCourtK){stageCourtK=ck;$("stageCourt").className="stage-court sc-"+ck;$("stage").className="stage st-"+ck;
     let d="";if(ck==="forest")d='<span style="left:6%;top:30%">🌲</span><span style="left:88%;top:24%">🌳</span><span style="left:16%;top:60%">🌲</span><span style="left:80%;top:58%">🌲</span><span style="left:46%;top:14%">🌳</span>';
     if(ck==="sea")d='<span style="left:8%;top:18%">🌊</span><span style="left:84%;top:26%">🌊</span><span style="left:70%;top:8%">☁️</span><span style="left:20%;top:6%">🐦</span>';
+    if(ck==="parking")d='<span style="left:84%;top:4%;font-size:40px">☀️</span><span style="left:6%;top:56%">🚗</span><span style="left:84%;top:58%">🚙</span><span style="left:10%;top:16%">🅿️</span>';
+    if(ck==="cliff")d='<span style="left:6%;top:50%">🪨</span><span style="left:80%;top:12%">🦅</span><span style="left:86%;top:50%">🌫️</span><span style="left:40%;top:6%">☁️</span>';
     if(ck==="ice")d='<span style="left:12%;top:20%">❄️</span><span style="left:82%;top:14%">❄️</span><span style="left:60%;top:30%">✨</span>';
     if(ck==="grass")d='<span style="left:10%;top:16%">☀️</span>';if(ck==="clay")d='<span style="left:84%;top:12%">☀️</span>';if(ck==="random")d='<span style="left:46%;top:10%">🎲</span>';
     $("stageDeco").innerHTML=d}
@@ -1936,9 +2000,9 @@ function updateStage(react){
     line=mode==="multi"&&mood==="will"&&myChar==="husky"&&opp==="monkey"?pool.vsBoss[0]:mode==="multi"&&mood==="will"&&myChar==="monkey"&&opp==="husky"?pool.vsHero[0]:(pool[mood]||[])[Math.floor(Math.random()*(pool[mood]||[""]).length)];
     $("stageFx").textContent=MOOD_FX[mood]||"";$("stageFx").className="stage-fx fx-"+mood;
     if(!react){if(!Snd.voice(myChar,{dance:"win",will:"taunt",fear:"lose",angry:"lose",idle:""}[mood]))Snd.play({dance:"jingle",will:"powerUp",fear:"shiver",idle:"pop"}[mood]||"pop")}}
-  if(react){["hard","clay","grass","ice","sea","forest","random"].forEach(k=>el.classList.remove("react-"+k));void el.offsetWidth;el.classList.add("react-"+ck);
+  if(react){[...E.COURTS,"random"].forEach(k=>el.classList.remove("react-"+k));void el.offsetWidth;el.classList.add("react-"+ck);
     setTimeout(()=>el.classList.remove("react-"+ck),1600);line=STAGE_COURT_LINE[ck];
-    Snd.play({ice:"slip",sea:"whoosh",forest:"rustle",clay:"rustle",grass:"jingle",hard:"pop",random:"split"}[ck]||"pop")}
+    Snd.play({ice:"slip",sea:"whoosh",forest:"rustle",parking:"heat",cliff:"thud",clay:"rustle",grass:"jingle",hard:"pop",random:"split"}[ck]||"pop")}
   if(line)stageBubble(line);
 }
 /* ───── 전적 화면 ───── */
@@ -2074,7 +2138,7 @@ $("backModes").onclick=()=>{if(room&&!confirm("방에서 나가고 모드 선택
 /* ───── 첫 로딩 화면: 그림·글꼴·게임 준비를 기다리며 막대가 차고, 다 되면 "화면을 눌러 시작!" (이 터치로 소리도 켜짐) ───── */
 let splashOn=true,splashReady=false;
 (function(){
-  const TIPS=["상대 도발에 2초 안에 맞도발하면 <em>반사!</em>","공 아래 <em>그림자</em>가 공의 실제 위치예요","웅덩이에 떨어진 공은 <em>멈출 수도</em> 있어요","기가 100%가 되면 <em>필살기</em>를 쓸 수 있어요",
+  const TIPS=["상대 도발에 2초 안에 맞도발하면 <em>반사!</em>","<em>주차장</em>에서 반사광이 비치면 상대가 눈부셔요. 지금이 공격 타이밍!","<em>잔도</em>에 빨간 그림자가 생기면 낙석! 얼른 피하세요","공 아래 <em>그림자</em>가 공의 실제 위치예요","웅덩이에 떨어진 공은 <em>멈출 수도</em> 있어요","기가 100%가 되면 <em>필살기</em>를 쓸 수 있어요",
     "포인트가 끝나면 가끔 <em>아이템</em>을 얻어요","<em>파이어 뚜리</em>의 공은 휘지 않고 곧게 날아가요","<em>스네이크샷</em>은 꿈틀대다 막판에 확 달려들어요","잡초에 떨어진 공은 <em>어디로 튈지</em> 몰라요","<em>개시키</em>의 분신샷은 그림자가 있는 공이 진짜!","<em>바나킹</em>이 남긴 바나나 껍질을 조심하세요","<em>숲속 코트</em>의 낙엽 더미 중 몇 개는 구덩이예요","<em>우리 바다 코트</em>에선 돌풍 방향을 보고 치세요"];
   const touch=matchMedia("(pointer:coarse)").matches||innerWidth<600;
   if(touch){$("splKeys").hidden=true;$("splTouch").hidden=false}
