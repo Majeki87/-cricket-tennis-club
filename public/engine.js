@@ -8,7 +8,7 @@
 
 const COURT = { L: 11.885, S: 4.115, D: 5.485, SV: 6.40, NET: 0.914, POST: 1.07, POSTX: 6.4, AX: 7.3, AY: 15.5 };
 const G = 9.8, LINE = 0.04;
-const CHARS = ["tornado", "snake", "fire", "quake", "husky", "monkey"];
+const CHARS = ["tornado", "snake", "fire", "quake", "husky", "monkey", "cat", "frog"];
 const SKILLS = ["normal", "volley", "drop", "speed", "lob", "slice", "special"];
 const FORMATS = { short: { games: 4, sets: 1 }, set1: { games: 6, sets: 1 }, set3: { games: 6, sets: 2 } };
 // 아이템: 경기 중 포인트가 끝날 때마다 무작위로 얻고(최대 3개), 쓰면 그 포인트가 끝날 때까지 효과 유지
@@ -23,7 +23,9 @@ const CHAR_STATS = {
   fire:    { power: 5, speed: 3, control: 2, spin: 1, reach: 3, serve: 5 },   // 파워·직진형: 빠르고 곧게, 대신 정확도가 낮음
   tornado: { power: 3, speed: 3, control: 3, spin: 5, reach: 2, serve: 3 },   // 스핀형: 공이 크게 휘고 튄 뒤 뻗음
   snake:   { power: 2, speed: 5, control: 4, spin: 3, reach: 3, serve: 2 },   // 스피드·테크닉형: 발이 빠르고 정교함
-  quake:   { power: 3, speed: 3, control: 4, spin: 3, reach: 3, serve: 3 }    // 정석·올라운드형: 고르게, 실수가 적음
+  quake:   { power: 3, speed: 3, control: 4, spin: 3, reach: 3, serve: 3 },   // 정석·올라운드형: 고르게, 실수가 적음
+  cat:     { power: 3, speed: 4, control: 4, spin: 3, reach: 2, serve: 3 },   // 귀뚤냥이 사기꾼·심리전형: 날렵하고 정교하지만 몸이 작아 리치가 짧음
+  frog:    { power: 3, speed: 3, control: 3, spin: 2, reach: 5, serve: 3 }    // 청개구리 점프·변칙형: 긴 혀와 점프로 리치 최고, 대신 점프 중엔 방향을 못 바꿈
 };
 // 환경 버프 '맑은 공기'가 있으면 두 선수 모든 능력치 +1
 const statOf = (st, side, key) => ((CHAR_STATS[st.chars && st.chars[side]] || {})[key] || 3) + (st.buff && st.buff.type === "fresh" ? 1 : 0);
@@ -63,7 +65,14 @@ const CP_SLOW = { bush: .6, mud: .45, water: .6, pit: 1, tar: .5, manhole: 1, pl
 const BLIZZ = { S: 1.8 };                                 // 눈보라 분신샷: 네트를 넘으면 공이 1.8m 간격 셋으로 갈라짐(진짜는 그림자가 있는 하나)
 const PEEL = { r: .6, slip: 1.0, speed: 5.5, max: 6 };   // 바나나 껍질: 밟으면 1초 동안 미끄덩
 const MONKEY = { steal: .15, fake: .2, fakeAmp: 1.6 };   // 바나킹: 득점 때 15% 아이템 훔치기, 20% 페이크 샷
-const HUSKY = { justice: 1.5 };                          // 개시키: 게임에서 2점 이상 지고 있으면 기가 1.5배로 참
+const HUSKY = { justice: 1.5 };
+// 귀뚤냥이: 칠 때 절반쯤 방향 예고(65%는 거짓말) · 시치미샷(공과 그림자가 가짜 자리로 보이다 바운드 0.35초 전에 진짜 자리로)
+// 반칙 아웃 콜: 세트당 1번, 상대 공이 라인 0.3m 안쪽에 떨어졌고 내가 받기 어려울 만큼(2.2m 넘게) 멀면 75% 확률로 "아웃!" → 심판이 속아 실제로 아웃(서브면 폴트) 판정
+const CAT = { say: .5, lie: .65, fakeDX: 3, snap: .35, callLine: .3, callFar: 2.2, callRate: .75 };
+// 청개구리: 0.22초 점프 + 0.05초 착지(평균 속도는 1.08배), 점프 중엔 방향 고정 · 혀가 길어 0.5m 더 높은 공까지 침
+// 비가 좋아: 비 디버프 중 1.1배, 물웅덩이에선 느려지지 않고 1.15배 · 청개구리 심보: 상대가 도발하면 내 기 +10, 맞도발(반사) 인정 시간 +0.5초
+const FROG = { move: 1.08, hopT: .22, rest: .05, hitZ: .5, rain: 1.1, puddle: 1.15, tauntGauge: 10, reflect: .5, zig: 2.8 };
+const maxHitZ = (st, side) => MAX_HIT_Z + (st.chars && st.chars[side] === "frog" ? FROG.hitZ : 0);                          // 개시키: 게임에서 2점 이상 지고 있으면 기가 1.5배로 참
 const SNAKE = { coil: .62, slow: .52, fast: 1.783, amp: 1.7, waves: 4.5 };   // 4번 반 꿈틀 · .62×.52 + .38×1.783 ≈ 1 (총 이동 거리 유지)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
@@ -145,7 +154,7 @@ function newMatch(opts = {}) {
     events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
     court: COURTS.includes(opts.court) ? opts.court : opts.court === "random" ? COURTS[Math.floor(Math.random() * COURTS.length)] : "hard",
     pvel: [{ x: 0, y: 0 }, { x: 0, y: 0 }], cpatch: [], decor: [], wind: null, windNext: 6, waveNext: 12, pitImmune: [0, 0],
-    glare: null, glareNext: PARK.firstGlare, rockWarn: null, rockNext: CLIFF.firstRock,
+    glare: null, glareNext: PARK.firstGlare, rockWarn: null, rockNext: CLIFF.firstRock, catCall: [false, false], hop: [null, null],
     posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], dash: [null, null], dashCd: [0, 0], peels: [], slip: [null, null], lastDir: [{ x: 0, y: -1 }, { x: 0, y: 1 }], hazard: null, lastHazard: null,
     buff: null, lastBuff: null, envIn: 1 + Math.floor(Math.random() * 3), envRun: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
   };
@@ -160,7 +169,7 @@ function startPoint(st) {
   const s = st.server, r = 1 - s, sign = stanceSign(st);
   st.players[s] = { x: sign * 1.2, y: ownSign(s) * (COURT.L + .35) };
   st.players[r] = { x: -sign * 2.3, y: ownSign(r) * (COURT.L + .7) };
-  st.ball = idleBall(st.ball.id); st.ball.held = true;
+  st.ball = idleBall(st.ball.id); st.ball.held = true; st.hop = [null, null];
   holdBall(st);
   st.phase = "serve"; st.stun = [0, 0]; st.freeze = [0, 0]; st.dash = [null, null]; st.peels = []; st.slip = [null, null]; st.rally = 0;
   st.posEpoch = (st.posEpoch || 0) + 1; st.hist = [];     // 실시간 대전: 선수 위치를 새로 맞추는 기준
@@ -188,9 +197,12 @@ function movePlayer(st, i, inp, dt) {
   if (dsh && dsh.rec > 0) return;   // 착지 경직
   const p = st.players[i], hz = st.hazard;
   let sp = (inp.speed || MOVE_SPEED) * SF.speed(statOf(st, i, "speed"));
-  if (hz && HZ_SLOW[hz.type] && inPatch(st, p.x, p.y)) sp *= HZ_SLOW[hz.type];
+  const frog = st.chars && st.chars[i] === "frog";
+  if (frog) sp *= FROG.move;   // 뒷다리 힘: 점프로 방향이 묶이는 만큼 조금 더 멀리 뜀
+  if (hz && HZ_SLOW[hz.type] && inPatch(st, p.x, p.y)) sp *= frog && hz.type === "rain" ? FROG.puddle : HZ_SLOW[hz.type];   // 청개구리는 웅덩이가 좋아
+  else if (frog && hz && hz.type === "rain") sp *= FROG.rain;
   if (st.buff && st.buff.type === "heat") sp *= HEAT.move;   // 코트 난방: 몸이 풀려 빨라짐
-  const cp = cpatchAt(st, p.x, p.y); if (cp) sp *= CP_SLOW[cp.type];
+  const cp = cpatchAt(st, p.x, p.y); if (cp) sp *= frog && cp.type === "water" ? FROG.puddle : CP_SLOW[cp.type];
   const cf = COURT_FX[st.court] || COURT_FX.hard;
   let vx = 0, vy = 0;   // 이번에 가려는 속도
   // 비상벨: 0.66초마다 바뀌는 방향으로 조작이 틀어지고, 가만히 있어도 우왕좌왕(서버·화면이 같은 값을 계산하도록 시간 기반)
@@ -204,13 +216,20 @@ function movePlayer(st, i, inp, dt) {
   if (inp.target) {
     let dx = inp.target.x - p.x, dy = inp.target.y - p.y; const dist = Math.hypot(dx, dy);
     if (ang) [dx, dy] = rot(dx, dy, ang * .6);
-    if (dist > .03) { const m = Math.min(dist, sp * dt); vx = dx / dist * m / dt; vy = dy / dist * m / dt; }
+    if (frog) { if (dist > .05) { const v = Math.min(sp * (FROG.hopT + FROG.rest) / FROG.hopT, dist / FROG.hopT); vx = dx / dist * v; vy = dy / dist * v; } }   // 청개구리: 목표까지 한 번에 뛸 속도
+    else if (dist > .03) { const m = Math.min(dist, sp * dt); vx = dx / dist * m / dt; vy = dy / dist * m / dt; }
   } else {
     const k = inp.keys || {};
     let dx = (k.right ? 1 : 0) - (k.left ? 1 : 0), dy = (k.down ? 1 : 0) - (k.up ? 1 : 0), s2 = sp;
     if (ang && (dx || dy)) [dx, dy] = rot(dx, dy, ang);
     else if (drift !== null && !dx && !dy) { dx = Math.cos(drift); dy = Math.sin(drift); s2 = sp * .45; }
     if (dx || dy) { const mag = Math.hypot(dx, dy); vx = dx / mag * s2; vy = dy / mag * s2; if (st.lastDir) st.lastDir[i] = { x: dx / mag, y: dy / mag }; }
+  }
+  if (frog) {   // 청개구리: 폴짝 뛰는 동안은 방향 고정, 착지 후 잠깐 멈췄다가 다음 점프
+    const hops = st.hop || (st.hop = [null, null]), hop = hops[i] || (hops[i] = { t: 0, rest: 0, vx: 0, vy: 0 });
+    if (hop.t > 0) { vx = hop.vx; vy = hop.vy; hop.t -= dt; if (hop.t <= 0) hop.rest = FROG.rest; }
+    else if (hop.rest > 0) { hop.rest -= dt; vx = vy = 0; }
+    else if (vx || vy) { const k = inp.target ? 1 : (FROG.hopT + FROG.rest) / FROG.hopT; hop.vx = vx * k; hop.vy = vy * k; hop.t = FROG.hopT - dt; vx = hop.vx; vy = hop.vy; }
   }
   if (cf.accel && st.pvel) {   // 빙판·클레이: 바로 서거나 돌지 못하고 미끄러짐
     const v = st.pvel[i] || { x: 0, y: 0 }, a = Math.min(1, cf.accel * dt);
@@ -236,7 +255,7 @@ function launch(b, from, to, T, margin) {
   if (margin != null) T = clearT(from, to, T, margin);
   b.x = b.bx = b.px = from.x; b.y = b.by = b.py = from.y; b.z = Math.max(.05, from.z);
   b.vx = (to.x - from.x) / T; b.vy = (to.y - from.y) / T; b.vz = (-b.z + .5 * G * T * T) / T;
-  Object.assign(b, { t: 0, T, bounces: 0, crossed: false, let: false, curve: null, e: .72, keep: .78, live: true, held: false });
+  Object.assign(b, { t: 0, T, bounces: 0, crossed: false, let: false, curve: null, e: .72, keep: .78, live: true, held: false, fakeDX: 0, fx: 0 });
   b.id++;
 }
 
@@ -301,10 +320,11 @@ function tryHit(st, side, skill, aim = {}, lookback = 0) {
   if (skill === "special" && (st.gauge[side] < 100 || !CHARS.includes(st.chars[side]))) return "noGauge";
   const reach = REACH[skill] * SF.reach(statOf(st, side, "reach")) * recvMul(st, side, b) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
   const pl = st.players[side];
-  let best = b.z <= MAX_HIT_Z ? ballDist(b, pl) : Infinity;
+  const topZ = maxHitZ(st, side);
+  let best = b.z <= topZ ? ballDist(b, pl) : Infinity;
   // 실시간 대전: 상대 화면에 보이던 조금 전 공 위치까지 인정(네트워크 지연 보정)
   if (lookback && st.hist) for (const hp of st.hist.slice(-lookback))
-    if (hp.id === b.id && hp.owner === b.owner && hp.crossed && !(hp.serve && hp.bounces === 0) && hp.bounces <= 1 && hp.z <= MAX_HIT_Z)
+    if (hp.id === b.id && hp.owner === b.owner && hp.crossed && !(hp.serve && hp.bounces === 0) && hp.bounces <= 1 && hp.z <= topZ)
       best = Math.min(best, Math.hypot(pl.x - hp.x, pl.y - hp.y));
   if (best === Infinity) return "high";
   if (best > reach) return b.kind === "fire" ? "fireFar" : "far";
@@ -332,6 +352,8 @@ function shoot(st, side, skill, aim) {
       else if (char === "fire") { depth = 10.2; tx = away * 2.3; T = FIREBALL.T; margin = FIREBALL.margin; }   // 너무 빨라서 구석까지 찌르면 아무도 못 받으니 조준 폭은 약간 안쪽
       else if (char === "husky") { depth = 9; T = 1.15; }
       else if (char === "monkey") { depth = 9.2; T = 1.2; }
+      else if (char === "cat") { depth = 9; T = 1.25; tx = away * 2.9; }      // 시치미샷: 실제 궤적은 평범, 화면에 가짜 자리로 보임
+      else if (char === "frog") { depth = 9.4; T = 1.05; tx = away * 2.6; }   // 폴짝폴짝샷: 낮게 튀며 반대 방향으로 지그재그
       else { depth = 8.4; T = 1.15; }
       break;
     default: tx = h ? h * 3 : clamp(-opp.x * .45 + (Math.random() - .5) * 3.2, -3.1, 3.1); depth = 8.6 + v * 1.4; T = 1.25 - v * .08; sig = .5;
@@ -355,6 +377,11 @@ function shoot(st, side, skill, aim) {
   itemBall(st, side, b);
   if (skill !== "special") charSpin(st, side, b);
   b.slot = slot; b.split = false; b.sg = 0;
+  if (skill === "special" && char === "cat") b.fakeDX = -(Math.sign(tx) || 1) * CAT.fakeDX;   // 반대쪽에 떨어지는 것처럼 보이게
+  if (char === "cat" && skill !== "special" && Math.abs(tx) > .8 && Math.random() < CAT.say) {   // 거짓 예고: "왼쪽으로 칠 거다냥"(65%는 반대)
+    const real = Math.sign(tx), lie = Math.random() < CAT.lie;
+    pushEv(st, { type: "catSay", side, dir: lie ? -real : real, lie });
+  }
   if (skill === "special" && char === "monkey") { b.spin = Math.random() < .5 ? -1 : 1; b.spinAmp = 2.1; }   // 바나나처럼 크게 휘어 들어감
   // 바나킹 페이크: 라켓 방향과 반대로 — 공이 한쪽으로 가는 척하다가 반대로 꺾여 들어감
   if (char === "monkey" && (skill === "normal" || skill === "speed") && Math.random() < MONKEY.fake) {
@@ -383,14 +410,16 @@ function taunt(st, side, n) {
   if (!["serve", "rally", "point", "fault", "done"].includes(st.phase)) return false;
   const now = st.clock || 0;
   if (now - st.tauntAt[side] < TAUNT_GAP) return false;
-  const lt = st.lastTaunt, reflect = !!lt && lt.side === 1 - side && now - lt.at <= TAUNT_REFLECT;
+  const lt = st.lastTaunt, reflect = !!lt && lt.side === 1 - side && now - lt.at <= TAUNT_REFLECT + (st.chars[side] === "frog" ? FROG.reflect : 0);
   const lv = lt && lt.side === side && now - lt.at <= TAUNT_COMBO ? Math.min(3, st.tauntLv[side] + 1) : 1;
   st.tauntLv[side] = lv; st.tauntAt[side] = now;
   const inPlay = st.phase === "serve" || st.phase === "rally";
   if (inPlay) st.freeze[side] = TAUNT_FREEZE;
   const chain = reflect ? (lt.chain || 0) + 1 : 0;
   st.lastTaunt = { side, at: now, chain };
-  pushEv(st, { type: "taunt", side, n: Math.max(1, Math.min(8, n | 0)), lv, reflect, chain, inPlay });
+  const frogMad = st.chars[1 - side] === "frog";   // 청개구리 심보: 도발당하면 오히려 기가 참
+  if (frogMad) addGauge(st, 1 - side, FROG.tauntGauge);
+  pushEv(st, { type: "taunt", side, n: Math.max(1, Math.min(8, n | 0)), lv, reflect, chain, inPlay, frogMad });
   return true;
 }
 // 실시간 대전: 내 화면에서 먼저 움직이는 선수 위치 계산(서버와 같은 규칙)
@@ -431,13 +460,17 @@ function stepBall(st, dt) {
   if (b.spinAmp && b.bounces === 0 && b.t < b.T) ox += b.spinAmp * Math.sin(Math.PI * b.t / b.T) * b.spin;   // 스핀으로 바나나처럼 휘었다가 목표 지점에 떨어짐
   if (b.split && b.bounces === 0) { b.sg = clamp((b.t - b.splitT) / Math.max(.01, b.T - b.splitT), 0, 1); ox += b.slot * BLIZZ.S * b.sg; }
   b.x = b.bx + ox; b.y = b.by + oy;
+  if (b.fakeDX) {   // 시치미샷: 화면에 보이는 위치만 옆으로(실제 공은 b.x). 바운드 0.35초 전에 진짜 자리로 '냥!'
+    if (b.bounces === 0 && b.t < b.T - CAT.snap) b.fx = b.fakeDX * Math.min(1, b.t / (b.T * .25));
+    else { b.fx = 0; b.fakeDX = 0; pushEv(st, { type: "catSnap", x: b.x, y: b.y }); }
+  }
   if (!b.crossed && b.by * dirOf(b.owner) >= 0) {         // 네트 통과 판정
     b.crossed = true;
     if (b.kind === "husky" && b.slot !== undefined && b.bounces === 0) { b.split = true; b.splitT = b.t; pushEv(st, { type: "split", x: b.bx, y: 0, slot: b.slot }); }
     const tb = Math.abs(b.vy) > 0 ? Math.abs(b.by) / Math.abs(b.vy) : 0;
     const zc = b.z - b.vz * tb - .5 * G * tb * tb, nh = netHeight(b.bx);
     if (zc < nh - .12) {                                  // 네트에 걸림
-      b.by = -dirOf(b.owner) * .15; b.x = b.bx; b.y = b.by; b.z = Math.max(0, zc * .4); b.live = false;
+      b.by = -dirOf(b.owner) * .15; b.x = b.bx; b.y = b.by; b.z = Math.max(0, zc * .4); b.live = false; b.fx = 0; b.fakeDX = 0;
       pushEv(st, { type: "net", x: b.x, y: 0, side: b.owner });
       if (b.serve) fault(st, "net"); else pointTo(st, 1 - b.owner, "net");
       return;
@@ -464,6 +497,18 @@ function bounce(st) {
     pushEv(st, { type: "bounce", x: b.x, y: b.y, out: !ok });
     if (!ok) { b.live = false; if (b.serve) fault(st, "out"); else pointTo(st, recv, "out"); return true; }
     if (b.serve && b.let) { b.live = false; letServe(st); return true; }
+    if (st.chars[recv] === "cat" && st.catCall && !st.catCall[recv] && lineGap(st, b, recv) <= CAT.callLine
+      && Math.hypot(st.players[recv].x - b.x, st.players[recv].y - b.y) > CAT.callFar && Math.random() < CAT.callRate) {   // 귀뚤냥이 반칙 아웃 콜
+      st.catCall[recv] = true; b.live = false;
+      pushEv(st, { type: "catCall", side: recv, x: b.x, y: b.y, serve: b.serve });
+      if (b.serve) fault(st, "cheat"); else pointTo(st, recv, "cheat");
+      return true;
+    }
+    if (b.kind === "frog") {   // 폴짝폴짝샷: 낮게 깡충 튀며 옆 방향이 반대로 꺾임
+      const s0 = Math.sign(b.vx) || (Math.random() < .5 ? 1 : -1);
+      b.vx = -s0 * FROG.zig + b.vx * .2; b.e = .4; b.keep = 1;
+      pushEv(st, { type: "frogHop", x: b.x, y: b.y });
+    }
     if (b.kind === "quake") { st.stun[recv] = STUN_TIME; pushEv(st, { type: "quake", side: recv, x: b.x, y: b.y }); }
     if (inPatch(st, b.x, b.y)) hazardBounce(st, b);
     const cq = cpatchAt(st, b.x, b.y); if (cq) courtPatchBounce(st, b, cq);
@@ -481,6 +526,11 @@ function bounce(st) {
   b.live = false;                                          // 투 바운드: 마지막에 친 선수의 포인트
   pointTo(st, b.owner, b.serve ? "ace" : "winner");
   return true;
+}
+function lineGap(st, b, recv) {   // 공이 떨어진 자리에서 가장 가까운 라인까지 거리(안쪽)
+  const yr = b.y * ownSign(recv), ax = Math.abs(b.x);
+  if (b.serve) return Math.min(COURT.S - ax, ax, COURT.SV - yr);
+  return Math.min(COURT.S - ax, COURT.L - yr);
 }
 function hazardBounce(st, b) {
   const type = st.hazard.type, rot = a => { const c = Math.cos(a), s2 = Math.sin(a), vx = b.vx; b.vx = vx * c - b.vy * s2; b.vy = vx * s2 + b.vy * c; };
@@ -629,7 +679,7 @@ function gameWon(st, w) {
 function setWon(st, w) {
   st.sets[w]++; st.history.push([...st.games]);
   pushEv(st, { type: "set", winner: w, score: [...st.games] });
-  st.games = [0, 0];
+  st.games = [0, 0]; st.catCall = [false, false];   // 귀뚤냥이 반칙 콜은 세트마다 1번
   if (st.sets[w] >= st.setsToWin) { st.phase = "done"; st.winner = w; pushEv(st, { type: "match", winner: w }); }
 }
 
@@ -725,6 +775,10 @@ function aiCore(st, side, level, dt) {
     if (ai.splitFor !== b.id) { ai.splitFor = b.id; ai.readSplit = Math.random() < cfg.readSplit; }
     if (ai.readSplit) spot.x += b.slot * BLIZZ.S;   // 그림자를 보고 진짜를 찾음
   }
+  if (b.kind === "cat" && b.fx) {   // 시치미샷: 간파하지 못하면 가짜 자리로 감
+    if (ai.catFor !== b.id) { ai.catFor = b.id; ai.readCat = Math.random() < cfg.readSplit * .6; }
+    if (!ai.readCat) spot.x += b.fx;
+  }
   if (ai.leave) { out.target = { x: spot.x + (me.x >= spot.x ? 1.8 : -1.8), y: me.y }; return out; }
   out.target = { x: spot.x + ai.off, y: spot.y + own * .35 };
   const obst = (st.peels || []).map(q => ({ x: q.x, y: q.y, r: PEEL.r })).concat((st.cpatch || []).filter(q => q.type === "mud" || q.type === "water" || q.type === "tar" || q.type === "rock" || (q.type === "pit" && !q.hidden)));
@@ -745,12 +799,12 @@ function aiCore(st, side, level, dt) {
     const gx = out.target.x - me.x, gy = out.target.y - me.y, far = Math.hypot(gx, gy);
     if (far > 2.6) { ai.dashFor = b.id; if (Math.random() < cfg.dash) dash(st, side, null, { x: gx, y: gy }); }
   }
-  if (!ai.tried && b.crossed && b.z <= MAX_HIT_Z) {
+  if (!ai.tried && b.crossed && b.z <= maxHitZ(st, side)) {
     const canVolley = !b.serve && Math.abs(me.y) < 6;
     const reach = REACH.normal * SF.reach(statOf(st, side, "reach")) * recvMul(st, side, b) * (b.kind === "fire" ? FIRE_REACH : 1) * (b.pow ? ITEM_FX.anchovyRecv : 1) * (st.active[side].milk ? ITEM_FX.milkReach : 1);
     if ((b.bounces === 1 || (b.bounces === 0 && canVolley)) && ballDist(b, me) < reach) {
       ai.tried = true;
-      const miss = cfg.error + (b.kind === "slice" ? .06 : 0) + (b.kind === "monkey" ? .15 : 0) + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
+      const miss = cfg.error + (b.kind === "slice" ? .06 : 0) + (b.kind === "monkey" ? .15 : 0) + (b.kind === "cat" ? .12 : 0) + (b.kind === "frog" ? .2 : 0) + (b.kind === "tornado" || b.kind === "snake" ? .26 : 0) + (b.pow ? ITEM_FX.anchovyMiss : 0);   // 죽방멸치 공은 묵직해서 받기 어려움
       if (Math.random() < miss) pushEv(st, { type: "whiff", side });
       else {
         let skill = "normal";
@@ -767,7 +821,7 @@ function aiCore(st, side, level, dt) {
   return out;
 }
 
-const api = { COURTS, PARK, CLIFF, cpatchAt, BLIZZ, PEEL, DASH, dash, HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { COURTS, PARK, CLIFF, CAT, FROG, cpatchAt, BLIZZ, PEEL, DASH, dash, HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
