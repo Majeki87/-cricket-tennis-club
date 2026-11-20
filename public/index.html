@@ -743,6 +743,63 @@ body:not(.mobile) #lobby .pick-h{margin-top:16px}
 body:not(.mobile) #modePanel .h2{font-size:18px}
 body:not(.mobile) #modePanel .seg button{min-height:52px;font-size:15px}
 body:not(.mobile) #lobbyStart{padding:16px;font-size:18px}
+/* ───── 🏆 대회 ───── */
+.mode-card.tour{background:linear-gradient(135deg,#a8741a,#5e3c0a)}
+@media (min-width:621px){.mode-cards{grid-template-columns:repeat(3,1fr)}}
+.tour{max-width:1100px;margin:12px auto 0;padding:0 12px 30px;display:grid;gap:12px}
+#tourBody{display:grid;gap:12px}
+.tr-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.tr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tr-card{position:relative;background:#10242d;border:2px solid #3c5a63;border-radius:14px;color:#e8f5ef;padding:10px 10px 12px;cursor:pointer;font:inherit;text-align:left;display:flex;flex-direction:column;gap:3px;transition:transform .15s,border-color .15s}
+.tr-card:hover{transform:translateY(-2px);border-color:#ffd84a}
+.tr-card i{display:block;height:34px;border-radius:7px;border:1.5px solid #ffffffaa;margin-bottom:5px}.tr-card.cpk-hard i{background:#2d7d6a}
+.tr-card b{font-size:15px;word-break:keep-all}.tr-card small{color:#9fb8af;font-size:12px}
+.tr-card em{font-style:normal;font-size:12px;margin-top:4px;color:#cfe3dc}.tr-card em.won{color:#ffd84a;font-weight:900}
+.tr-tier{align-self:flex-start;font-size:10.5px;font-weight:800;border-radius:8px;padding:1px 7px;background:#ffffff1a;color:#cfe3dc}.tr-tier.major{background:#ffd84a2e;color:#ffe27a}
+.tr-head .tr-tier{display:inline-block;margin-left:8px;vertical-align:middle}
+.tr-resume{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-color:#ffd84a77}
+.tr-titles{line-height:2}.tr-title-chip{display:inline-block;background:#ffd84a26;color:#ffe27a;border-radius:10px;padding:2px 10px;margin-left:6px;font-weight:900}
+.tr-head{display:flex;gap:12px;align-items:center}.tr-head b{font-size:19px}.tr-big{font-size:38px;line-height:1}
+.tr-fit{margin:12px 0 4px;padding:9px 12px;border-radius:10px;background:#ffffff0d;font-size:13px;line-height:1.7}
+.tr-chars{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-top:6px}
+@media (max-width:760px){.tr-chars{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tr-ch{background:#10242d;border:2px solid #3c5a63;border-radius:10px;padding:4px 2px 6px;cursor:pointer;color:#e8f5ef;font:inherit;--body:#42a86b;--belly:#8bdc85;--head:#62c878;--band:transparent}
+.tr-ch svg{width:100%;height:auto;display:block;max-height:64px}.tr-ch small{display:block;font-size:11px;word-break:keep-all;margin-top:2px}
+.tr-ch.active{border-color:#ffd84a;box-shadow:0 0 0 2px #ffd84a55;background:#1b3640}
+.tr-diff{margin-top:6px}.tr-rule{margin:12px 0;line-height:1.6;font-size:12.5px}.tr-btns{gap:8px;justify-content:flex-end;margin-top:6px}
+.tr-prog{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}.tr-prog i{font-style:normal;min-width:26px;height:26px;border-radius:13px;display:grid;place-items:center;background:#ffffff14;color:#9fb8af;font-size:12px;font-weight:800;padding:0 6px}
+.tr-prog i.done{background:#1f8a5c;color:#e8fff3}.tr-prog i.now{background:#ffd84a;color:#3a2a00;box-shadow:0 0 0 3px #ffd84a44}.tr-prog i.fin{padding:0 10px}
+.tr-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;align-items:start}.tr-cols .tr-news{grid-column:1/-1}
+@media (max-width:820px){.tr-cols{grid-template-columns:minmax(0,1fr)}}
+.tr-fx{border:1px solid #ffffff1a;border-radius:12px;padding:9px 10px;margin-top:8px;background:#ffffff08}.tr-fx.mine{border-color:#ffd84a99;background:#ffd84a12}
+.tr-fxp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:800;font-size:14px}.tr-fxp em{font-style:normal;color:#9fb8af;font-size:12px}
+.tr-fxp .w{color:#8ff0b8}.tr-fxp .l{opacity:.55}
+.tr-fx .btn{margin-top:8px;width:100%}.tr-sc{margin-top:5px;font-size:13px;color:#cfe3dc}.tr-sc b{color:#ffd84a}
+.tr-rv{display:inline-block;margin-top:5px;font-size:11.5px;font-weight:900;color:#ffb36b;background:#ff7a2e22;border-radius:8px;padding:1px 8px}
+.tr-next{margin-top:12px;width:100%}
+.tr-tbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;font-variant-numeric:tabular-nums}
+.tr-tbl th{font-size:11px;color:#9fb8af;font-weight:700;padding:4px 3px;text-align:center}.tr-tbl td{padding:6px 3px;text-align:center;border-top:1px solid #ffffff12}
+.tr-tbl td.nm{text-align:left;white-space:nowrap;font-weight:700}.tr-tbl tr.q td:first-child{color:#ffd84a;font-weight:900}.tr-tbl tr.me{background:#ffd84a14}
+.tr-note{font-size:11.5px;margin-top:6px}
+.tr-news div{padding:7px 0;border-bottom:1px solid #ffffff10;font-size:13px;line-height:1.5}.tr-news div:last-child{border-bottom:0}.tr-news div.mine{color:#ffe9a6}
+.tr-news span{display:inline-block;min-width:34px;margin-right:6px;font-size:11px;font-weight:900;color:#9fb8af}
+.tr-finalp,.tr-cere{text-align:center;position:relative;overflow:hidden}.tr-ctitle{display:block;font-size:20px;font-weight:1000;color:#ffe27a}
+.tr-vs{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0}.tr-vs>span{font-size:26px;font-weight:1000;color:#ff8a5a}
+.tr-vs>div{display:flex;flex-direction:column;align-items:center;gap:3px}.tr-vs small{color:#9fb8af}
+.pod-ch{width:110px;--body:#42a86b;--belly:#8bdc85;--head:#62c878;--band:transparent;filter:drop-shadow(0 6px 6px #0007)}.pod-ch svg{width:100%;height:auto;display:block}
+.tr-finalp .btn,.tr-cere .btn{margin-top:10px}
+.tr-podium{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin:18px 0 6px}
+.pod{display:flex;flex-direction:column;align-items:center;gap:4px;width:130px}.pod b{font-size:13px;word-break:keep-all}
+.pod-step{width:100%;border-radius:10px 10px 0 0;background:linear-gradient(#3c5a63,#1b3640);display:grid;place-items:center;font-size:26px}
+.pod.p1 .pod-step{height:96px;background:linear-gradient(#ffd84a,#b8860b)}.pod.p2 .pod-step{height:66px;background:linear-gradient(#e2e8ee,#8d9aa6)}.pod.p3 .pod-step{height:46px;background:linear-gradient(#e8a46a,#8a5226)}
+.pod.p1 .pod-ch{width:130px;animation:podJump 1.2s ease-in-out infinite}@keyframes podJump{50%{transform:translateY(-10px)}}
+.tr-speech{margin:12px auto 4px;max-width:520px;background:#ffffff12;border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.6}
+.tr-me{margin-top:12px;font-size:18px;font-weight:1000}.tr-newtitle{margin-top:8px;color:#ffe27a;font-weight:900;animation:hzIn 3.2s ease-out}
+.tr-confetti{position:absolute;inset:0;pointer-events:none}.tr-confetti span{position:absolute;top:-30px;font-size:22px;animation:conf 3.4s linear infinite}
+@keyframes conf{to{transform:translateY(560px) rotate(360deg);opacity:.2}}
+.pod-ch .yawn,.pod-ch .tongue,.tr-ch .yawn,.tr-ch .tongue{display:none}
+.goldracket .racket path,.goldracket .racket ellipse{stroke:#ffd84a!important}.goldracket .racket{filter:drop-shadow(0 0 4px #ffd84a)}
+@media (max-width:560px){.pod{width:96px}.pod-ch,.pod.p1 .pod-ch{width:84px}.tr-vs .pod-ch{width:84px}.tr-tbl{font-size:12px}}
 </style></head><body><div id="splash" role="dialog" aria-label="게임 불러오는 중"><div class="spl-frame"><img id="splImg" src="loading_bg.jpg" alt="귀뚜라미 테니스 — 최강의 귀뚜라미를 가려라!">
 <div class="spl-ui"><div><div class="spl-lbl">GAME LOADING<span id="splDots">...</span><small id="splStage">게임 불러오는 중</small></div>
 <div class="spl-barrow"><div class="spl-bar"><i id="splBar"></i></div><div class="spl-pct" id="splPct">0%</div></div>
@@ -776,14 +833,20 @@ body:not(.mobile) #lobbyStart{padding:16px;font-size:18px}
 <div class="mode-cards">
 <button class="mode-card solo" id="modeSolo"><span class="mc-ic">🎾</span><b>개인 연습</b><small>컴퓨터와 1:1 · 난이도 3단계</small></button>
 <button class="mode-card multi" id="modeMulti"><span class="mc-ic">⚔️</span><b>실시간 대전</b><small>동료와 1:1 · 방 만들기 · 참가</small></button>
+<button class="mode-card tour" id="modeTour"><span class="mc-ic">🏆</span><b>대회</b><small>코트별 8인 리그 · 결승 · 트로피</small></button>
 </div><button id="recOpen" class="btn alt rec-open">📊 전적 보기</button></div>
 
 <div id="records" class="records hidden">
 <div class="stagebar"><button id="recBack" class="mini">← 모드 선택</button><b>📊 전적</b><span class="acct-chip" id="recChip"></span></div>
 <section class="panel rec-sum" id="recSum"></section>
-<div class="seg rec-tabs" id="recTabs"><button data-rtab="recent" class="active">최근 경기</button><button data-rtab="opp">상대별</button><button data-rtab="rank">랭킹 TOP 10</button></div>
+<div class="seg rec-tabs" id="recTabs"><button data-rtab="recent" class="active">최근 경기</button><button data-rtab="opp">상대별</button><button data-rtab="rank">랭킹 TOP 10</button><button data-rtab="trophy">🏆 트로피</button></div>
 <section class="panel rec-body" id="recBody"></section>
 <div class="muted rec-note">전적에는 사람과 한 실시간 대전만 들어가요. 컴퓨터와 한 개인 연습은 기록되지 않아요.</div>
+</div>
+
+<div id="tour" class="tour hidden">
+<div class="stagebar"><button id="tourBack" class="mini">← 모드 선택</button><b id="tourTitle">🏆 대회</b><span class="acct-chip" id="tourChip"></span></div>
+<div id="tourBody"></div>
 </div>
 
 <div id="lobby" class="lobby hidden">
@@ -1073,7 +1136,7 @@ const MONKEY_SVG=`<svg viewBox="0 0 120 100" aria-hidden="true"><g class="butt">
 const CAT_SVG=`<svg viewBox="0 0 120 100" aria-hidden="true"><g class="butt"><path d="M84 70 Q112 66 104 40 Q100 30 94 36" fill="none" stroke="#5a3212" stroke-width="8" stroke-linecap="round"/><path d="M84 70 Q112 66 104 40 Q100 30 94 36" fill="none" stroke="#f0a04b" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="60" cy="65" rx="26" ry="19" fill="#f0a04b" stroke="#5a3212" stroke-width="4"/><ellipse cx="53" cy="68" rx="13" ry="12" fill="#fff1dc"/><path d="M68 50 Q72 56 69 62 M77 53 Q81 59 78 65" stroke="#c8721f" stroke-width="3" fill="none" stroke-linecap="round"/></g><path d="M44 80 L40 95 M56 83 L55 97 M70 81 L75 95" stroke="#5a3212" stroke-width="5" stroke-linecap="round"/><path d="M78 47 Q90 40 95 46" fill="none" stroke="#5a3212" stroke-width="5" stroke-linecap="round"/><g class="ant"><path d="M25 27 L26 6 L40 18Z" fill="#f0a04b" stroke="#5a3212" stroke-width="3" stroke-linejoin="round"/><path d="M29 21 L29 12 L35 18Z" fill="#ffb3c6"/><path d="M45 17 L58 5 L59 26Z" fill="#f0a04b" stroke="#5a3212" stroke-width="3" stroke-linejoin="round"/><path d="M49 17 L56 11 L56 21Z" fill="#ffb3c6"/></g><g class="hd"><circle cx="42" cy="34" r="19" fill="#f0a04b" stroke="#5a3212" stroke-width="4"/><path d="M36 17 L38 23 M42 16 L42 22 M48 17 L46 23" stroke="#c8721f" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="42" cy="43" rx="11" ry="8" fill="#fff1dc"/><path d="M29 33 Q34 28 39 33 Q34 36 29 33Z" fill="#9be05a" stroke="#2a1a08" stroke-width="1.4"/><ellipse cx="34.5" cy="32.6" rx=".9" ry="2.3" fill="#111"/><path d="M45 33 Q50 28 55 33 Q50 36 45 33Z" fill="#9be05a" stroke="#2a1a08" stroke-width="1.4"/><ellipse cx="50.5" cy="32.6" rx=".9" ry="2.3" fill="#111"/><path d="M28 30.5 Q34 27.5 40 31.5 M44 31.5 Q50 27.5 56 30.5" stroke="#5a3212" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M40 38.5 L44 38.5 L42 41Z" fill="#ff7fa0"/><path d="M30 42 L18 40 M30 45 L19 47 M54 42 L66 40 M54 45 L65 47" stroke="#5a3212" stroke-width="1.3" stroke-linecap="round"/><path class="mouth" d="M36 43 Q39 46.5 42 42 Q45 46.5 49 42.5" fill="none" stroke="#2a1a08" stroke-width="1.8" stroke-linecap="round"/><ellipse class="yawn" cx="42" cy="46" rx="4.5" ry="4.5" fill="#3a1a1a"/><path class="tongue" d="M40 44 Q42 51 45 44Z" fill="#e8607a" stroke="#2a1a08" stroke-width="1"/></g><g class="racket"><path d="M79 42 L95 18" stroke="#f5d58b" stroke-width="5" stroke-linecap="round"/><ellipse cx="101" cy="12" rx="10" ry="15" transform="rotate(35 101 12)" fill="none" stroke="#f5f1dd" stroke-width="4"/><path d="M94 3 L108 20 M91 10 L104 1 M98 24 L110 9" stroke="#f5f1dd" stroke-width="1.5"/></g><path d="M40 95 L33 97 M55 97 L49 99 M75 95 L82 97" stroke="#5a3212" stroke-width="4" stroke-linecap="round"/></svg>`;
 const FROG_SVG=`<svg viewBox="0 0 120 100" aria-hidden="true"><g class="butt"><ellipse cx="62" cy="68" rx="27" ry="18" fill="#4caf3a" stroke="#1b4a16" stroke-width="4"/><ellipse cx="55" cy="72" rx="14" ry="10" fill="#d8f2a0"/><circle cx="72" cy="60" r="3.5" fill="#2f7d25"/><circle cx="81" cy="68" r="2.5" fill="#2f7d25"/><circle cx="65" cy="55" r="2" fill="#2f7d25"/></g><path d="M80 74 Q100 70 93 86 L104 92 M44 78 Q30 84 40 91 L28 95" fill="none" stroke="#1b4a16" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M80 74 Q100 70 93 86 L104 92 M44 78 Q30 84 40 91 L28 95" fill="none" stroke="#4caf3a" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M104 92 L111 89 M104 92 L111 96 M28 95 L21 92 M28 95 L21 98" stroke="#1b4a16" stroke-width="3" stroke-linecap="round"/><path d="M58 84 L56 97 M56 97 L50 99 M56 97 L61 99" stroke="#1b4a16" stroke-width="4" stroke-linecap="round"/><path d="M78 50 Q90 42 95 46" fill="none" stroke="#1b4a16" stroke-width="5" stroke-linecap="round"/><g class="hd"><ellipse cx="42" cy="37" rx="23" ry="16" fill="#4caf3a" stroke="#1b4a16" stroke-width="4"/><ellipse cx="42" cy="45" rx="14" ry="6" fill="#d8f2a0" opacity=".85"/><circle cx="26" cy="41" r="3.4" fill="#ff9fb0" opacity=".75"/><circle cx="58" cy="41" r="3.4" fill="#ff9fb0" opacity=".75"/><circle cx="38" cy="31" r="1.2" fill="#1b4a16"/><circle cx="46" cy="31" r="1.2" fill="#1b4a16"/><path class="mouth" d="M24 38 Q42 50 60 38" fill="none" stroke="#1b4a16" stroke-width="2.6" stroke-linecap="round"/><ellipse class="yawn" cx="42" cy="44" rx="9" ry="5" fill="#7a1f2a"/><path class="tongue" d="M39 44 Q40 62 50 64 Q46 56 45 44Z" fill="#ff6f8a" stroke="#1b4a16" stroke-width="1.2"/></g><g class="ant"><circle cx="29" cy="22" r="9" fill="#4caf3a" stroke="#1b4a16" stroke-width="3.5"/><circle cx="55" cy="22" r="9" fill="#4caf3a" stroke="#1b4a16" stroke-width="3.5"/><circle cx="29" cy="21" r="5.5" fill="#fff"/><circle cx="30" cy="21" r="3.2" fill="#111"/><circle cx="31" cy="19.5" r="1" fill="#fff"/><circle cx="55" cy="21" r="5.5" fill="#fff"/><circle cx="56" cy="21" r="3.2" fill="#111"/><circle cx="57" cy="19.5" r="1" fill="#fff"/></g><g class="racket"><path d="M79 42 L95 18" stroke="#f5d58b" stroke-width="5" stroke-linecap="round"/><ellipse cx="101" cy="12" rx="10" ry="15" transform="rotate(35 101 12)" fill="none" stroke="#f5f1dd" stroke-width="4"/><path d="M94 3 L108 20 M91 10 L104 1 M98 24 L110 9" stroke="#f5f1dd" stroke-width="1.5"/></g></svg>`;
 const svgFor=k=>({husky:HUSKY_SVG,monkey:MONKEY_SVG,cat:CAT_SVG,frog:FROG_SVG})[k]||BUG_SVG;
-function setSprite(el,k){const t=isAnimalChar(k)?k:"bug";if(el.dataset.svg!==t){el.innerHTML=svgFor(k)+`<span class="badges" id="${el.id==="player"?"meBadge":"opBadge"}"></span><span class="sweat">💦</span>`;el.dataset.svg=t;itemCache=""}setLook(el,k)}
+function setSprite(el,k){if(el.id==="player")el.classList.toggle("goldracket",isMaster());const t=isAnimalChar(k)?k:"bug";if(el.dataset.svg!==t){el.innerHTML=svgFor(k)+`<span class="badges" id="${el.id==="player"?"meBadge":"opBadge"}"></span><span class="sweat">💦</span>`;el.dataset.svg=t;itemCache=""}setLook(el,k)}
 /* ───── 상태 ───── */
 let mode="solo",side=0,st=null,myChar=null,difficulty="easy",format="set1",keys={};
 let screen="entry",roomChars=[null,null],lobbyCache="";
@@ -1363,6 +1426,7 @@ function callScore(pts,server,tb){   // 심판 콜: 서버 점수를 먼저 부�
 /* ───── 경기 이벤트 → 메시지 · 연출 ───── */
 const REASON={out:"아웃",net:"네트",double:"더블 폴트",ace:"에이스",winner:"위너",cheat:"아웃(?)"};
 function handleEvent(e){
+  if(tourGame)tourTally(e);
   const nextHint=mode==="solo"?" · Space로 다음 서브":" · 잠시 후 다음 서브(Space로 바로)";
   switch(e.type){
     case "toss":tossText+="동전 던지기 결과 "+who(e.server)+"의 서브로 시작합니다. ";break;
@@ -1442,7 +1506,7 @@ function handleEvent(e){
     case "tiebreak":Snd.play("tiebreak");banner("타이브레이크","7점 먼저 · 2점 차");msg("게임 스코어 동점! 타이브레이크로 세트를 결정합니다. 7점을 먼저, 2점 차로 따야 합니다."+nextHint);break;
     case "ends":msg(curMsg+" · 코트 체인지(화면은 그대로)");break;
     case "set":Snd.play("set");Snd.play("cheer",true);banner("세트 "+who(e.winner),e.score[side]+" - "+e.score[1-side]);msg("세트, "+who(e.winner)+"! "+e.score[side]+"-"+e.score[1-side]+nextHint);break;
-    case "match":recordResult(e.winner===side);Snd.play(e.winner===side?"victory":"defeat",Snd.isAnimal(st.chars?.[side]));Snd.voice(st.chars?.[e.winner],"match");say(e.winner,lineFor(e.winner,"match",e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"?"Space로 새 경기를 시작하세요.":"두 사람 모두 Ready를 누르면 다시 시작해요."));break;
+    case "match":recordResult(e.winner===side);if(tourGame)tourMatchDone();Snd.play(e.winner===side?"victory":"defeat",Snd.isAnimal(st.chars?.[side]));Snd.voice(st.chars?.[e.winner],"match");say(e.winner,lineFor(e.winner,"match",e.id),5,true);msg("게임, 세트, 매치! "+(e.winner===side?"축하합니다, 승리입니다! ":who(e.winner)+"의 승리입니다. ")+(mode==="solo"?(tourGame?"Space로 대회 화면으로 돌아가요.":"Space로 새 경기를 시작하세요."):"두 사람 모두 Ready를 누르면 다시 시작해요."));break;
   }
 }
 function processEvents(){for(const e of st.events){if(e.id<=lastEv)continue;lastEv=e.id;handleEvent(e)}}
@@ -1459,10 +1523,10 @@ function setGauge(prefix,v){v=clamp(v||0,0,100);const full=v>=100;$(prefix+"Gaug
   $(prefix+"GaugeTxt").textContent=full?"기 100% · 필살기 준비!":"기 "+Math.floor(v)+"%";$(prefix+"GaugeTxt").classList.toggle("full",full)}
 function isLocked(){return mode==="multi"&&!!(st&&st.phase!=="done")}
 function formatLocked(){return mode==="multi"&&!!room&&(side!==0||isLocked())}
-function showScreen(v){const was=screen;screen=v;["entry","modes","records","lobby","game"].forEach(k=>$(k).classList.toggle("hidden",v!==k));keys={};joyEnd();window.scrollTo(0,0);
+function showScreen(v){const was=screen;screen=v;["entry","modes","records","tour","lobby","game"].forEach(k=>$(k).classList.toggle("hidden",v!==k));keys={};joyEnd();window.scrollTo(0,0);
   document.body.classList.toggle("playing",v==="game");document.body.dataset.scr=v;lockScreen(v==="game");
   if((was==="game")!==(v==="game")||was===v)Snd.setScene(v==="game"?"game":"lobby");   // 입장·모드·로비 사이를 오갈 땐 배경음이 다시 시작되지 않게
-  if(v==="lobby")updateStage(false);requestAnimationFrame(layoutView)}
+  if(v==="lobby")updateStage(false);if(v==="tour")renderTour();requestAnimationFrame(layoutView)}
 let wakeLock=null;   // 경기 중에는 화면이 꺼지지 않도록
 async function lockScreen(on){try{if(on&&isMobile()&&!wakeLock&&navigator.wakeLock){wakeLock=await navigator.wakeLock.request("screen");wakeLock.addEventListener("release",()=>wakeLock=null)}else if(!on&&wakeLock){await wakeLock.release();wakeLock=null}}catch{}}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&screen==="game")lockScreen(true)});
@@ -1590,6 +1654,7 @@ function render(){
   if(st&&st.phase!==lastPhase){phaseAt=performance.now();
     if(st.phase==="serve")msg(serveMessage());
     if(st.phase==="done"){const sets=st.history.map(h=>h[side]+"-"+h[1-side]).join(", "),host=mode==="solo"||side===0;
+      if(tourGame)overlay(st.winner===side?(tourGame.fin?"🏆 우승!":"🎉 승리!"):"😵 패배","세트 스코어 "+sets,`<div class="ov-btns"><button class="btn" data-act="tour">${mt("🏆 대회로 돌아가기 (Space)")}</button></div>`);else
       overlay(st.winner===side?"🏆 우승!":"😵 패배","세트 스코어 "+sets,`<div class="ov-btns">${'<button class="btn" data-act="again">'+mt(mode==="multi"?"다시 하기 Ready (Space)":"다시 하기 (Space)")+'</button>'}<button class="btn alt" data-act="lobby">선수 다시 고르기</button></div>`)}
     else hideOverlay();
     lastPhase=st.phase;
@@ -1729,13 +1794,14 @@ function startSolo(){
   showScreen("game");
 }
 function toLobby(){
+  if(tourGame){if(st&&st.phase!=="done"){if(!confirm("경기를 그만두면 기권패로 기록돼요. 대회 화면으로 나갈까요?"))return;tourForfeit()}tourBack();return}
   if(mode==="solo"){st=null;showScreen("lobby");msg("선수와 경기 방식을 고른 뒤 경기 시작을 누르세요.");return}
   if(st&&st.phase!=="done"){if(!confirm("경기를 그만두고 로비로 나갈까요? 방에서도 나가게 됩니다."))return;leaveRoom();msg("방에서 나왔습니다.")}
   showScreen("lobby");
 }
 function nextPoint(){
   if(mode==="multi"){send(!st||st.phase==="done"?{type:"ready"}:{type:"next"});return}
-  if(canStartNewMatch()){startSolo();return}
+  if(canStartNewMatch()){if(tourGame){tourBack();return}startSolo();return}
   if(!myChar){msg("먼저 캐릭터를 선택하세요.");return}
   if(st&&(st.phase==="point"||st.phase==="fault"))E.startPoint(st);
 }
@@ -1929,11 +1995,12 @@ $("refreshRooms").onclick=()=>loadRooms(true);
 $("roomList").addEventListener("click",e=>{const b=e.target.closest("[data-join]");if(!b)return;
   if(!myChar){msg("먼저 캐릭터를 선택하세요.");return}
   $("roomCode").value=b.dataset.join;connect(false)});
-$("lobbyStart").onclick=()=>{if(mode==="solo")startSolo();else send({type:"ready"})};
+$("lobbyStart").onclick=()=>{if(mode==="solo"){tourGame=null;startSolo()}else send({type:"ready"})};
 $("toLobby").onclick=toLobby;
 $("dashBtn").onclick=dashUI;
 $("tauntBtn").onclick=tauntUI;
 $("overlay").addEventListener("click",e=>{const a=e.target.closest("[data-act]");if(!a)return;
+  if(a.dataset.act==="tour"){tourBack();return}
   if(a.dataset.act==="lobby")toLobby();else if(mode==="solo")startSolo();else{send({type:"ready"});a.textContent=roomReadyFlags[side]?"다시 하기 Ready":"✅ 준비 완료 · 상대 기다리는 중"}});
 $("createRoom").onclick=()=>{setMode("multi");connect(true)};
 $("joinRoom").onclick=()=>{if(!$("roomCode").value.trim()){msg("방 코드를 입력하세요.");return}connect(false)};
@@ -2075,6 +2142,183 @@ function updateStage(react){
     Snd.play({ice:"slip",sea:"whoosh",forest:"rustle",parking:"heat",cliff:"thud",clay:"rustle",grass:"jingle",hard:"pop",random:"split"}[ck]||"pop")}
   if(line)stageBubble(line);
 }
+/* ───── 🏆 대회: 코트별 8인 풀리그(7라운드, 짧은 세트) → 1·2위 결승(3세트 2선승) → 시상식 ─────
+   내 경기는 직접 하고, 컴퓨터끼리 경기는 같은 엔진으로 화면 없이 실제로 경기를 시켜 결과를 냄. 진행 상황·트로피는 이 기기에 저장 */
+const TOURS={hard:{name:"귀뚜라미 오픈",major:1},clay:{name:"귀랑스 오픈",major:1},grass:{name:"귀블던",major:1},
+  ice:{name:"귀뚤 아이스 클래식"},sea:{name:"해적왕 컵"},forest:{name:"정글 서바이벌 리그"},parking:{name:"주차장 그랑프리"},cliff:{name:"클리프 마스터스"}};
+// 코트별 강세·고전(컴퓨터끼리 코트마다 168경기씩 돌려 본 승률 기준)
+const TOUR_FIT={hard:[["husky","monkey"],"cat"],clay:[["fire","husky"],"snake"],grass:[["husky","monkey"],"quake"],ice:[["fire","snake"],"frog"],
+  sea:[["fire","husky"],"frog"],forest:[["husky","fire"],"tornado"],parking:[["monkey","fire"],"quake"],cliff:[["husky","monkey"],"cat"]};
+const SHORT={tornado:"토네이도 뚜리",snake:"스네이크 뚜리",fire:"파이어 뚜리",quake:"어스 뚜리",husky:"개시키",monkey:"바나킹",cat:"귀뚤냥이",frog:"꺼꾸리"};
+const CRICKETS=["tornado","snake","fire","quake"],DIFF_NAME={easy:"쉬움",normal:"보통",hard:"어려움"};
+const RIVAL={"husky|monkey":"⚔️ 정의 vs 흑막","cat|husky":"🐶🐱 견묘지간","cat|monkey":"😈 악당 대결","cat|frog":"🐱🐸 앙숙 신경전"};
+const SPEECH={tornado:"회오리처럼 휘몰아쳐서 우승! 응원해 주신 분들 감사해요!",snake:"스르륵~ 빈틈을 파고들었죠. 우승이다!",fire:"불꽃처럼 타올랐다! 트로피도 뜨끈뜨끈해!",
+  quake:"기본에 충실했더니 우승! 안전 최우선!",husky:"정의는 반드시 승리한다! 아우우우~!",monkey:"끼하하! 이 트로피는 원래 내 거였다!",
+  cat:"냐옹~ 정정당당하게 이겼다냥. (진짜다냥)",frog:"우승 안 했다 개굴~! (했다) 개굴개굴!"};
+function rivalOf(a,b){const k=[a,b].sort().join("|");if(RIVAL[k])return RIVAL[k];
+  const has=(x,y)=>(a===x&&CRICKETS.includes(b))||(b===x&&CRICKETS.includes(a));return has("cat")?"🐾 천적전":has("frog")?"👅 개구리 혀 주의보":""}
+function jo(w,a,b){const m=[...w].reverse().find(c=>c>="가"&&c<="힣");return w+(m&&(m.charCodeAt(0)-0xAC00)%28?a:b)}   // 받침에 맞는 조사
+let T=null,tourView="list",tourPickCourt="hard",tourPickChar=null,tourPickDiff="normal",tourBusy=false,tourGame=null,tourPrev=null;
+const tn=k=>T&&k===T.me?"나("+SHORT[k]+")":SHORT[k],tl=k=>(CHARS[k]?.emoji||"")+" "+tn(k);
+const tourOwner=()=>account&&!account.guest?account.nick:"guest",tourKey=()=>"ct_tour:"+tourOwner(),trophyKey=()=>"ct_trophy:"+tourOwner();
+function tourLoad(){try{T=JSON.parse(localStorage.getItem(tourKey())||"null")}catch{T=null}if(T&&(T.v!==1||!TOURS[T.court]))T=null}
+function tourSave(){try{T?localStorage.setItem(tourKey(),JSON.stringify(T)):localStorage.removeItem(tourKey())}catch{}}
+function trophies(){try{return JSON.parse(localStorage.getItem(trophyKey())||"{}")||{}}catch{return{}}}
+function titlesOf(tr){const won=k=>(tr[k]?.wins||0)>0,t=[];if(["hard","clay","grass"].every(won))t.push("🎾 귀뚤 그랜드슬램");if(E.COURTS.every(won))t.push("👑 코트의 지배자");return t}
+const isMaster=()=>{try{return titlesOf(trophies()).includes("👑 코트의 지배자")}catch{return false}};
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function roundRobin(ps){const a=[...ps],n=a.length,R=[];for(let r=0;r<n-1;r++){const pr=[];for(let i=0;i<n/2;i++)pr.push(r%2&&i===0?[a[n-1-i],a[i]]:[a[i],a[n-1-i]]);R.push(pr);a.splice(1,0,a.pop())}return R}
+function newTour(court,me,diff){const ps=shuffleArr([...SPECIALS]);T={v:1,court,me,diff,players:ps,rounds:roundRobin(ps),round:0,res:{},news:[],stage:"league",final:null,at:Date.now()};snapRanks();tourSave()}
+function curFix(){return T.rounds[T.round].map((f,i)=>({a:f[0],b:f[1],id:T.round+"-"+i,r:T.res[T.round+"-"+i]}))}
+const roundDone=()=>curFix().every(f=>f.r);
+function standings(){
+  const R={};T.players.forEach(p=>R[p]={p,P:0,W:0,L:0,sw:0,sl:0,gw:0,gl:0});const list=Object.values(T.res);
+  for(const r of list){const A=R[r.a],B=R[r.b];A.P++;B.P++;if(r.w===r.a){A.W++;B.L++}else{B.W++;A.L++}
+    for(const [x,y] of r.h){A.gw+=x;A.gl+=y;B.gw+=y;B.gl+=x;if(x>y){A.sw++;B.sl++}else{B.sw++;A.sl++}}}
+  const h2h={};for(const p of T.players){h2h[p]=0;for(const r of list)if(r.w===p){const o=r.a===p?r.b:r.a;if(R[o].W===R[p].W)h2h[p]++}}   // 승수가 같은 선수끼리의 맞대결
+  return Object.values(R).sort((x,y)=>y.W-x.W||h2h[y.p]-h2h[x.p]||(y.sw-y.sl)-(x.sw-x.sl)||(y.gw-y.gl)-(x.gw-x.gl)||SPECIALS.indexOf(x.p)-SPECIALS.indexOf(y.p));
+}
+function snapRanks(){T.rankAt={};standings().forEach((s,i)=>T.rankAt[s.p]=i+1)}
+const scoreTxt=r=>r.h.map(x=>x[0]+"-"+x[1]).join(", ");
+function addNews(r,label){   // 경기에서 생긴 일 중 가장 화제가 될 만한 하나를 헤드라인으로
+  const W=r.w,L=W===r.a?r.b:r.a,wi=W===r.a?0:1,li=1-wi,s=r.sum||{},g=r.h.map(x=>wi?[x[1],x[0]]:x),lostG=g.reduce((t,x)=>t+x[1],0);
+  const nW=tn(W),nL=tn(L),ci=r.a==="cat"?0:r.b==="cat"?1:-1,rv=rivalOf(W,L),rkW=T.rankAt?.[W]||0,rkL=T.rankAt?.[L]||0;let t="",cheatNews=false;
+  if(r.forfeit)t=`🏳️ ${jo(nL,"이","가")} 경기 도중 기권… ${nW} 부전승`;
+  else if(label==="결승")t=`🏆 ${TOURS[T.court].name} 우승은 ${nW}! 결승에서 ${nL} 상대로 ${g.map(x=>x.join("-")).join(", ")}`;
+  else if(ci>=0&&s.cheat&&s.cheat[ci]&&!T.news.slice(0,4).some(n=>n.cheat)){const cat=tn("cat"),oth=tn(ci===0?r.b:r.a),k=Math.floor(Math.random()*3);cheatNews=true;   // 반칙 기사는 연달아 나오지 않게
+    t=W==="cat"?[`📰 ${jo(cat,"이","가")} 또 반칙 아웃 콜! ${oth} 측 "분명히 인이었다" 강력 항의`,`📰 "아웃이다냥!" 한마디에 판정 뒤집혀… ${jo(cat,"이","가")} ${oth} 꺾어`,`📰 심판 또 속았다! ${cat} 반칙 콜 논란 속 승리`][k]
+      :[`📰 반칙까지 했는데… ${jo(cat,"은","는")} ${oth}에게 덜미`,`📰 ${oth}, 귀뚤냥이 거짓 콜에도 흔들림 없이 승리`,`📰 "정의는 이긴다" ${jo(oth,"이","가")} 반칙왕 귀뚤냥이 제압`][k]}
+  else if(s.rock&&s.rock[li])t=`📰 낙석 ${s.rock[li]}번 맞은 ${nL}, ${nW}에 덜미`;
+  else if(s.pit&&s.pit[li])t=`📰 숨은 구덩이에 빠진 ${nL}… ${jo(nW,"이","가")} 웃었다`;
+  else if(s.slip&&s.slip[li])t=`📰 바나나 껍질에 미끄덩! ${nL} 무너뜨린 ${nW}`;
+  else if(T.round>=2&&rkW&&rkL&&rkW-rkL>=4)t=`📰 이변! ${rkW}위 ${jo(nW,"이","가")} ${rkL}위 ${nL} 격파`;
+  else if(!lostG)t=`📰 ${jo(nW,"이","가")} ${nL}에게 ${g.map(x=>x.join("-")).join(", ")} 완봉승`;
+  else if(s.tb)t=`📰 타이브레이크 혈투 끝에 ${nW} 승리`;
+  else if(rv)t=`📰 [${rv}] ${jo(nW,"이","가")} 웃었다`;
+  if(t){T.news.unshift({l:label,t,mine:r.a===T.me||r.b===T.me,cheat:cheatNews||undefined});T.news=T.news.slice(0,30)}
+}
+const newSum=()=>({cheat:[0,0],rock:[0,0],pit:[0,0],slip:[0,0],special:[0,0],ace:[0,0],tb:0});
+function simOne(a,b,format){const s=E.simMatch({format,court:T.court,chars:[a,b],level:"hard"});return{a,b,w:s.winner===0?a:b,h:s.history,sum:s.sum}}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function simPending(){   // 이번 라운드 컴퓨터끼리 경기를 하나씩 진행
+  if(tourBusy||!T||T.stage!=="league")return;tourBusy=true;renderTour();
+  for(const f of curFix())if(!f.r&&f.a!==T.me&&f.b!==T.me){await wait(450);if(!T)break;const r=simOne(f.a,f.b,"short");T.res[f.id]=r;addNews(r,"R"+(T.round+1));tourSave();Snd.play("bounce");renderTour()}
+  tourBusy=false;if(T&&roundDone())Snd.play("jingle");renderTour();
+}
+function nextRound(){
+  if(!roundDone())return;
+  if(T.round<6){T.round++;snapRanks();tourSave();Snd.play("pop","big");return}
+  const tb=standings();T.stage="final";T.final={a:tb[0].p,b:tb[1].p};snapRanks();tourSave();Snd.play("game");
+}
+async function simFinal(){if(tourBusy||!T||T.stage!=="final"||T.final.r)return;tourBusy=true;renderTour();await wait(1400);
+  const r=simOne(T.final.a,T.final.b,"set3");T.final.r=r;tourBusy=false;finishTour()}
+function finishTour(){
+  const r=T.final.r,w=r.w,l=w===r.a?r.b:r.a,tb=standings(),third=tb.find(s=>s.p!==r.a&&s.p!==r.b).p;
+  addNews(r,"결승");T.podium=[w,l,third];
+  const myRank=T.me===w?1:T.me===l?2:tb.findIndex(s=>s.p===T.me)+1;T.myRank=myRank;
+  const tr=trophies(),before=titlesOf(tr),x=tr[T.court]||{best:9,wins:0,played:0};
+  x.best=Math.min(x.best||9,myRank);x.played=(x.played||0)+1;if(myRank===1)x.wins=(x.wins||0)+1;tr[T.court]=x;
+  try{localStorage.setItem(trophyKey(),JSON.stringify(tr))}catch{}
+  T.newTitles=titlesOf(tr).filter(t=>!before.includes(t));T.stage="done";tourSave();tourView="hub";
+  Snd.play(myRank===1?"victory":myRank<=3?"game":"jingle");Snd.play("cheer",true);if(myRank===1)setTimeout(()=>Snd.voice(T.me,"match"),900);
+  renderTour();
+}
+function startTourGame(){
+  const fin=T.stage==="final",fx=fin?{a:T.final.a,b:T.final.b,id:"final",r:T.final.r}:curFix().find(f=>f.a===T.me||f.b===T.me);
+  if(!fx||fx.r)return;const opp=fx.a===T.me?fx.b:fx.a,rv=rivalOf(T.me,opp);
+  tourPrev={myChar,difficulty,format};myChar=T.me;difficulty=T.diff;format=fin?"set3":"short";
+  tourGame={fx,fin,opp,sum:newSum(),done:false};
+  st=E.newMatch({format,court:T.court,chars:[T.me,opp],autoNext:0});lastEv=0;lastPhase="";
+  tossText=`🏆 ${TOURS[T.court].name} ${fin?"결승전":"라운드 "+(T.round+1)} · 상대는 ${charLabel(opp)}${rv?" ("+rv+")":""}! `;processEvents();
+  $("toLobby").textContent="대회 화면으로";showScreen("game");Snd.play("pop","big");
+}
+function tourTally(e){const s=tourGame.sum;
+  if(e.type==="catCall")s.cheat[e.side]++;else if(e.type==="rockHit")s.rock[e.side]++;else if(e.type==="pitfall")s.pit[e.side]++;
+  else if(e.type==="slip")s.slip[e.side]++;else if(e.type==="tiebreak")s.tb++}
+function tourResult(r){const g=tourGame;g.done=true;if(g.fin)T.final.r=r;else{T.res[g.fx.id]=r;addNews(r,"R"+(T.round+1))}tourSave()}
+function tourMatchDone(){   // 내 경기가 끝나면 대회 기록에 넣음(경기 화면의 0번 선수가 나)
+  const g=tourGame;if(!g||g.done)return;const fl=g.fx.a!==T.me,sw=v=>fl?[v[1],v[0]]:v,sum={};
+  for(const k in g.sum)sum[k]=Array.isArray(g.sum[k])?sw(g.sum[k]):g.sum[k];
+  tourResult({a:g.fx.a,b:g.fx.b,w:st.chars[st.winner],h:st.history.map(sw),sum,mine:true});
+}
+function tourForfeit(){const g=tourGame;if(!g||g.done)return;const fl=g.fx.a!==T.me,h=(g.fin?[[0,6],[0,6]]:[[0,4]]).map(x=>fl?[x[1],x[0]]:x);
+  tourResult({a:g.fx.a,b:g.fx.b,w:g.opp,h,sum:newSum(),mine:true,forfeit:true})}
+function tourBack(){
+  if(tourPrev){myChar=tourPrev.myChar;difficulty=tourPrev.difficulty;format=tourPrev.format;tourPrev=null}
+  tourGame=null;st=null;lastPhase="";hideOverlay();$("toLobby").textContent="로비로 나가기";
+  showScreen("tour");
+  if(T&&T.stage==="final"&&T.final.r)finishTour();else if(T&&T.stage==="league"&&!roundDone())simPending();
+}
+function openTour(){leaveRoom();st=null;setMode("solo");tourLoad();if(T&&T.stage==="done"){T=null;tourSave()}
+  tourView=T?"hub":"list";tourPickChar=tourPickChar||myChar;showScreen("tour");Snd.play("pop","big");
+  if(T&&T.stage==="league"&&curFix().some(f=>f.r&&(f.a===T.me||f.b===T.me))&&!roundDone())simPending()}
+function tourStandHTML(){
+  const tb=standings(),fin=T.stage!=="league";
+  return `<table class="tr-tbl"><thead><tr><th>#</th><th>선수</th><th>경기</th><th>승</th><th>패</th><th>세트</th><th>게임</th></tr></thead><tbody>${tb.map((s,i)=>{const d=(a,b)=>(a-b>0?"+":"")+(a-b);
+    return `<tr class="${s.p===T.me?"me":""} ${i<2?"q":""}"><td>${i+1}</td><td class="nm">${tl(s.p)}</td><td>${s.P}</td><td><b>${s.W}</b></td><td>${s.L}</td><td>${d(s.sw,s.sl)}</td><td>${d(s.gw,s.gl)}</td></tr>`}).join("")}</tbody></table>
+    <div class="muted tr-note">${fin?"🏅 리그 1·2위가 결승에 올랐어요":"🏅 1·2위 결승 진출 · 승수 → 승자승 → 세트 득실 → 게임 득실"}</div>`}
+const tourNewsHTML=()=>`<section class="panel tr-news"><b>📰 대회 소식</b>${T.news.length?T.news.slice(0,10).map(n=>`<div class="${n.mine?"mine":""}"><span>${n.l}</span>${esc(n.t)}</div>`).join(""):'<div class="muted">아직 소식이 없어요. 첫 경기를 기다리는 중!</div>'}</section>`;
+function tourHeadHTML(){const c=COURT_INFO[T.court];
+  return `<section class="panel tr-top"><div class="tr-head"><span class="tr-big">${c.ic}</span><div><b>${TOURS[T.court].name}</b><div class="muted">${c.name} · 내 선수 ${tl(T.me)} · 상대 난이도 ${DIFF_NAME[T.diff]}</div></div></div>
+  <div class="tr-prog">${[0,1,2,3,4,5,6].map(i=>`<i class="${T.stage!=="league"||i<T.round?"done":i===T.round?"now":""}">${i+1}</i>`).join("")}<i class="fin ${T.stage==="final"?"now":T.stage==="done"?"done":""}">결승</i></div></section>`}
+function renderTour(){
+  if(screen!=="tour")return;
+  $("tourChip").textContent=account?(account.guest?"👤 ":"🦗 ")+account.nick:"";
+  const B=$("tourBody");let h="";
+  if(tourView==="setup"){const k=tourPickCourt,c=COURT_INFO[k],f=TOUR_FIT[k];
+    h=`<section class="panel tr-setup"><div class="tr-head"><span class="tr-big">${c.ic}</span><div><b>${TOURS[k].name}</b><span class="tr-tier ${TOURS[k].major?"major":""}">${TOURS[k].major?"🏆 정식 대회":"🎪 이색 대회"}</span><div class="muted">${c.name} · ${c.desc}</div></div></div>
+      <div class="tr-fit">📈 이 코트 강세 ${f[0].map(x=>"<b>"+CHARS[x].emoji+" "+SHORT[x]+"</b>").join(", ")} · 📉 고전 <b>${CHARS[f[1]].emoji} ${SHORT[f[1]]}</b></div>
+      <b class="pick-h">내 선수</b><div class="tr-chars">${SPECIALS.map(x=>`<button class="tr-ch${x===tourPickChar?" active":""}" data-tact="char" data-v="${x}">${svgFor(x)}<small>${CHARS[x].emoji} ${SHORT[x]}</small></button>`).join("")}</div>
+      <b class="pick-h">내 상대 컴퓨터 난이도</b><div class="seg tr-diff">${["easy","normal","hard"].map(d=>`<button class="${d===tourPickDiff?"active":""}" data-tact="diff" data-v="${d}">${DIFF_NAME[d]}</button>`).join("")}</div>
+      <div class="muted tr-rule">8명이 서로 한 번씩 붙는 리그 7경기(짧은 세트 · 4게임) → 리그 1·2위 결승(3세트 2선승). 내 경기는 직접 하고, 다른 경기는 컴퓨터끼리 실제로 경기를 치러요.</div>
+      <div class="row tr-btns"><button class="btn alt" data-tact="list">← 대회 목록</button><button class="btn big" data-tact="start"${tourPickChar?"":" disabled"}>🏆 대회 시작</button></div></section>`}
+  else if(!T||tourView==="list"){const tr=trophies(),tt=titlesOf(tr);
+    h=(T?`<section class="panel tr-resume"><div><b>진행 중인 대회</b><div class="muted">${COURT_INFO[T.court].ic} ${TOURS[T.court].name} · ${T.stage==="final"?"결승전":"라운드 "+(T.round+1)+"/7"} · 내 선수 ${CHARS[T.me].emoji} ${SHORT[T.me]}</div></div><div class="row"><button class="btn" data-tact="resume">이어 하기</button><button class="btn alt" data-tact="quit">포기</button></div></section>`:"")
+      +`<div class="tr-grid">${E.COURTS.map(k=>{const t=TOURS[k],c=COURT_INFO[k],x=tr[k];
+        return `<button class="tr-card cpk-${k}" data-tact="pick" data-v="${k}"><i></i><span class="tr-tier ${t.major?"major":""}">${t.major?"🏆 정식 대회":"🎪 이색 대회"}</span><b>${t.name}</b><small>${c.ic} ${c.name}</small><em class="${x?.wins?"won":""}">${x?.wins?"🏆 우승 "+x.wins+"회":x?.best?"최고 "+x.best+"위":"도전 전"}</em></button>`}).join("")}</div>
+      <section class="panel tr-titles"><b>칭호</b> ${tt.length?tt.map(t=>`<span class="tr-title-chip">${t}</span>`).join(""):'<span class="muted">정식 대회 3개(귀뚜라미 오픈·귀랑스 오픈·귀블던) 우승 → 🎾 귀뚤 그랜드슬램 · 8개 모두 우승 → 👑 코트의 지배자(금빛 라켓)</span>'}</section>`}
+  else if(T.stage==="done"){const P=T.podium,r=T.final.r,w=r.w;
+    h=`<section class="panel tr-cere"><div class="tr-confetti">${[..."🎉🎊✨🏆🎉🎊✨🎾"].map((x,i)=>`<span style="left:${6+i*12}%;animation-delay:${i*.18}s">${x}</span>`).join("")}</div>
+      <div class="tr-ctitle">🏆 ${TOURS[T.court].name} 시상식</div>
+      <div class="tr-podium">${[1,0,2].map(i=>`<div class="pod p${i+1}"><div class="pod-ch" data-look="${P[i]}">${svgFor(P[i])}</div><b>${tn(P[i])}</b><div class="pod-step">${["🥇","🥈","🥉"][i]}</div></div>`).join("")}</div>
+      <div class="tr-speech">💬 ${CHARS[w].emoji} <b>${tn(w)}</b> "${SPEECH[w]}"</div>
+      <div class="muted">결승 ${tl(r.a)} ${scoreTxt(r)} ${tl(r.b)}</div>
+      <div class="tr-me">${T.myRank===1?"🎉 우승! 트로피를 손에 넣었어요!":T.myRank===2?"🥈 준우승! 정말 아까웠어요!":T.myRank===3?"🥉 3위! 시상대에 올랐어요!":"최종 "+T.myRank+"위 · 다음엔 시상대에!"}</div>
+      ${(T.newTitles||[]).length?`<div class="tr-newtitle">✨ 새 칭호 획득! ${T.newTitles.join(" · ")}</div>`:""}
+      <div class="row tr-btns"><button class="btn big" data-tact="again">같은 대회 다시 도전</button><button class="btn alt" data-tact="list">대회 목록</button></div></section>${tourNewsHTML()}`}
+  else if(T.stage==="final"){const f=T.final,tb=standings(),rec=p=>{const s=tb.find(x=>x.p===p);return `${s.W}승 ${s.L}패`},meIn=f.a===T.me||f.b===T.me,myR=tb.findIndex(s=>s.p===T.me)+1;
+    h=tourHeadHTML()+`<section class="panel tr-finalp"><b class="tr-ctitle">🏆 결승전 · 3세트 2선승</b><div class="tr-vs"><div><div class="pod-ch" data-look="${f.a}">${svgFor(f.a)}</div><b>${tl(f.a)}</b><small>리그 1위 · ${rec(f.a)}</small></div><span>VS</span><div><div class="pod-ch" data-look="${f.b}">${svgFor(f.b)}</div><b>${tl(f.b)}</b><small>리그 2위 · ${rec(f.b)}</small></div></div>
+      ${rivalOf(f.a,f.b)?`<div class="tr-rv">🔥 빅매치 · ${rivalOf(f.a,f.b)}</div>`:""}
+      ${meIn?`<button class="btn big" data-tact="play">▶ 결승전 시작</button>`:`<div class="muted">아쉽게 결승 진출 실패… 리그 ${myR}위로 마쳤어요. 결승전을 지켜볼까요?</div><button class="btn big" data-tact="simfinal"${tourBusy?" disabled":""}>${tourBusy?"⏳ 결승전 진행 중…":"▶ 결승전 진행"}</button>`}</section>
+      <div class="tr-cols"><section class="panel"><b>최종 순위표</b>${tourStandHTML()}</section>${tourNewsHTML()}</div>`}
+  else{const fx=curFix().sort((x,y)=>((y.a===T.me||y.b===T.me)-(x.a===T.me||x.b===T.me)));
+    h=tourHeadHTML()+`<div class="tr-cols"><section class="panel"><b>라운드 ${T.round+1} 경기</b>${fx.map(f=>{const mine=f.a===T.me||f.b===T.me,r=f.r,rv=rivalOf(f.a,f.b),wc=p=>r&&r.w===p?"w":r?"l":"";
+        return `<div class="tr-fx${mine?" mine":""}"><div class="tr-fxp"><span class="${wc(f.a)}">${tl(f.a)}</span><em>vs</em><span class="${wc(f.b)}">${tl(f.b)}</span></div>${rv?`<div class="tr-rv">🔥 빅매치 · ${rv}</div>`:""}
+          ${r?`<div class="tr-sc">${r.forfeit?"기권 · ":""}${scoreTxt(r)} · <b>${tn(r.w)} 승</b></div>`:mine?`<button class="btn" data-tact="play">▶ 내 경기 시작 (짧은 세트)</button>`:`<div class="muted tr-sc">${tourBusy?"⏳ 경기 중…":"내 경기 뒤에 진행"}</div>`}</div>`}).join("")}
+        ${roundDone()?`<button class="btn big tr-next" data-tact="next">${T.round===6?"🏆 결승 대진 보기":"다음 라운드 ▶"}</button>`:""}</section>
+      <section class="panel"><b>순위표</b>${tourStandHTML()}</section>${tourNewsHTML()}</div>`}
+  B.innerHTML=h;
+  B.querySelectorAll(".tr-ch").forEach(el=>setLook(el,el.dataset.v));B.querySelectorAll("[data-look]").forEach(el=>setLook(el,el.dataset.look));
+}
+$("tourBody").addEventListener("click",e=>{const b=e.target.closest("[data-tact]");if(!b||b.disabled)return;const a=b.dataset.tact,v=b.dataset.v;
+  if(a!=="play")Snd.play("pop",a==="start"?"big":a==="char"?"char":undefined);
+  switch(a){
+    case "pick":tourPickCourt=v;tourView="setup";break;
+    case "char":tourPickChar=v;break;
+    case "diff":tourPickDiff=v;break;
+    case "list":if(T&&T.stage==="done"){T=null;tourSave()}tourView="list";break;
+    case "start":if(T&&!confirm("진행 중인 대회를 포기하고 새 대회를 시작할까요?"))return;newTour(tourPickCourt,tourPickChar,tourPickDiff);tourView="hub";Snd.play("game");break;
+    case "resume":tourView="hub";break;
+    case "quit":if(!confirm("진행 중인 대회를 포기할까요? 기록은 남지 않아요."))return;T=null;tourSave();break;
+    case "play":startTourGame();return;
+    case "next":nextRound();break;
+    case "simfinal":simFinal();return;
+    case "again":{const c=T.court,m=T.me,d=T.diff;newTour(c,m,d);tourView="hub";Snd.play("game");break}
+  }
+  renderTour();if(a!=="char"&&a!=="diff")window.scrollTo(0,0)});
+$("tourBack").onclick=()=>{renderAcct();showScreen("modes")};
+$("modeTour").onclick=openTour;
+
 /* ───── 전적 화면 ───── */
 let recTab="recent",recData={list:[],top:null};
 const FMT_NAME={short:"짧은 세트",set1:"1세트",set3:"3세트"};
@@ -2116,6 +2360,11 @@ function renderRecords(){
     const rows=Object.entries(g).sort((a,b)=>(b[1].w+b[1].l)-(a[1].w+a[1].l));
     body.innerHTML=!account||account.guest?'<div class="muted">로그인하면 상대별 전적을 볼 수 있어요.</div>':rows.length?rows.map(([k,v])=>`<div class="rec-row"><span class="rec-res ${v.w>=v.l?"w":"l"}">${v.w>v.l?"우세":v.w<v.l?"열세":"동률"}</span>
       <div class="rec-main"><b>${ce(v.ch)} ${esc(k)}</b><small>마지막 대결 ${recDate(v.last)}</small></div><span class="rec-score">${v.w}승 ${v.l}패</span></div>`).join(""):'<div class="muted">아직 상대한 사람이 없어요.</div>';
+  }else if(recTab==="trophy"){
+    const tr=trophies(),tt=titlesOf(tr);
+    body.innerHTML=(tt.length?`<div class="rec-row"><span class="rec-rank">✨</span><div class="rec-main"><b>${tt.join(" · ")}</b><small>획득한 칭호</small></div></div>`:"")+E.COURTS.map(k=>{const x=tr[k];
+      return `<div class="rec-row"><span class="rec-rank">${x?.wins?"🏆":x?.best===2?"🥈":x?.best===3?"🥉":COURT_INFO[k].ic}</span><div class="rec-main"><b>${TOURS[k].name}</b><small>${COURT_INFO[k].ic} ${COURT_INFO[k].name}${x?.played?" · 참가 "+x.played+"회":""}</small></div><span class="rec-score">${x?.wins?"우승 "+x.wins+"회":x?.best?"최고 "+x.best+"위":"도전 전"}</span></div>`}).join("")
+      +`<div class="muted" style="margin-top:8px">대회 기록은 이 기기에 저장돼요. 모드 선택 화면의 🏆 대회에서 도전하세요.</div>`;
   }else{
     const T=recData.top;
     body.innerHTML=!serverAcc?'<div class="muted">랭킹은 서버 계정이 켜져 있을 때 볼 수 있어요.</div>':!T||!T.length?'<div class="muted">아직 랭킹에 오른 사람이 없어요.</div>':
