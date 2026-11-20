@@ -43,7 +43,7 @@ const HAZARDS = ["weeds", "alarm", "rain"];   // 잡초 · 비상벨 · 비
 const HAZARD_POINTS = 2, ENV_PER_GAME = .9;   // 버프·디버프: 게임마다 한 번쯤(90%), 게임 중 아무 포인트 사이에 시작해서 점수 2번 동안 유지
 // 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
 const TORNADO = { r: 2.3, loops: 5, squash: .7 };   // 회전회오리샷: 반지름 2.3m 고리를 5바퀴
-const FIREBALL = { T: .45, margin: .06, z: 1.1 };   // 불꽃샷: 0.45초 목표(멸치보다 빠르게), 낮은 공도 허리 높이에서 강타
+const FIREBALL = { T: .62, margin: .06, z: 1.1 };   // 불꽃샷: 0.62초 만에 도착(가장 빠른 공), 낮은 공도 허리 높이에서 강타
 // 코트: 정식 3종(하드·클레이·잔디) + 특별 5종(빙판·우리 바다·숲속·땡볕 주차장·주상절리 잔도)
 const COURTS = ["hard", "clay", "grass", "ice", "sea", "forest", "parking", "cliff"];
 const COURT_FX = {   // e: 튀는 높이 · keep: 튄 뒤 속도 · spin: 스핀 효과 · accel: 미끄러짐(0이면 바로 멈춤, 작을수록 잘 미끄러짐)
@@ -69,9 +69,9 @@ const HUSKY = { justice: 1.5 };
 // 귀뚤냥이: 칠 때 절반쯤 방향 예고(65%는 거짓말) · 시치미샷(공과 그림자가 가짜 자리로 보이다 바운드 0.35초 전에 진짜 자리로)
 // 반칙 아웃 콜: 세트당 1번, 상대 공이 라인 0.3m 안쪽에 떨어졌고 내가 받기 어려울 만큼(2.2m 넘게) 멀면 75% 확률로 "아웃!" → 심판이 속아 실제로 아웃(서브면 폴트) 판정
 const CAT = { say: .5, lie: .65, fakeDX: 3, snap: .35, callLine: .3, callFar: 2.2, callRate: .75 };
-// 청개구리: 0.22초 점프 + 0.05초 착지(평균 속도는 1.08배), 점프 중엔 방향 고정 · 혀가 길어 0.5m 더 높은 공까지 침
+// 청개구리: 0.22초 점프 + 0.05초 착지(평균 속도는 1.13배), 점프 중엔 방향 고정 · 혀가 길어 0.5m 더 높은 공까지 침
 // 비가 좋아: 비 디버프 중 1.1배, 물웅덩이에선 느려지지 않고 1.15배 · 청개구리 심보: 상대가 도발하면 내 기 +10, 맞도발(반사) 인정 시간 +0.5초
-const FROG = { move: 1.08, hopT: .22, rest: .05, hitZ: .5, rain: 1.1, puddle: 1.15, tauntGauge: 10, reflect: .5, zig: 2.8 };
+const FROG = { move: 1.13, hopT: .22, rest: .05, hitZ: .5, rain: 1.1, puddle: 1.15, tauntGauge: 10, reflect: .5, zig: 2.8 };
 const maxHitZ = (st, side) => MAX_HIT_Z + (st.chars && st.chars[side] === "frog" ? FROG.hitZ : 0);                          // 개시키: 게임에서 2점 이상 지고 있으면 기가 1.5배로 참
 const SNAKE = { coil: .62, slow: .52, fast: 1.783, amp: 1.7, waves: 4.5 };   // 4번 반 꿈틀 · .62×.52 + .38×1.783 ≈ 1 (총 이동 거리 유지)
 const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
@@ -108,7 +108,7 @@ function forestLayout(st) {   // 양쪽 코트에 덤불 2 · 진흙 1 · 숨은
   }
 }
 function inPatch(st, x, y) { const hz = st.hazard; if (!hz || !hz.patches) return null; for (const p of hz.patches) if ((x - p.x) ** 2 + (y - p.y) ** 2 <= p.r * p.r) return p; return null; }
-const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.85, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
+const GAUGE_HIT = 10, GAUGE_LOSE = 10, STUN_TIME = 0.75, FIRE_REACH = 0.97, MOVE_SPEED = 5.8, MAX_HIT_Z = 2.6;
 const REACH = { normal: 1.45, volley: 2.1, drop: 1.45, speed: 1.45, lob: 1.45, slice: 1.45, special: 1.7 };
 // 슬라이스: 낮게 깔리고 튄 뒤 거의 안 솟고 미끄러짐 → 받는 쪽은 허리를 숙여야 해서 받는 범위 15% 감소
 const SLICE = { e: .32, keep: .88, side: .45, recvReach: .85 };
@@ -821,7 +821,35 @@ function aiCore(st, side, level, dt) {
   return out;
 }
 
-const api = { COURTS, PARK, CLIFF, CAT, FROG, cpatchAt, BLIZZ, PEEL, DASH, dash, HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+/* ───── 대회: 컴퓨터끼리 경기를 화면 없이 끝까지 진행 ───── */
+function simMatch(opts = {}) {
+  const st = newMatch({ format: opts.format || "short", court: opts.court, chars: opts.chars, autoNext: .3 });
+  const lv = opts.level || "hard", dt = 1 / 30, maxT = opts.maxT || 3000;
+  const sum = { cheat: [0, 0], rock: [0, 0], pit: [0, 0], slip: [0, 0], special: [0, 0], ace: [0, 0], tb: 0, rain: 0 };
+  let t = 0, last = st.evId;
+  while (st.phase !== "done" && t < maxT) {
+    step(st, dt, [aiThink(st, 0, lv, dt), aiThink(st, 1, lv, dt)]); t += dt;
+    for (const e of st.events) if (e.id > last) {
+      last = e.id;
+      if (e.type === "catCall") sum.cheat[e.side]++;
+      else if (e.type === "rockHit") sum.rock[e.side]++;
+      else if (e.type === "pitfall") sum.pit[e.side]++;
+      else if (e.type === "slip") sum.slip[e.side]++;
+      else if (e.type === "special") sum.special[e.side]++;
+      else if (e.type === "point" && e.reason === "ace") sum.ace[e.winner]++;
+      else if (e.type === "tiebreak") sum.tb++;
+      else if (e.type === "hazard" && e.kind === "rain") sum.rain++;
+    }
+  }
+  if (st.phase !== "done") {   // 너무 길어지면(거의 없음) 그때까지 앞선 쪽 승리
+    const sc = i => st.sets[i] * 1000 + st.games[i] * 10 + st.pts[i];
+    st.winner = sc(0) === sc(1) ? (Math.random() < .5 ? 0 : 1) : sc(0) > sc(1) ? 0 : 1;
+    if (st.games[0] + st.games[1]) st.history.push([...st.games]);
+  }
+  return { winner: st.winner, history: st.history, sum, time: t };
+}
+
+const api = { simMatch, COURTS, PARK, CLIFF, CAT, FROG, cpatchAt, BLIZZ, PEEL, DASH, dash, HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
