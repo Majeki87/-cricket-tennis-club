@@ -42,6 +42,7 @@ function packMatch(room) {
     buff: st.buff ? { type: st.buff.type, pointsLeft: st.buff.pointsLeft } : null,
     court: st.court, cpatch: (st.cpatch || []).map(q => ({ type: q.type, x: r2(q.x), y: r2(q.y), r: r2(q.r), hidden: q.hidden ? 1 : 0 })), decor: (st.decor || []).map(q => ({ x: r2(q.x), y: r2(q.y), r: r2(q.r) })),
     wind: st.wind && st.wind.on ? { dir: st.wind.dir } : null,
+    glare: st.glare ? { own: st.glare.own } : null, rockWarn: st.rockWarn ? { x: r2(st.rockWarn.x), y: r2(st.rockWarn.y), r: r2(st.rockWarn.r) } : null,
     clock: r2(st.clock || 0), hazard: st.hazard ? { type: st.hazard.type, pointsLeft: st.hazard.pointsLeft, patches: st.hazard.patches.map(p => ({ x: r2(p.x), y: r2(p.y), r: r2(p.r) })) } : null,
     players: st.players.map(p => ({ x: r2(p.x), y: r2(p.y) })),
     ball: { x: r2(b.x), y: r2(b.y), z: r2(b.z), kind: b.kind, live: b.live, held: b.held, pow: b.pow, spinVis: b.spinVis, id: b.id, split: b.split ? 1 : 0, slot: b.slot || 0, sg: r2(b.sg || 0) },
