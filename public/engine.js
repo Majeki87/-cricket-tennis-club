@@ -42,18 +42,24 @@ const HAZARD_POINTS = 2, ENV_PER_GAME = .9;   // 버프·디버프: 게임마다
 // 환경 버프(디버프와 같은 빈도·기간, 따로 정해져서 겹칠 수도 있음): 맑은 공기(모든 능력치 +1) · AI 코트 난방(선수·공이 빨라짐)
 const TORNADO = { r: 2.3, loops: 5, squash: .7 };   // 회전회오리샷: 반지름 2.3m 고리를 5바퀴
 const FIREBALL = { T: .45, margin: .06, z: 1.1 };   // 불꽃샷: 0.45초 목표(멸치보다 빠르게), 낮은 공도 허리 높이에서 강타
-// 코트: 정식 3종(하드·클레이·잔디) + 특별 3종(빙판·우리 바다·숲속)
-const COURTS = ["hard", "clay", "grass", "ice", "sea", "forest"];
+// 코트: 정식 3종(하드·클레이·잔디) + 특별 5종(빙판·우리 바다·숲속·땡볕 주차장·주상절리 잔도)
+const COURTS = ["hard", "clay", "grass", "ice", "sea", "forest", "parking", "cliff"];
 const COURT_FX = {   // e: 튀는 높이 · keep: 튄 뒤 속도 · spin: 스핀 효과 · accel: 미끄러짐(0이면 바로 멈춤, 작을수록 잘 미끄러짐)
   hard:   { e: 1,    keep: 1,    spin: 1,   accel: 0 },
   clay:   { e: 1.15, keep: .82,  spin: 1.3, accel: 14 },   // 귀랑스 오픈: 느리고 높게 튐, 스핀이 잘 먹음, 살짝 미끄러짐
   grass:  { e: .78,  keep: 1.08, spin: 1,   accel: 0 },    // 귀블던: 빠르고 낮게 깔림, 슬라이스가 특히 강함
   ice:    { e: .72,  keep: 1.1,  spin: .8,  accel: 2.6 },  // 빙판: 공도 선수도 쭉 미끄러짐
   sea:    { e: 1,    keep: 1,    spin: 1,   accel: 0 },    // 우리 바다: 배가 출렁이고, 돌풍·파도
-  forest: { e: 1,    keep: 1,    spin: 1,   accel: 0 }     // 숲속: 덤불·진흙·숨은 구덩이
+  forest: { e: 1,    keep: 1,    spin: 1,   accel: 0 },    // 숲속: 덤불·진흙·숨은 구덩이
+  parking:{ e: 1.08, keep: 1.04, spin: .9,  accel: 0 },    // 땡볕 주차장: 달궈진 아스팔트라 높고 빠르게 튐, 스핀은 덜 먹음
+  cliff:  { e: .92,  keep: .94,  spin: 1,   accel: 0 }     // 주상절리 잔도: 나무 판자라 살짝 덜 튐
 };
+// 땡볕 주차장: 9~14초마다 차 유리에 반사된 햇빛이 한쪽 코트를 2.6초 동안 비춤 → 그쪽 선수는 눈이 부셔 받는 범위 20% 감소
+const PARK = { glareGap: [9, 14], glareLen: 2.6, glareReach: .8, firstGlare: 7 };
+// 주상절리 잔도: 폭이 좁아 사이드라인 밖으로 1.15m까지만 나갈 수 있음 · 8~13초마다(랠리 중) 낙석 → 1.5초 전에 그림자로 경고, 맞으면 1초 기절, 떨어진 바위는 9초 동안 남음
+const CLIFF = { lim: COURT.S + 1.15, rockGap: [8, 13], warn: 1.5, rockLen: 9, rockR: .6, hitR: .95, stun: 1, firstRock: 9 };
 const SEA = { rock: .75, period: 6.5, gust: [2.6, 4.2], gustLen: 2.2, gustGap: [7, 12], waveGap: [13, 19], waveLen: 9 };
-const CP_SLOW = { bush: .6, mud: .45, water: .6, pit: 1 };   // 코트 함정을 밟으면 느려지는 정도
+const CP_SLOW = { bush: .6, mud: .45, water: .6, pit: 1, tar: .5, manhole: 1, plank: .8, rock: .45 };   // 코트 함정을 밟으면 느려지는 정도
 const BLIZZ = { S: 1.8 };                                 // 눈보라 분신샷: 네트를 넘으면 공이 1.8m 간격 셋으로 갈라짐(진짜는 그림자가 있는 하나)
 const PEEL = { r: .6, slip: 1.0, speed: 5.5, max: 6 };   // 바나나 껍질: 밟으면 1초 동안 미끄덩
 const MONKEY = { steal: .15, fake: .2, fakeAmp: 1.6 };   // 바나킹: 득점 때 15% 아이템 훔치기, 20% 페이크 샷
@@ -63,11 +69,28 @@ const BUFFS = ["fresh", "heat"], HEAT = { move: 1.2, ballT: .85 };
 const HZ_SLOW = { weeds: .55, rain: .6 };      // 잡초·웅덩이를 밟으면 느려짐
 function h01(n) { let x = Math.imul(n | 0, 0x9E3779B1); x ^= x >>> 16; x = Math.imul(x, 0x85EBCA6B); x ^= x >>> 13; x = Math.imul(x, 0xC2B2AE35); x ^= x >>> 16; return (x >>> 0) / 4294967296; }
 function cpatchAt(st, x, y) { for (const q of st.cpatch || []) if ((x - q.x) ** 2 + (y - q.y) ** 2 <= q.r * q.r) return q; return null; }
+function placer() {   // 서로 겹치지 않게 함정 자리를 고름
+  const spots = [];
+  return (own, r) => { for (let k = 0; k < 30; k++) { const x = (Math.random() * 2 - 1) * 3.5, y = own * (1.8 + Math.random() * 9);
+    if (spots.every(q => Math.hypot(q.x - x, q.y - y) > q.r + r + .4)) { const q = { x, y, r }; spots.push(q); return q; } } return { x: 0, y: own * 6, r }; };
+}
+function parkingLayout(st) {   // 양쪽 코트에 녹은 아스팔트(타르) 1 · 맨홀 뚜껑 1
+  st.cpatch = st.cpatch.filter(q => q.type === "rock"); st.decor = [];
+  const place = placer();
+  for (const own of [1, -1]) {
+    st.cpatch.push({ type: "tar", ...place(own, .8 + Math.random() * .25) });
+    st.cpatch.push({ type: "manhole", ...place(own, .5) });
+  }
+}
+function cliffLayout(st) {   // 양쪽 코트에 헐거운 판자 2(낙석으로 떨어진 바위는 그대로 둠)
+  st.cpatch = (st.cpatch || []).filter(q => q.type === "rock"); st.decor = [];
+  const place = placer();
+  for (const own of [1, -1]) for (let k = 0; k < 2; k++) st.cpatch.push({ type: "plank", ...place(own, .65 + Math.random() * .15) });
+}
+const LAYOUT = { forest: forestLayout, parking: parkingLayout, cliff: cliffLayout };
 function forestLayout(st) {   // 양쪽 코트에 덤불 2 · 진흙 1 · 숨은 구덩이 1, 그리고 구덩이와 똑같아 보이는 낙엽 더미 2
   st.cpatch = []; st.decor = [];
-  const spots = [];
-  const place = (own, r) => { for (let k = 0; k < 30; k++) { const x = (Math.random() * 2 - 1) * 3.5, y = own * (1.8 + Math.random() * 9);
-    if (spots.every(q => Math.hypot(q.x - x, q.y - y) > q.r + r + .4)) { const q = { x, y, r }; spots.push(q); return q; } } return { x: 0, y: own * 6, r }; };
+  const place = placer();
   for (const own of [1, -1]) {
     for (let k = 0; k < 2; k++) st.cpatch.push({ type: "bush", ...place(own, .9 + Math.random() * .3) });
     st.cpatch.push({ type: "mud", ...place(own, .8 + Math.random() * .2) });
@@ -122,11 +145,12 @@ function newMatch(opts = {}) {
     events: [], evId: opts.evId || 0, ai: {}, items: [[], []], active: [{}, {}], pointNo: 0,
     court: COURTS.includes(opts.court) ? opts.court : opts.court === "random" ? COURTS[Math.floor(Math.random() * COURTS.length)] : "hard",
     pvel: [{ x: 0, y: 0 }, { x: 0, y: 0 }], cpatch: [], decor: [], wind: null, windNext: 6, waveNext: 12, pitImmune: [0, 0],
+    glare: null, glareNext: PARK.firstGlare, rockWarn: null, rockNext: CLIFF.firstRock,
     posEpoch: Math.floor(Math.random() * 1e6), hist: [], freeze: [0, 0], dash: [null, null], dashCd: [0, 0], peels: [], slip: [null, null], lastDir: [{ x: 0, y: -1 }, { x: 0, y: 1 }], hazard: null, lastHazard: null,
     buff: null, lastBuff: null, envIn: 1 + Math.floor(Math.random() * 3), envRun: null, clock: 0, tauntAt: [-99, -99], tauntLv: [0, 0], lastTaunt: null
   };
   pushEv(st, { type: "toss", server: st.server });
-  if (st.court === "forest") forestLayout(st);
+  if (LAYOUT[st.court]) LAYOUT[st.court](st);
   startPoint(st);
   return st;
 }
@@ -151,7 +175,8 @@ function constrain(st, i) {
     p.x = s > 0 ? clamp(p.x, .2, COURT.S) : clamp(p.x, -COURT.S, -.2);
     p.y = own * (COURT.L + .35); return;
   }
-  p.x = clamp(p.x, -COURT.AX + .6, COURT.AX - .6);
+  const lim = st.court === "cliff" ? CLIFF.lim : COURT.AX - .6;   // 잔도는 폭이 좁아 옆으로 멀리 못 나감(난간 밖은 절벽)
+  p.x = clamp(p.x, -lim, lim);
   p.y = clamp(p.y * own, .7, COURT.AY - .8) * own;
 }
 function movePlayer(st, i, inp, dt) {
@@ -242,7 +267,8 @@ function addGauge(st, side, amt) {
   st.gauge[side] = Math.min(100, st.gauge[side] + amt);
 }
 function recvMul(st, side, b) {
-  return (b.kind === "slice" && b.bounces >= 1 ? SLICE.recvReach : 1) * (st.dash && st.dash[side] && st.dash[side].t > 0 ? DASH.reach : 1);
+  return (b.kind === "slice" && b.bounces >= 1 ? SLICE.recvReach : 1) * (st.dash && st.dash[side] && st.dash[side].t > 0 ? DASH.reach : 1)
+    * (st.glare && st.glare.own === ownSign(side) ? PARK.glareReach : 1);   // 주차장 눈부심
 }
 function dash(st, side, keys, vec) {
   if (st.phase !== "rally" && st.phase !== "serve") return "idle";
@@ -472,6 +498,10 @@ function courtPatchBounce(st, b, q) {
   else if (q.type === "mud") { b.e = .1; b.keep = .2; }
   else if (q.type === "water") { if (Math.random() < .5) { b.e = .12; b.keep = .25; mode = "stop"; } else { rot((Math.random() - .5) * 2.6); b.e = .5; b.keep = .65; mode = "skid"; } }
   else if (q.type === "pit") { b.e = .04; b.keep = .1; q.hidden = false; }
+  else if (q.type === "tar") { b.e = .3; b.keep = .5; }                                                   // 끈적한 타르: 철퍽 붙어 거의 안 튐
+  else if (q.type === "manhole") { b.e = Math.min(1.25, b.e * 1.7); b.keep = .95; rot((Math.random() - .5) * .9); }   // 쇠 맨홀 뚜껑: 깡! 높이 튀고 살짝 꺾임
+  else if (q.type === "plank") { b.e = .28; b.keep = .6; }                                                // 헐거운 판자: 텅! 힘없이 죽음
+  else if (q.type === "rock") { rot((Math.random() - .5) * 2.8); b.e = Math.min(1.2, b.e * 1.5); b.keep = .8; }   // 바위: 딱! 엉뚱한 방향으로 튐
   b.curve = null; b.spinAmp = 0;
   pushEv(st, { type: "cpBounce", kind: q.type, mode, x: b.x, y: b.y });
 }
@@ -508,8 +538,11 @@ function envPoint(st) {   // 포인트가 끝날 때마다: 진행 중인 환경
 function courtTick(st) {
   const now = st.clock;
   if (st.cpatch && st.cpatch.length) st.cpatch = st.cpatch.filter(q => !q.until || q.until > now);   // 파도 웅덩이는 9초 뒤 마름
-  if (st.court !== "sea" || st.phase === "done") return;
+  if (st.phase === "done") return;
   const rnd = ([a, b]) => a + Math.random() * (b - a);
+  if (st.court === "parking") return parkTick(st, now, rnd);
+  if (st.court === "cliff") return cliffTick(st, now, rnd);
+  if (st.court !== "sea") return;
   if (st.wind && st.wind.on && now > st.wind.until) { st.wind.on = false; pushEv(st, { type: "gustEnd" }); }
   if (now > st.windNext) {
     st.wind = { on: true, dir: Math.random() < .5 ? -1 : 1, str: rnd(SEA.gust), until: now + SEA.gustLen };
@@ -519,6 +552,34 @@ function courtTick(st) {
     const own = Math.random() < .5 ? 1 : -1, sideX = Math.random() < .5 ? -1 : 1;
     for (let k = 0; k < 2; k++) st.cpatch.push({ type: "water", x: sideX * (1.5 + Math.random() * 2.2), y: own * (2.5 + Math.random() * 8), r: .9 + Math.random() * .35, until: now + SEA.waveLen });
     st.waveNext = now + rnd(SEA.waveGap); pushEv(st, { type: "wave", own, sideX });
+  }
+}
+function parkTick(st, now, rnd) {   // 땡볕 주차장: 차 유리 반사광이 번갈아 한쪽 코트를 비춤
+  if (st.glare && now > st.glare.until) { st.glare = null; pushEv(st, { type: "glareEnd" }); }
+  if (!st.glare && now > st.glareNext) {
+    const own = Math.random() < .5 ? 1 : -1;
+    st.glare = { own, until: now + PARK.glareLen };
+    st.glareNext = now + PARK.glareLen + rnd(PARK.glareGap); pushEv(st, { type: "glare", own });
+  }
+}
+function cliffTick(st, now, rnd) {   // 주상절리 잔도: 낙석(그림자로 먼저 경고)
+  const w = st.rockWarn;
+  if (w && now >= w.at) {
+    st.rockWarn = null;
+    st.cpatch.push({ type: "rock", x: w.x, y: w.y, r: CLIFF.rockR, until: now + CLIFF.rockLen });
+    pushEv(st, { type: "rockfall", x: w.x, y: w.y });
+    if (st.phase === "rally") for (let i = 0; i < 2; i++) {
+      const p = st.players[i];
+      if (Math.hypot(p.x - w.x, p.y - w.y) < CLIFF.hitR && st.stun[i] <= 0) { st.stun[i] = CLIFF.stun; pushEv(st, { type: "rockHit", side: i, x: p.x, y: p.y }); }
+    }
+  }
+  if (!st.rockWarn && st.phase === "rally" && now > st.rockNext) {   // 랠리 중에만 떨어짐. 절반은 선수 근처, 절반은 아무 데나
+    let x, y;
+    if (Math.random() < .5) { const p = st.players[Math.random() < .5 ? 0 : 1]; x = p.x + (Math.random() - .5) * 2.4; y = p.y + (Math.random() - .5) * 2.4; }
+    else { x = (Math.random() * 2 - 1) * 3.6; y = (Math.random() < .5 ? 1 : -1) * (1.5 + Math.random() * 9.5); }
+    x = clamp(x, -COURT.S + .3, COURT.S - .3); y = Math.sign(y || 1) * clamp(Math.abs(y), 1.2, COURT.L + .3);
+    st.rockWarn = { x, y, r: CLIFF.rockR, at: now + CLIFF.warn };
+    st.rockNext = now + CLIFF.warn + rnd(CLIFF.rockGap); pushEv(st, { type: "rockWarn", x, y });
   }
 }
 function fault(st, reason) {
@@ -563,7 +624,7 @@ function gameWon(st, w) {
   else if (gw === st.G && gl === st.G) { st.tb = true; st.tbFirst = st.server; pushEv(st, { type: "tiebreak" }); }
   else if ((st.games[0] + st.games[1]) % 2 === 1) pushEv(st, { type: "ends" });
   planEnv(st);   // 이번 게임의 버프·디버프 계획
-  if (st.court === "forest" && st.phase !== "done") { forestLayout(st); pushEv(st, { type: "forestShift" }); }   // 게임마다 함정 위치가 바뀜
+  if (LAYOUT[st.court] && st.phase !== "done") { LAYOUT[st.court](st); pushEv(st, { type: st.court === "forest" ? "forestShift" : "courtShift", court: st.court }); }   // 게임마다 함정 위치가 바뀜
 }
 function setWon(st, w) {
   st.sets[w]++; st.history.push([...st.games]);
@@ -619,7 +680,16 @@ function hitSpot(b) {
   if (b.bounces === 0) { const L = landing(b), vz1 = -L.vz * b.e, th = timeToHeight(0, vz1, 1); return { x: L.x + b.vx * b.keep * th, y: L.y + b.vy * b.keep * th }; }
   const th = timeToHeight(b.z, b.vz, 1); return { x: b.bx + b.vx * th, y: b.by + b.vy * th };
 }
-function aiThink(st, side, level, dt) {
+function aiThink(st, side, level, dt) {   // 낙석 경고 그림자 안에 있으면 난이도만큼 피함
+  const out = aiCore(st, side, level, dt), w = st.rockWarn, me = st.players[side];
+  if (w && out && Math.hypot(me.x - w.x, me.y - w.y) < CLIFF.hitR + .4) {
+    const ai = st.ai[side];
+    if (ai.rockFor !== w.at) { ai.rockFor = w.at; ai.rockDodge = Math.random() < (AI[level] || AI.normal).dodge; }
+    if (ai.rockDodge) { const dx = me.x - w.x || (me.x > 0 ? -1 : 1), dy = me.y - w.y, d = Math.hypot(dx, dy) || 1; out.target = { x: w.x + dx / d * (CLIFF.hitR + 1), y: w.y + dy / d * (CLIFF.hitR + 1) }; }
+  }
+  return out;
+}
+function aiCore(st, side, level, dt) {
   const cfg = AI[level] || AI.normal, me = st.players[side], b = st.ball, own = ownSign(side), base = own * (COURT.L + .9);
   const ai = st.ai[side] || (st.ai[side] = { ball: -1, leave: false, tried: false, off: 0 });
   const out = { speed: cfg.speed, target: { x: me.x, y: me.y } };   // (캐릭터 스피드는 movePlayer에서 곱함)
@@ -657,7 +727,7 @@ function aiThink(st, side, level, dt) {
   }
   if (ai.leave) { out.target = { x: spot.x + (me.x >= spot.x ? 1.8 : -1.8), y: me.y }; return out; }
   out.target = { x: spot.x + ai.off, y: spot.y + own * .35 };
-  const obst = (st.peels || []).map(q => ({ x: q.x, y: q.y, r: PEEL.r })).concat((st.cpatch || []).filter(q => q.type === "mud" || q.type === "water" || (q.type === "pit" && !q.hidden)));
+  const obst = (st.peels || []).map(q => ({ x: q.x, y: q.y, r: PEEL.r })).concat((st.cpatch || []).filter(q => q.type === "mud" || q.type === "water" || q.type === "tar" || q.type === "rock" || (q.type === "pit" && !q.hidden)));
   if (obst.length) {   // 바나나 껍질·보이는 함정 피하기(공 하나에 한 번, 난이도만큼 성공)
     if (ai.peelFor !== b.id) { ai.peelFor = b.id; ai.dodge = Math.random() < cfg.dodge; }
     if (ai.dodge) {   // 가는 길을 막는 가장 가까운 껍질 옆으로 돌아감
@@ -697,7 +767,7 @@ function aiThink(st, side, level, dt) {
   return out;
 }
 
-const api = { COURTS, cpatchAt, BLIZZ, PEEL, DASH, dash, HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
+const api = { COURTS, PARK, CLIFF, cpatchAt, BLIZZ, PEEL, DASH, dash, HAZARDS, BUFFS, inPatch, COURT, CHARS, SKILLS, FORMATS, AI, ITEMS, ITEM_MAX, MOVE_SPEED, STAT_KEYS, CHAR_STATS, useItem, taunt, moveLocal, constrainPos, newMatch, startPoint, step, serve, tryHit, aiThink, serveCourt, stanceSign, inCourt, inBox, netHeight };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.TennisEngine = api;
 })(typeof self !== "undefined" ? self : this);
