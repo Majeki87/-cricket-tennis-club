@@ -561,6 +561,8 @@ body.mobile #mCtrl{display:block;position:absolute;inset:0;z-index:6;pointer-eve
 .ball.cat.fib{animation:catFib .18s ease-in-out infinite alternate}@keyframes catFib{to{filter:hue-rotate(40deg) brightness(1.2)}}
 .ball.frog{width:15px;height:15px;background:radial-gradient(circle,#f4ffe0,#9fe86a 60%,#3d9a2a);border-color:#e9ffd6;box-shadow:0 0 10px 3px #7ee05a}
 .trail.cat{background:#ff8fc8}.trail.frog{background:#7ee05a}
+.frogskip{position:absolute;z-index:3;transform:translate(-50%,-50%);font-size:16px;pointer-events:none;animation:frogSkip .6s ease-out forwards}
+@keyframes frogSkip{from{transform:translate(-50%,-50%) scale(.4);opacity:1}to{transform:translate(-50%,-90%) scale(1.3);opacity:0}}
 #player svg,#opponent svg{translate:0 var(--hop,0)}
 .ball.monkey{width:15px;height:15px;background:radial-gradient(circle,#fff6b0,#f2d03b 65%,#c9a00e);border-color:#8a6410;box-shadow:0 0 10px 3px #f2d03b}
 .trail.husky{width:9px;height:9px;background:radial-gradient(circle,#fff,#9fe0ff 70%,transparent)}.trail.monkey{background:#f2d03b}
@@ -1469,6 +1471,7 @@ function handleEvent(e){
       const m=document.createElement("div");m.className="bmark cheatmark";m.style.left=sx(e.x)+"%";m.style.top=sy(e.y)+"%";$("arena").appendChild(m);setTimeout(()=>m.remove(),5000);
       setTimeout(()=>{popup("📺 다시 보기: 사실은 IN!",e.x,e.y,"call");msg(mine?"😼 반칙 아웃 콜 성공! 심판이 깜빡 속았다냥~ (이번 세트엔 더 못 써요)":"😾 귀뚤냥이가 들어온 공을 아웃이라고 우겼어요! 심판이 속아 판정이 뒤집혔어요. (세트당 1번)")},1300);break}
     case "frogHop":Snd.play("croak",1,0,1.3);popup("🐸 폴짝!",e.x,e.y,"call");break;
+    case "frogSkip":{Snd.play("croak",1,0,1.6);const d=document.createElement("div");d.className="frogskip";d.textContent="💦";d.style.left=sx(e.x)+"%";d.style.top=sy(e.y)+"%";$("arena").appendChild(d);setTimeout(()=>d.remove(),600);break}
     case "split":Snd.play("split");popup("❄️ 분신! 진짜는 그림자가 있는 공",e.x,e.y,"call");break;
     case "peel":Snd.play("boing");popup("🍌",e.x,e.y);break;
     case "slip":{Snd.play("slip");const p=st.players[e.side];popup("🍌 미끄덩!",p.x,p.y,"bad");if(e.side===side)msg("바나나 껍질을 밟았어요! 잠깐 조작이 안 돼요.");break}
@@ -1588,8 +1591,8 @@ function render(){
   const show=!!b&&(b.held||b.live||st.phase==="point"||st.phase==="fault");
   $("ball").style.display=$("ballShadow").style.display=show?"block":"none";
   if(show){
-    const bx=b.x+(b.fx||0),hopZ=b.kind==="frog"&&b.live?.35*Math.abs(Math.sin(performance.now()/150)):0;   // 시치미샷은 가짜 자리에 그림 · 폴짝폴짝샷은 깡충깡충
-    const lift=(b.z+hopZ)*.62/(viewBot-viewTop)*100;
+    const bx=b.x+(b.fx||0);   // 시치미샷은 가짜 자리에 그림(폴짝폴짝샷의 점프는 엔진의 실제 높이 그대로)
+    const lift=b.z*.62/(viewBot-viewTop)*100;
     $("ballShadow").style.left=$("ball").style.left=sx(bx)+"%";
     $("ballShadow").style.top=sy(b.y)+"%";$("ball").style.top=(sy(b.y)-lift)+"%";
     $("ballShadow").style.opacity=String(clamp(1-b.z*.18,.35,1));
@@ -2147,8 +2150,8 @@ function updateStage(react){
 const TOURS={hard:{name:"귀뚜라미 오픈",major:1},clay:{name:"귀랑스 오픈",major:1},grass:{name:"귀블던",major:1},
   ice:{name:"귀뚤 아이스 클래식"},sea:{name:"해적왕 컵"},forest:{name:"정글 서바이벌 리그"},parking:{name:"주차장 그랑프리"},cliff:{name:"클리프 마스터스"}};
 // 코트별 강세·고전(컴퓨터끼리 코트마다 168경기씩 돌려 본 승률 기준)
-const TOUR_FIT={hard:[["husky","monkey"],"cat"],clay:[["fire","husky"],"snake"],grass:[["husky","monkey"],"quake"],ice:[["fire","snake"],"frog"],
-  sea:[["fire","husky"],"frog"],forest:[["husky","fire"],"tornado"],parking:[["monkey","fire"],"quake"],cliff:[["husky","monkey"],"cat"]};
+const TOUR_FIT={hard:[["monkey","husky"],"tornado"],clay:[["fire","monkey"],"cat"],grass:[["fire","monkey"],"quake"],ice:[["fire","husky"],"tornado"],
+  sea:[["fire","monkey"],"cat"],forest:[["snake","fire"],"cat"],parking:[["fire","husky"],"quake"],cliff:[["snake","husky"],"tornado"]};
 const SHORT={tornado:"토네이도 뚜리",snake:"스네이크 뚜리",fire:"파이어 뚜리",quake:"어스 뚜리",husky:"개시키",monkey:"바나킹",cat:"귀뚤냥이",frog:"꺼꾸리"};
 const CRICKETS=["tornado","snake","fire","quake"],DIFF_NAME={easy:"쉬움",normal:"보통",hard:"어려움"};
 const RIVAL={"husky|monkey":"⚔️ 정의 vs 흑막","cat|husky":"🐶🐱 견묘지간","cat|monkey":"😈 악당 대결","cat|frog":"🐱🐸 앙숙 신경전"};
